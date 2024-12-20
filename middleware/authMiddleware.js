@@ -5,6 +5,8 @@ dotenv.config();
 
 const authMiddleware = (req, res, next) => {
     console.log('Auth middleware invoked');
+
+    console.log('Request headers:', req.headers);
     
     // Get token from Authorization header
     const authHeader = req.headers.authorization;

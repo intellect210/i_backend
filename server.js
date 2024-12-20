@@ -1,36 +1,59 @@
+// FILE: server.js
+const { createServer } = require('http');
+const { Server } = require('ws');
 const express = require('express');
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-const userRoutes = require('./routes/userRoutes');
-const sessionRoutes = require('./routes/sessionRoutes'); // Import session routes
 
-dotenv.config();
+const connectDB = require('./config/dbConfig');
+const { connectRedis } = require('./config/redisConfig');
+const websocketAuthMiddleware = require('./middleware/websocketAuthMiddleware');
+const websocketService = require('./services/websocketService');
+const {
+  handleDatabaseError,
+  handleRedisError,
+  handleInvalidTokenError,
+  handleWebsocketError,
+} = require('./utils/errorHandlers');
+const logger = require('./utils/logger');
 
 const app = express();
-const port = process.env.PORT || 3000;
+const server = createServer(app);
 
-// Middleware
-app.use(express.json());
+const wss = new Server({ noServer: true });
 
-// MongoDB connection
-mongoose
-  .connect(process.env.MONGODB_URI, {})
-  .then(() => {
-    console.log('Connected to MongoDB');
-  })
-  .catch((error) => {
-    console.error('MongoDB connection error:', error);
+// Error handling middleware (example)
+app.use((err, req, res, next) => {
+  logger.error(err.stack);
+  res.status(500).send('Something broke!');
+});
+
+// Upgrade HTTP connection to WebSocket
+server.on('upgrade', (request, socket, head) => {
+  console.log('upgrade event');
+  wss.handleUpgrade(request, socket, head, (ws) => {
+    console.log('emit connection event');
+    wss.emit('connection', ws, request);
   });
-
-// Mount user routes
-app.use('/api/users', userRoutes);
-// Mount session routes
-app.use('/api/sessions', sessionRoutes);
-
-app.get('/', (req, res) => {
-  res.send('Hello World!');
 });
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+wss.on('connection', async (ws, request) => {
+  // Use the authentication middleware to verify the token
+  websocketAuthMiddleware(ws, (err) => {
+    // if (err) {
+    //   handleInvalidTokenError(err, ws);
+    // } else {
+      // Handle new connection
+      websocketService.handleNewConnection(ws, request);
+    // }
+  });
 });
+
+const PORT = process.env.PORT || 3000;
+
+(async () => {
+  await connectDB();
+  await connectRedis();
+
+  server.listen(PORT, () => {
+    logger.info(`Server is running on port ${PORT}`);
+  });
+})();
