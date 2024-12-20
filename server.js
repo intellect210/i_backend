@@ -1,7 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-const userRoutes = require('./routes/userRoutes'); // Import user routes
+const userRoutes = require('./routes/userRoutes');
+const sessionRoutes = require('./routes/sessionRoutes'); // Import session routes
 
 dotenv.config();
 
@@ -23,6 +24,8 @@ mongoose
 
 // Mount user routes
 app.use('/api/users', userRoutes);
+// Mount session routes
+app.use('/api/sessions', sessionRoutes);
 
 app.get('/', (req, res) => {
   res.send('Hello World!');

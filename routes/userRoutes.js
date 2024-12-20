@@ -3,11 +3,11 @@ const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 const userController = require('../controllers/userController');
 
-// Apply authentication middleware to all routes
-router.use(authMiddleware);
-
 // POST / - Create a new user
 router.post('/', userController.createUser);
+
+// Apply authentication middleware to all subsequent routes
+router.use(authMiddleware);
 
 // GET /:useruid - Get a user by useruid
 router.get('/:useruid', userController.getUser);
