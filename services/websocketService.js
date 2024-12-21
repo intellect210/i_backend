@@ -37,7 +37,7 @@ const websocketService = {
   handleMessage: async (ws, message) => {
     const user = ws.user;
     const userId = user.useruid;
-    const { messageType, message: text, chatId, receiver } = message;
+    const { messageType, message: text, chatId, role } = message;
 
     console.log(`Handling message from user ${userId}:`, message);
 
@@ -54,7 +54,7 @@ const websocketService = {
       console.log(`Stored message from user ${userId} in the database`);
 
       // Handle bot response only if the message is intended for the bot
-      if (receiver === 'bot') {
+      if (role === 'user') {
         console.log(`Message is for bot, processing with bot controller`);
         const timeoutId = messageService.handleBotResponseTimeout(userId); // Start timeout timer
         activeTimeouts.set(userId, timeoutId); // Store the timeout ID
