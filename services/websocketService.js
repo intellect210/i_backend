@@ -1,11 +1,12 @@
 // FILE: services/websocketService.js
-const { MESSAGE_TYPES, ERROR_CODES, MESSAGE_ROLES } = require('../config/constants');
+const { MESSAGE_TYPES, ERROR_CODES, MESSAGE_ROLES, MODELS } = require('../config/constants');
 const messageService = require('./messageService');
 const redisService = require('./redisService');
 const botController = require('../controllers/botController');
 const websocketConnectionManager = require('../utils/websocketConnectionManager');
 // const logger = require('../utils/logger');
-
+const ChatHistoryManager = require('../utils/data/ChatHistoryManager');
+const chatRepository = require('../utils/data/chatRepository');
 const activeTimeouts = new Map(); // Store active timeouts for each user
 
 const websocketService = {
@@ -59,7 +60,15 @@ const websocketService = {
         activeTimeouts.set(userId, timeoutId); // Store the timeout ID
 
         // Process the message with the bot controller
-        const botResponse = await botController.handleBotResponse(message);
+        const chatHistoryManager = new ChatHistoryManager(
+          updatedChatUser._id,
+          chatRepository
+        );
+
+        // Get the formatted history for the model
+        const history = await chatHistoryManager.buildHistory();
+
+        const botResponse = await botController.handleBotResponse(message,MODELS.GEMINI_105_FLASH_8B, history);
 
         // Store bot response in db
         const botMessageResult = await messageService.storeMessage(

@@ -12,18 +12,15 @@ const genAI = new GoogleGenerativeAI(apiKey);
 const generationConfig = {
   temperature: 0.75,
   topP: 0.95,
-  topK: 64,
+  topK: 40,
   maxOutputTokens:4200,
 };
 
 const botController = {
   handleBotResponse: async (message, modelName = MODELS.GEMINI_105_FLASH_8B, history = []) => {
-    if (!modelName || !MODELS[modelName]) {
-      throw new Error("Invalid model name provided.");
-    }
 
     const model = genAI.getGenerativeModel({
-      model: MODELS[modelName],
+      model: MODELS[modelName] ? MODELS[modelName] : MODELS.GEMINI_105_FLASH_8B,
     });
 
     const chatSession = model.startChat({

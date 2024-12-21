@@ -14,7 +14,7 @@ const websocketConnectionManager = {
     connections.get(userId).set(ws.id, ws);
 
     logger.info(`WebSocket connection added for user ${userId}`);
-    console.log(`Current active connections:`, connections);
+    // console.log(`Current active connections:`, connections);
   },
 
   removeConnection: (userId, socketId) => {
@@ -37,12 +37,12 @@ const websocketConnectionManager = {
       console.log(`No connections found for user ${userId}`);
     }
 
-    console.log(`Current active connections:`, connections);
+    // console.log(`Current active connections:`, connections);
   },
 
   getConnection: (userId) => {
     console.log(`Getting connection for user ${userId}`);
-    console.log(`Current active connections:`, connections);
+    // console.log(`Current active connections:`, connections);
 
     if (connections.has(userId)) {
       // Return the Map of connections for the user

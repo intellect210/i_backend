@@ -25,7 +25,7 @@ const messageService = {
       if (chatId) {
         console.log('Searching for chat by ID:', chatId);
         chat = await findChatById(chatId);
-        console.log('Chat found by ID:', chat);
+        // console.log('Chat found by ID:', chat);
       }
 
       if (!chat) {
