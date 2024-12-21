@@ -79,3 +79,83 @@
 {"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T02:26:29.986Z"}
 {"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T02:26:52.960Z"}
 {"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T02:30:13.030Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T02:41:18.656Z"}
+{"level":"info","message":"WebSocket connection added for user testuser123","timestamp":"2024-12-21T02:42:47.111Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T03:46:25.967Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T03:53:42.983Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T03:54:14.381Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T03:54:21.208Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T03:54:25.342Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T03:54:54.124Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T03:55:01.373Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T03:55:04.057Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T03:55:06.842Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T03:55:25.405Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T03:55:48.293Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T03:55:53.510Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T03:55:58.988Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T03:58:07.406Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T03:58:52.730Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T03:59:51.060Z"}
+{"level":"info","message":"WebSocket connection added for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-21T04:00:04.375Z"}
+{"level":"info","message":"WebSocket connection removed for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-21T04:00:08.810Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:01:18.512Z"}
+{"level":"info","message":"WebSocket connection added for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-21T04:01:53.517Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:02:53.054Z"}
+{"level":"info","message":"WebSocket connection added for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-21T04:04:23.917Z"}
+{"level":"error","message":"Error storing message: CONSECUTIVE_USER_MESSAGE","stack":"Error: CONSECUTIVE_USER_MESSAGE\n    at Object.storeMessage (F:\\i1\\i_backend\\services\\messageService.js:49:17)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async Object.handleMessage (F:\\i1\\i_backend\\services\\websocketService.js:81:9)\n    at async WebSocket.<anonymous> (F:\\i1\\i_backend\\services\\websocketService.js:41:9)","timestamp":"2024-12-21T04:04:26.506Z"}
+{"level":"error","message":"Error storing message: CONSECUTIVE_USER_MESSAGE","stack":"Error: CONSECUTIVE_USER_MESSAGE\n    at Object.storeMessage (F:\\i1\\i_backend\\services\\messageService.js:49:17)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async Object.handleMessage (F:\\i1\\i_backend\\services\\websocketService.js:81:9)\n    at async WebSocket.<anonymous> (F:\\i1\\i_backend\\services\\websocketService.js:41:9)","timestamp":"2024-12-21T04:04:47.292Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:06:51.805Z"}
+{"level":"info","message":"WebSocket connection added for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-21T04:06:54.461Z"}
+{"level":"error","message":"Error storing message: CONSECUTIVE_USER_MESSAGE","stack":"Error: CONSECUTIVE_USER_MESSAGE\n    at Object.storeMessage (F:\\i1\\i_backend\\services\\messageService.js:49:17)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async Object.handleMessage (F:\\i1\\i_backend\\services\\websocketService.js:81:9)\n    at async WebSocket.<anonymous> (F:\\i1\\i_backend\\services\\websocketService.js:41:9)","timestamp":"2024-12-21T04:07:05.966Z"}
+{"level":"error","message":"Error storing message: CONSECUTIVE_USER_MESSAGE","stack":"Error: CONSECUTIVE_USER_MESSAGE\n    at Object.storeMessage (F:\\i1\\i_backend\\services\\messageService.js:49:17)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async Object.handleMessage (F:\\i1\\i_backend\\services\\websocketService.js:81:9)\n    at async WebSocket.<anonymous> (F:\\i1\\i_backend\\services\\websocketService.js:41:9)","timestamp":"2024-12-21T04:07:46.437Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:09:59.385Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:10:33.565Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:10:51.577Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:12:01.797Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:12:04.569Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:12:10.324Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:12:48.855Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:13:26.370Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:13:42.081Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:13:47.706Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:13:51.888Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:14:05.464Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:14:13.038Z"}
+{"level":"info","message":"WebSocket connection added for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-21T04:14:39.654Z"}
+{"_message":"Chat validation failed","errors":{"messages.0.type":{"kind":"enum","message":"`text` is not a valid enum value for path `type`.","name":"ValidatorError","path":"type","properties":{"enumValues":["user","bot"],"message":"`text` is not a valid enum value for path `type`.","path":"type","type":"enum","value":"text"},"value":"text"}},"level":"error","message":"Error storing message: Chat validation failed: messages.0.type: `text` is not a valid enum value for path `type`.","stack":"ValidationError: Chat validation failed: messages.0.type: `text` is not a valid enum value for path `type`.\n    at Document.invalidate (F:\\i1\\i_backend\\node_modules\\mongoose\\lib\\document.js:3331:32)\n    at Subdocument.invalidate (F:\\i1\\i_backend\\node_modules\\mongoose\\lib\\types\\subdocument.js:229:12)\n    at F:\\i1\\i_backend\\node_modules\\mongoose\\lib\\document.js:3092:17\n    at F:\\i1\\i_backend\\node_modules\\mongoose\\lib\\schemaType.js:1407:9\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)","timestamp":"2024-12-21T04:14:42.809Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:15:23.348Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:15:26.375Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:17:34.669Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:18:11.341Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:18:26.740Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:18:30.547Z"}
+{"level":"info","message":"WebSocket connection added for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-21T04:18:45.424Z"}
+{"_message":"Chat validation failed","errors":{"messages.1.type":{"kind":"enum","message":"`text` is not a valid enum value for path `type`.","name":"ValidatorError","path":"type","properties":{"enumValues":["user","bot"],"message":"`text` is not a valid enum value for path `type`.","path":"type","type":"enum","value":"text"},"value":"text"}},"level":"error","message":"Error storing message: Chat validation failed: messages.1.type: `text` is not a valid enum value for path `type`.","stack":"ValidationError: Chat validation failed: messages.1.type: `text` is not a valid enum value for path `type`.\n    at Document.invalidate (F:\\i1\\i_backend\\node_modules\\mongoose\\lib\\document.js:3331:32)\n    at Subdocument.invalidate (F:\\i1\\i_backend\\node_modules\\mongoose\\lib\\types\\subdocument.js:229:12)\n    at F:\\i1\\i_backend\\node_modules\\mongoose\\lib\\document.js:3092:17\n    at F:\\i1\\i_backend\\node_modules\\mongoose\\lib\\schemaType.js:1407:9\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)","timestamp":"2024-12-21T04:18:47.322Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:20:43.562Z"}
+{"level":"info","message":"WebSocket connection added for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-21T04:20:45.979Z"}
+{"_message":"Chat validation failed","errors":{"messages.1.type":{"kind":"enum","message":"`text` is not a valid enum value for path `type`.","name":"ValidatorError","path":"type","properties":{"enumValues":["user","bot"],"message":"`text` is not a valid enum value for path `type`.","path":"type","type":"enum","value":"text"},"value":"text"}},"level":"error","message":"Error storing message: Chat validation failed: messages.1.type: `text` is not a valid enum value for path `type`.","stack":"ValidationError: Chat validation failed: messages.1.type: `text` is not a valid enum value for path `type`.\n    at Document.invalidate (F:\\i1\\i_backend\\node_modules\\mongoose\\lib\\document.js:3331:32)\n    at Subdocument.invalidate (F:\\i1\\i_backend\\node_modules\\mongoose\\lib\\types\\subdocument.js:229:12)\n    at F:\\i1\\i_backend\\node_modules\\mongoose\\lib\\document.js:3092:17\n    at F:\\i1\\i_backend\\node_modules\\mongoose\\lib\\schemaType.js:1407:9\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)","timestamp":"2024-12-21T04:21:02.401Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:22:39.403Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:22:58.589Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:23:33.783Z"}
+{"level":"info","message":"WebSocket connection added for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-21T04:23:59.247Z"}
+{"_message":"Chat validation failed","errors":{"messages.2.type":{"kind":"enum","message":"`text` is not a valid enum value for path `type`.","name":"ValidatorError","path":"type","properties":{"enumValues":["user","bot"],"message":"`text` is not a valid enum value for path `type`.","path":"type","type":"enum","value":"text"},"value":"text"}},"level":"error","message":"Error storing message: Chat validation failed: messages.2.type: `text` is not a valid enum value for path `type`.","stack":"ValidationError: Chat validation failed: messages.2.type: `text` is not a valid enum value for path `type`.\n    at Document.invalidate (F:\\i1\\i_backend\\node_modules\\mongoose\\lib\\document.js:3331:32)\n    at Subdocument.invalidate (F:\\i1\\i_backend\\node_modules\\mongoose\\lib\\types\\subdocument.js:229:12)\n    at F:\\i1\\i_backend\\node_modules\\mongoose\\lib\\document.js:3092:17\n    at F:\\i1\\i_backend\\node_modules\\mongoose\\lib\\schemaType.js:1407:9\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)","timestamp":"2024-12-21T04:24:26.712Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:25:31.118Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:25:34.989Z"}
+{"level":"info","message":"WebSocket connection added for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-21T04:25:47.051Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:27:58.777Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:29:07.619Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:29:23.730Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:29:27.685Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:29:31.338Z"}
+{"level":"info","message":"WebSocket connection added for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-21T04:30:50.387Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:31:15.548Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:31:18.238Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:31:42.230Z"}
+{"level":"info","message":"WebSocket connection added for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-21T04:32:10.842Z"}
+{"level":"error","message":"Error storing message: EMPTY_MESSAGE","stack":"Error: EMPTY_MESSAGE\n    at Object.storeMessage (F:\\i1\\i_backend\\services\\messageService.js:44:17)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async Object.handleMessage (F:\\i1\\i_backend\\services\\websocketService.js:81:9)\n    at async WebSocket.<anonymous> (F:\\i1\\i_backend\\services\\websocketService.js:41:9)","timestamp":"2024-12-21T04:32:15.307Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T04:33:12.337Z"}
+{"level":"info","message":"WebSocket connection added for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-21T04:33:26.260Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T03:27:50.608Z"}
+{"level":"info","message":"WebSocket connection added for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-21T03:45:58.880Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-21T03:52:13.705Z"}

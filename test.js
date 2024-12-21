@@ -1,7 +1,9 @@
+// FILE: test.txt
 const WebSocket = require('ws');
 const fetch = require('node-fetch'); // Or another HTTP client like axios
 const { createServer } = require('http');
 const { Server } = require('ws');
+const express = require('express'); // Import express
 
 const connectDB = require('./config/dbConfig');
 const { connectRedis } = require('./config/redisConfig');
@@ -15,6 +17,7 @@ const {
 } = require('./utils/errorHandlers');
 const logger = require('./utils/logger');
 const jwt = require('jsonwebtoken');
+const { MESSAGE_TYPES, MESSAGE_ROLES } = require('./config/constants');
 
 // Assuming your server runs on this port
 const PORT = process.env.PORT || 3000;
@@ -58,6 +61,14 @@ describe('Chatbot Backend Tests', () => {
     // Upgrade HTTP connection to WebSocket
     server.on('upgrade', (request, socket, head) => {
       console.log('upgrade event');
+
+      // Create a new object to store authentication-related headers
+      request.authHeaders = {};
+      const authHeaderIndex = request.rawHeaders.indexOf('Authorization');
+      if (authHeaderIndex !== -1) {
+        request.authHeaders['Authorization'] = request.rawHeaders[authHeaderIndex + 1];
+      }
+
       wss.handleUpgrade(request, socket, head, (ws) => {
         console.log('emit connection event');
         wss.emit('connection', ws, request);
@@ -66,7 +77,7 @@ describe('Chatbot Backend Tests', () => {
 
     wss.on('connection', async (ws, request) => {
       // Use the authentication middleware to verify the token
-      websocketAuthMiddleware(ws, (err) => {
+      websocketAuthMiddleware(ws, request, (err) => {
         if (err) {
           handleInvalidTokenError(err, ws);
         } else {
@@ -129,25 +140,25 @@ describe('Chatbot Backend Tests', () => {
 
   it('should echo a message sent to the bot', (done) => {
     const ws = createWebSocketClient(TEST_TOKEN);
-
+  
     ws.on('open', () => {
       ws.send(
         JSON.stringify({
-          messageType: 'text',
+          messageType: MESSAGE_TYPES.TEXT,
           message: 'Hello bot!',
           receiver: 'bot',
         })
       );
     });
-
+  
     ws.on('message', (data) => {
       const receivedMessage = JSON.parse(data);
       expect(receivedMessage.message).toBe('Hello bot!');
-      expect(receivedMessage.sender).toBe('bot');
+      expect(receivedMessage.role).toBe(MESSAGE_ROLES.BOT);
       ws.close();
       done();
     });
-
+  
     ws.on('error', (err) => {
       done(err); // Fail the test if there's an error
     });
@@ -167,7 +178,7 @@ describe('Chatbot Backend Tests', () => {
       ws.on('open', () => {
         ws.send(
           JSON.stringify({
-            messageType: 'text',
+            messageType: MESSAGE_TYPES.TEXT,
             message: testMessage,
             receiver: 'bot',
           })
@@ -184,12 +195,13 @@ describe('Chatbot Backend Tests', () => {
     // Now check the database for the message
     const Chat = require('./models/chatModel'); // Import your Chat model
     const chatMessages = await Chat.find({
-      sender: testUserId,
-      message: testMessage,
+      userId: testUserId,
+      'messages.text': testMessage,
     });
 
     expect(chatMessages.length).toBeGreaterThan(0);
-    expect(chatMessages[0].message).toBe(testMessage);
+    expect(chatMessages[0].messages[0].text).toBe(testMessage);
+    expect(chatMessages[0].messages[0].role).toBe(MESSAGE_ROLES.USER);
 
     ws.close();
   });
@@ -204,7 +216,7 @@ describe('Chatbot Backend Tests', () => {
       // Try to send a message after disconnection (it should be stored in Redis)
       ws.send(
         JSON.stringify({
-          messageType: 'text',
+          messageType: MESSAGE_TYPES.TEXT,
           message: 'This message should be stored in Redis',
           receiver: 'bot',
         })

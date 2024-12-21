@@ -1,8 +1,7 @@
-// FILE: utils/errorHandlers.js
 const { ERROR_CODES } = require('../config/constants');
 const logger = require('./logger');
 const { removeUserSession } = require('../services/redisService');
-const websocketConnectionManager = require("./websocketConnectionManager");
+const websocketConnectionManager = require('./websocketConnectionManager');
 
 const errorHandlers = {
   handleDatabaseError: (error, ws = null, userId = null) => {
@@ -68,6 +67,20 @@ const errorHandlers = {
       websocketConnectionManager.removeConnection(userId);
       removeUserSession(userId);
     }
+  },
+
+  handleMessageValidationError: (error, ws = null, userId = null) => {
+    logger.error('Message validation error:', error);
+    if (ws) {
+      ws.send(
+        JSON.stringify({
+          error: error.code, // Use the error code from the error object
+          message: error.message, // Use the error message from the error object
+        })
+      );
+    }
+    // Note: We are not removing the user session or closing the connection
+    // on validation errors, as these might be temporary issues.
   },
 };
 
