@@ -6,6 +6,7 @@ const { ERROR_CODES } = require('../config/constants');
 const redisService = {
   setUserSession: async (userId, socketId) => {
     try {
+      console.log('Setting user session in Redis:', userId, socketId);
       await redisClient.set(`user:${userId}`, socketId);
     } catch (error) {
       // logger.error('Error setting user session in Redis:', error);

@@ -2,7 +2,7 @@
 const botController = {
     handleBotResponse: (message) => {
       // Simple echo for now
-      return message.message;
+      return "hello good boy";
     },
   };
   
