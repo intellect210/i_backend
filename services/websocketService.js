@@ -1,4 +1,3 @@
-// FILE: services/websocketService.js
 const {
   MESSAGE_TYPES,
   ERROR_CODES,
@@ -105,12 +104,13 @@ const websocketService = {
             history
           );
 
-        // Send the bot response back to the user, including chatId
+        // Send the bot response back to the user, including chatId and chatname
         websocketService.sendMessage(userId, {
           type: MESSAGE_TYPES.TEXT,
           message: botResponse,
           role: MESSAGE_ROLES.BOT,
           chatId: updatedChatBot._id,
+          chatname: updatedChatBot.chatname, // Include chatname
         });
       }
     } catch (error) {

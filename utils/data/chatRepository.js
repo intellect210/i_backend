@@ -36,6 +36,18 @@ const chatRepository = {
     }
     return chat;
   },
+
+  updateChatTitle: async (chatId, newTitle) => {
+    const updatedChat = await Chat.findByIdAndUpdate(
+      chatId,
+      { chatname: newTitle },
+      { new: true }
+    );
+    if (!updatedChat) {
+      throw new Error(`Failed to update chat title for chat ID: ${chatId}`);
+    }
+    return updatedChat;
+  },
 };
 
 module.exports = chatRepository;

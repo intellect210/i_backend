@@ -9,7 +9,7 @@ const chatSchema = new mongoose.Schema({
   },
   chatname: {
     type: String,
-    default: 'older chat',
+    default: '',
   },
   status: {
     type: String,

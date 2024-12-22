@@ -1,4 +1,3 @@
-// FILE: services/messageService.js
 const { ERROR_CODES, MESSAGE_TYPES, MESSAGE_ROLES } = require('../config/constants');
 const logger = require('../utils/logger');
 const {
@@ -10,6 +9,7 @@ const {
 const { isEmptyMessage, isConsecutiveUserMessage } = require('../utils/data/validators');
 const { BOT_RESPONSE_TIMEOUT_MS } = require('../config/constants');
 const websocketConnectionManager = require('../utils/websocketConnectionManager');
+const chatTitleService = require('./chatTitleService');
 
 const messageService = {
   storeMessage: async (userId, message, messageType, role, chatId = null) => {
@@ -38,11 +38,20 @@ const messageService = {
           createdAt: new Date(),
         });
         console.log('New chat created:', chat);
+
+        // Set chat title for new chat
+        await chatTitleService.setChatTitle(chat._id, userId, message);
+
         return {
           chat,
           message: 'New chat created and message stored successfully',
         };
       } else {
+        // Check and set chat title if not already set
+        if (!chat.chatname || chat.chatname.trim() === '') {
+          await chatTitleService.setChatTitle(chat._id, userId, message);
+        }
+
         if (isEmptyMessage(message)) {
           console.log('Message is empty');
           throw new Error(ERROR_CODES.EMPTY_MESSAGE);
