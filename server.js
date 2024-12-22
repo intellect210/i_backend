@@ -1,4 +1,3 @@
-// FILE: server.js
 const { createServer } = require("http");
 const { Server } = require("ws");
 const express = require("express");
@@ -21,6 +20,8 @@ const logger = require("./utils/logger");
 // Import your existing routes
 const userRoutes = require("./routes/userRoutes");
 const sessionRoutes = require("./routes/sessionRoutes");
+const chatRoutes = require("./routes/chatRoutes");
+const messageRoutes = require("./routes/messageRoutes");
 
 const app = express();
 const server = createServer(app);
@@ -41,6 +42,8 @@ app.use(express.json());
 // *** Mount your routes ***
 app.use("/api/users", userRoutes);
 app.use("/api/sessions", sessionRoutes);
+app.use("/api/chats", chatRoutes);
+app.use("/api/messages", messageRoutes);
 
 server.on('upgrade', (request, socket, head) => {
   console.log('upgrade event');

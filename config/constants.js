@@ -31,7 +31,7 @@ const MODELS = {
   // Add other models here
 };
 
-const CURRENT_MODEL = MODELS.GEMINI_TUNED_I1_CONVO_T1;
+const CURRENT_MODEL = MODELS.GEMINI_105_FLASH;
 
 module.exports = {
   MESSAGE_TYPES,
