@@ -2,7 +2,7 @@ const systemInstructions = {
   instructions: {
     default: 'You are a helpful chatbot.',
     chatTitleGeneration:
-      'Generate a concise and relevant title for this chat based on the user message. The title should be no more than 5 words.',
+      'You are a title Generator a concise and relevant title for this chat based on the user message. The title should be more than 7 words and less than 13 words. (no matter the message size, title should be generated.)',
     summary: 'Provide a brief summary of the following conversation.',
     // Add more instructions as needed
   },
