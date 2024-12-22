@@ -30,7 +30,9 @@ const wss = new Server({ noServer: true });
 // Error handling middleware (example)
 app.use((err, req, res, next) => {
   logger.error(err.stack);
-  res.status(500).send("Something broke!");
+  const statusCode = err.statusCode || 500;
+  const code = err.code || 'INTERNAL_SERVER_ERROR'; // Assign a code to the error
+  res.status(statusCode).json({ code, message: "Something broke!" });
 });
 
 // *** IMPORTANT: Add middleware to parse JSON request bodies ***

@@ -363,3 +363,41 @@
 {"level":"info","message":"WebSocket connection added for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-21T22:36:18.972Z"}
 {"level":"info","message":"WebSocket connection removed for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-21T22:38:25.439Z"}
 {"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-22T01:26:14.399Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-22T01:32:54.260Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-22T01:32:58.360Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-22T01:33:22.746Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-22T01:33:45.694Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-22T01:34:02.613Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-22T01:34:14.868Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-22T01:39:44.242Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-22T01:39:49.725Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-22T01:40:05.007Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-22T01:40:17.280Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-22T01:40:43.023Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-22T01:40:46.952Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-22T01:40:59.439Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-22T01:41:19.729Z"}
+{"level":"info","message":"Server is running on port 3000","timestamp":"2024-12-22T01:41:33.689Z"}
+{"level":"info","message":"WebSocket connection added for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-22T01:42:12.890Z"}
+{"level":"info","message":"WebSocket connection removed for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-22T01:43:19.379Z"}
+{"level":"info","message":"WebSocket connection added for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-22T01:46:26.533Z"}
+{"level":"error","message":"Error storing message: CONSECUTIVE_USER_MESSAGE","stack":"Error: CONSECUTIVE_USER_MESSAGE\n    at Object.storeMessage (F:\\i1\\i_backend\\services\\messageService.js:56:17)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async Object.handleMessage (F:\\i1\\i_backend\\services\\websocketService.js:77:33)\n    at async WebSocket.<anonymous> (F:\\i1\\i_backend\\services\\websocketService.js:33:9)","timestamp":"2024-12-22T01:46:45.173Z"}
+{"level":"info","message":"WebSocket connection removed for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-22T02:01:22.625Z"}
+{"level":"info","message":"WebSocket connection added for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-22T02:01:32.261Z"}
+{"level":"info","message":"WebSocket connection removed for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-22T02:01:52.359Z"}
+{"level":"info","message":"WebSocket connection added for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-22T02:04:52.980Z"}
+{"level":"info","message":"WebSocket connection removed for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-22T02:05:21.163Z"}
+{"level":"info","message":"WebSocket connection added for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-22T02:09:57.531Z"}
+{"level":"info","message":"WebSocket connection removed for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-22T02:10:25.040Z"}
+{"level":"info","message":"WebSocket connection added for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-22T02:10:26.068Z"}
+{"level":"info","message":"WebSocket connection removed for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-22T02:10:54.257Z"}
+{"level":"info","message":"WebSocket connection added for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-22T02:11:30.408Z"}
+{"level":"info","message":"WebSocket connection removed for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-22T02:11:40.866Z"}
+{"level":"info","message":"WebSocket connection added for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-22T02:13:11.923Z"}
+{"level":"info","message":"WebSocket connection removed for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-22T02:15:04.249Z"}
+{"level":"info","message":"WebSocket connection added for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-22T02:15:05.301Z"}
+{"level":"info","message":"WebSocket connection removed for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-22T02:20:26.150Z"}
+{"level":"info","message":"WebSocket connection added for user Rp3YdT7BYhbqoKI2UxINRiCCRZV2","timestamp":"2024-12-22T02:20:35.493Z"}
+{"level":"error","message":"Bot response error (code: BOT_RESPONSE_ERROR): [GoogleGenerativeAI Error]: Candidate was blocked due to SAFETY","response":{"candidates":[{"finishReason":"SAFETY","index":0,"safetyRatings":[{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","probability":"NEGLIGIBLE"},{"category":"HARM_CATEGORY_HATE_SPEECH","probability":"NEGLIGIBLE"},{"category":"HARM_CATEGORY_HARASSMENT","probability":"MEDIUM"},{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","probability":"NEGLIGIBLE"}]}],"modelVersion":"gemini-1.5-flash-001-tuning","usageMetadata":{"promptTokenCount":90,"totalTokenCount":90}},"stack":"Error: [GoogleGenerativeAI Error]: Candidate was blocked due to SAFETY\n    at response.text (F:\\i1\\i_backend\\node_modules\\@google\\generative-ai\\dist\\index.js:467:23)\n    at Object.handleBotResponse (F:\\i1\\i_backend\\controllers\\botController.js:31:28)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async BotResponseOrchestrator.generateResponse (F:\\i1\\i_backend\\utils\\BotResponseOrchestrator.js:27:27)\n    at async Object.handleMessage (F:\\i1\\i_backend\\services\\websocketService.js:101:11)\n    at async WebSocket.<anonymous> (F:\\i1\\i_backend\\services\\websocketService.js:33:9)","timestamp":"2024-12-22T02:24:01.674Z"}
+{"level":"error","message":"Error storing message: CONSECUTIVE_USER_MESSAGE","stack":"Error: CONSECUTIVE_USER_MESSAGE\n    at Object.storeMessage (F:\\i1\\i_backend\\services\\messageService.js:56:17)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async Object.handleMessage (F:\\i1\\i_backend\\services\\websocketService.js:77:33)\n    at async WebSocket.<anonymous> (F:\\i1\\i_backend\\services\\websocketService.js:33:9)","timestamp":"2024-12-22T02:24:08.018Z"}
+{"level":"error","message":"Error storing message: CONSECUTIVE_USER_MESSAGE","stack":"Error: CONSECUTIVE_USER_MESSAGE\n    at Object.storeMessage (F:\\i1\\i_backend\\services\\messageService.js:56:17)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async Object.handleMessage (F:\\i1\\i_backend\\services\\websocketService.js:77:33)\n    at async WebSocket.<anonymous> (F:\\i1\\i_backend\\services\\websocketService.js:33:9)","timestamp":"2024-12-22T02:24:13.641Z"}

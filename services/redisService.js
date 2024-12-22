@@ -1,60 +1,63 @@
 // FILE: services/redisService.js
-const { redisClient } = require('../config/redisConfig');
+const redisManager = require('../utils/redisManager');
 const { ERROR_CODES } = require('../config/constants');
-// const logger = require('../utils/logger');
 
 const redisService = {
   setUserSession: async (userId, socketId) => {
     try {
       console.log('Setting user session in Redis:', userId, socketId);
-      await redisClient.set(`user:${userId}`, socketId);
+      const success = await redisManager.set(`user:${userId}`, socketId);
+      if (!success) {
+        throw new Error('Failed to set user session in Redis');
+      }
     } catch (error) {
-      // logger.error('Error setting user session in Redis:', error);
       console.error('Error setting user session in Redis:', error);
-      throw new Error(ERROR_CODES.REDIS_ERROR);
+      throw { code: ERROR_CODES.REDIS_ERROR, message: error.message };
     }
   },
 
   getUserSession: async (userId) => {
     try {
-      return await redisClient.get(`user:${userId}`);
+      return await redisManager.get(`user:${userId}`);
     } catch (error) {
-      // logger.error('Error getting user session from Redis:', error);
       console.error('Error getting user session from Redis:', error);
-      throw new Error(ERROR_CODES.REDIS_ERROR);
+      throw { code: ERROR_CODES.REDIS_ERROR, message: error.message };
     }
   },
 
   removeUserSession: async (userId) => {
     try {
-      await redisClient.del(`user:${userId}`);
+      const success = await redisManager.del(`user:${userId}`);
+      if (!success) {
+        throw new Error('Failed to remove user session from Redis');
+      }
       console.log('User session removed for userId:', userId);
     } catch (error) {
-      // logger.error('Error removing user session from Redis:', error);
       console.error('Error removing user session from Redis:', error);
-      throw new Error(ERROR_CODES.REDIS_ERROR);
+      throw { code: ERROR_CODES.REDIS_ERROR, message: error.message };
     }
   },
 
   storeUnsentMessage: async (userId, message) => {
     try {
-      await redisClient.rPush(`unsent:${userId}`, JSON.stringify(message));
+      const success = await redisManager.set(`unsent:${userId}`, JSON.stringify(message));
+      if (!success) {
+        throw new Error('Failed to store unsent message in Redis');
+      }
     } catch (error) {
-      // logger.error('Error storing unsent message in Redis:', error);
       console.error('Error storing unsent message in Redis:', error);
-      throw new Error(ERROR_CODES.REDIS_ERROR);
+      throw { code: ERROR_CODES.REDIS_ERROR, message: error.message };
     }
   },
 
   getUnsentMessages: async (userId) => {
     try {
-      const messages = await redisClient.lRange(`unsent:${userId}`, 0, -1);
-      await redisClient.del(`unsent:${userId}`); // Clear the list after retrieving
-      return messages.map((message) => JSON.parse(message));
+      const messages = await redisManager.get(`unsent:${userId}`);
+      await redisManager.del(`unsent:${userId}`); // Clear the list after retrieving
+      return messages ? JSON.parse(messages) : [];
     } catch (error) {
-      // logger.error('Error getting unsent messages from Redis:', error);
       console.error('Error getting unsent messages from Redis:', error);
-      throw new Error(ERROR_CODES.REDIS_ERROR);
+      throw { code: ERROR_CODES.REDIS_ERROR, message: error.message };
     }
   },
 };

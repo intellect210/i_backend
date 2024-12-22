@@ -4,12 +4,12 @@ const { removeUserSession } = require('../services/redisService');
 const websocketConnectionManager = require('./websocketConnectionManager');
 
 const errorHandlers = {
-  handleDatabaseError: (error, ws = null, userId = null) => {
-    logger.error('Database error:', error);
+  handleDatabaseError: (error, code = ERROR_CODES.DATABASE_ERROR, ws = null, userId = null) => {
+    logger.error(`Database error (code: ${code}):`, error);
     if (ws) {
       ws.send(
         JSON.stringify({
-          error: ERROR_CODES.DATABASE_ERROR,
+          code,
           message: 'An error occurred with the database.',
         })
       );
@@ -20,12 +20,12 @@ const errorHandlers = {
     }
   },
 
-  handleRedisError: (error, ws = null, userId = null) => {
-    logger.error('Redis error:', error);
+  handleRedisError: (error, code = ERROR_CODES.REDIS_ERROR, ws = null, userId = null) => {
+    logger.error(`Redis error (code: ${code}):`, error);
     if (ws) {
       ws.send(
         JSON.stringify({
-          error: ERROR_CODES.REDIS_ERROR,
+          code,
           message: 'An error occurred with Redis.',
         })
       );
@@ -36,12 +36,12 @@ const errorHandlers = {
     }
   },
 
-  handleWebsocketError: (error, ws = null, userId = null) => {
-    logger.error('Websocket error:', error);
+  handleWebsocketError: (error, code = ERROR_CODES.WEBSOCKET_ERROR, ws = null, userId = null) => {
+    logger.error(`Websocket error (code: ${code}):`, error);
     if (ws) {
       ws.send(
         JSON.stringify({
-          error: ERROR_CODES.WEBSOCKET_ERROR,
+          code,
           message: 'An error occurred with the WebSocket connection.',
         })
       );
@@ -52,12 +52,12 @@ const errorHandlers = {
     }
   },
 
-  handleInvalidTokenError: (error, ws = null, userId = null) => {
-    logger.error('Invalid token error:', error);
+  handleInvalidTokenError: (error, code = ERROR_CODES.INVALID_TOKEN, ws = null, userId = null) => {
+    logger.error(`Invalid token error (code: ${code}):`, error);
     if (ws) {
       ws.send(
         JSON.stringify({
-          error: ERROR_CODES.INVALID_TOKEN,
+          code,
           message: 'Invalid or expired token.',
         })
       );
@@ -69,18 +69,32 @@ const errorHandlers = {
     }
   },
 
-  handleMessageValidationError: (error, ws = null, userId = null) => {
-    logger.error('Message validation error:', error);
+  handleMessageValidationError: (error, code = ERROR_CODES.MESSAGE_VALIDATION_ERROR, ws = null, userId = null) => {
+    logger.error(`Message validation error (code: ${code}):`, error);
     if (ws) {
       ws.send(
         JSON.stringify({
-          error: error.code, // Use the error code from the error object
-          message: error.message, // Use the error message from the error object
+          code,
+          message: error.message,
         })
       );
     }
     // Note: We are not removing the user session or closing the connection
     // on validation errors, as these might be temporary issues.
+  },
+
+  handleBotResponseError: (error, code = ERROR_CODES.BOT_RESPONSE_ERROR, ws = null, userId = null) => {
+    logger.error(`Bot response error (code: ${code}):`, error);
+    if (ws) {
+      ws.send(
+        JSON.stringify({
+          code,
+          message: 'An error occurred while generating the bot response.',
+        })
+      );
+    }
+    // Note: We are not removing the user session or closing the connection
+    // on bot response errors, as these might be temporary issues.
   },
 };
 
