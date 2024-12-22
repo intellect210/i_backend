@@ -68,7 +68,7 @@ const websocketService = {
         // Get the formatted history for the model
         const history = await chatHistoryManager.buildHistory();
 
-        const botResponse = await botController.handleBotResponse(message,MODELS.GEMINI_105_FLASH_8B, history);
+        const botResponse = await botController.handleBotResponse(message, null, history);
 
         // Store bot response in db
         const botMessageResult = await messageService.storeMessage(

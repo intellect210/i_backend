@@ -9,6 +9,7 @@ const {
 } = require('../utils/data/chatRepository');
 const { isEmptyMessage, isConsecutiveUserMessage } = require('../utils/data/validators');
 const { BOT_RESPONSE_TIMEOUT_MS } = require('../config/constants');
+const websocketConnectionManager = require('../utils/websocketConnectionManager');
 
 const messageService = {
   storeMessage: async (userId, message, messageType, role, chatId = null) => {
@@ -55,7 +56,6 @@ const messageService = {
           throw new Error(ERROR_CODES.CONSECUTIVE_USER_MESSAGE);
         }
 
-        // Add the message to the chat with the correct type and role
         const newMessage = {
           text: message,
           messageType: messageType,
