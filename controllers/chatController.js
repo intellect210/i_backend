@@ -25,7 +25,7 @@ const chatController = {
             console.log('Chat not found:', chatId);
           return res.status(404).json({ message: 'Chat not found' });
         }
-        await chat.remove();
+        await chat.deleteOne({chatId: chatId});
         console.log('Chat deleted:', chat);
         res.status(200).json({ message: 'Chat deleted' });
     } catch (error) {
