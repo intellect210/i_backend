@@ -8,5 +8,6 @@ router.use(authMiddleware);
 
 router.get('/', chatController.getAllChats);
 
+router.delete('/deletechat/:chatId', chatController.deleteChat);
 
 module.exports = router;

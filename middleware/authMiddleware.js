@@ -6,20 +6,20 @@ dotenv.config();
 const authMiddleware = (req, res, next) => {
     console.log('Auth middleware invoked');
 
-    console.log('Request headers:', req.headers);
+    // console.log('Request headers:', req.headers);
     
     // Get token from Authorization header
     const authHeader = req.headers.authorization;
-    console.log('Authorization header:', authHeader);
+    // console.log('Authorization header:', authHeader);
     
     const token = authHeader && authHeader.split(' ')[1]; // Bearer <token>
-    console.log('Extracted token:', token);
+    // console.log('Extracted token:', token);
     
     if (token) {
         try {
             console.log('Verifying token...');
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            console.log('Token verified, decoded payload:', decoded);
+            console.log('Token verified, decoded payload');
             
             req.user = decoded;
             return next(); // Proceed to the next middleware or route handler
