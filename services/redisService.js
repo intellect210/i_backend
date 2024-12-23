@@ -65,8 +65,8 @@ const redisService = {
   storeChunk: async (streamId, chatId, chunk) => {
     const key = `stream:${streamId}:${chatId}`;
     try {
-      await redisManager.rPush(key, chunk); // rPush adds the chunk to the end of the list
-      console.log(`Stored chunk for stream ${streamId} in Redis`);
+      await redisManager.rPush(key, chunk);
+      console.log(`Stored chunk for stream ${streamId}:chat ${chatId} in Redis`);
     } catch (error) {
       console.error(`Error storing chunk for stream ${streamId} in Redis:`, error);
       throw { code: ERROR_CODES.REDIS_ERROR, message: error.message };
@@ -76,9 +76,9 @@ const redisService = {
   combineChunks: async (streamId, chatId) => {
     const key = `stream:${streamId}:${chatId}`;
     try {
-      const chunks = await redisManager.lRange(key, 0, -1); // Get all chunks from the list
-      console.log(`Retrieved chunks for stream ${streamId} from Redis`);
-      return chunks.join(""); // Combine the chunks into a single string
+      const chunks = await redisManager.lRange(key, 0, -1);
+      console.log(`Retrieved chunks for stream ${streamId}:chat ${chatId} from Redis`);
+      return chunks.join("");
     } catch (error) {
       console.error(
         `Error retrieving chunks for stream ${streamId} from Redis:`,
@@ -92,7 +92,7 @@ const redisService = {
     const key = `stream:${streamId}:${chatId}`;
     try {
       await redisManager.del(key);
-      console.log(`Deleted chunks for stream ${streamId} from Redis`);
+      console.log(`Deleted chunks for stream ${streamId}:chat ${chatId} from Redis`);
     } catch (error) {
       console.error(
         `Error deleting chunks for stream ${streamId} from Redis:`,

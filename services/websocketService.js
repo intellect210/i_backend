@@ -48,9 +48,10 @@ const websocketService = {
 
   handleStream: async (streamId, chatId, chunk, isStreamEnd, ws) => {
     const userId = ws.user.useruid;
+
     try {
       if (!isStreamEnd) {
-        // Store chunk in Redis
+        // Store chunk in Redis with chatId
         await redisService.storeChunk(streamId, chatId, chunk);
   
         // Send chunk to client
@@ -68,13 +69,13 @@ const websocketService = {
           chatId
         );
   
-        // Store full message in MongoDB
+        // Store full message in MongoDB using the correct chatId
         const botMessageResult = await messageService.storeMessage(
           userId,
           fullMessage,
           MESSAGE_TYPES.TEXT,
           MESSAGE_ROLES.BOT,
-          chatId
+          chatId // Use the chatId passed to the function
         );
   
         // Send end of stream message to client
@@ -135,11 +136,24 @@ const websocketService = {
   handleMessage: async (ws, message) => {
     const user = ws.user;
     const userId = user.useruid;
-    const { messageType, message: text, chatId, role } = message;
+    let { messageType, message: text, chatId, role } = message;
 
     console.log(`Handling message from user ${userId}:`, message);
 
     try {
+      // Store the user message and get the updated chat
+      const userMessageResult = await messageService.storeMessage(
+        userId,
+        text,
+        messageType,
+        MESSAGE_ROLES.USER,
+        chatId // This may be null or an existing chatId
+      );
+      const { chat: updatedChatUser } = userMessageResult;
+
+      // Use the returned chatId (either existing or new)
+      chatId = updatedChatUser._id.toString();
+
       const redisKey = `bot_processing:${userId}:${chatId}`;
       const isBotProcessing = await redisManager.exists(redisKey);
 
@@ -162,32 +176,29 @@ const websocketService = {
       }
 
       // Store the user message
-      const userMessageResult = await messageService.storeMessage(
-        userId,
-        text,
-        messageType,
-        MESSAGE_ROLES.USER,
-        chatId
-      );
-      const { chat: updatedChatUser } = userMessageResult;
-      console.log(`Stored message from user ${userId} in the database`);
+      // const userMessageResult = await messageService.storeMessage(
+      //   userId,
+      //   text,
+      //   messageType,
+      //   MESSAGE_ROLES.USER,
+      //   chatId
+      // );
+      // const { chat: updatedChatUser } = userMessageResult;
+      // console.log(`Stored message from user ${userId} in the database`);
 
       // Handle bot response only if the message is intended for the bot
       if (role === 'user') {
         console.log(`Message is for bot, processing with bot controller`);
 
-        // Process the message with the bot controller
         const chatHistoryManager = new ChatHistoryManager(
           updatedChatUser._id,
           chatRepository
         );
-
-        // Get the formatted history for the model
         const history = await chatHistoryManager.buildHistory();
 
-        // Pass handleStream and handleStreamError as arguments
+        // Pass updated chatId to streamBotResponse
         await botController.streamBotResponse(
-          message,
+          { ...message, chatId }, // Pass chatId to the bot controller
           null,
           history,
           ws,
@@ -197,7 +208,6 @@ const websocketService = {
       }
     } catch (error) {
       console.error('Error handling message:', error);
-      // Send error message to the user
       websocketService.sendMessage(userId, {
         type: 'error',
         code: error.code,
