@@ -1,3 +1,4 @@
+// FILE: services/websocketService.txt
 const {
   MESSAGE_TYPES,
   ERROR_CODES,
@@ -12,8 +13,10 @@ const ChatHistoryManager = require('../utils/data/ChatHistoryManager');
 const chatRepository = require('../utils/data/chatRepository');
 const { handleRedisError } = require('../utils/errorHandlers');
 const redisManager = require('../utils/redisManager');
+const { v4: uuidv4 } = require("uuid");
 
 const botResponseOrchestrator = new BotResponseOrchestrator();
+const botController = require('../controllers/botController');
 
 const websocketService = {
   handleNewConnection: async (ws, userId) => {
@@ -41,6 +44,92 @@ const websocketService = {
       );
       websocketService.handleDisconnection(userId, socketId);
     });
+  },
+
+  handleStream: async (streamId, chatId, chunk, isStreamEnd, ws) => {
+    const userId = ws.user.useruid;
+    try {
+      if (!isStreamEnd) {
+        // Store chunk in Redis
+        await redisService.storeChunk(streamId, chatId, chunk);
+  
+        // Send chunk to client
+        websocketService.sendMessage(userId, {
+          type: MESSAGE_TYPES.CHUNK,
+          streamId: streamId,
+          chatId: chatId,
+          message: chunk,
+        });
+      } else {
+        // End of stream
+        // Retrieve and combine chunks from Redis
+        const fullMessage = await redisService.combineChunks(
+          streamId,
+          chatId
+        );
+  
+        // Store full message in MongoDB
+        const botMessageResult = await messageService.storeMessage(
+          userId,
+          fullMessage,
+          MESSAGE_TYPES.TEXT,
+          MESSAGE_ROLES.BOT,
+          chatId
+        );
+  
+        // Send end of stream message to client
+        websocketService.sendMessage(userId, {
+          type: MESSAGE_TYPES.CHUNK_END,
+          streamId: streamId,
+          chatId: chatId,
+        });
+  
+        // Remove chunks from Redis
+        await redisService.deleteChunks(streamId, chatId);
+      }
+    } catch (error) {
+      console.error("Error handling stream:", error);
+      let errorCode = "STREAM_ERROR";
+  
+      if (error.code) {
+        errorCode = error.code;
+      } else if (error.name) {
+        errorCode = error.name;
+      }
+      websocketService.sendMessage(userId, {
+        type: MESSAGE_TYPES.ERROR,
+        streamId,
+        chatId,
+        code: errorCode,
+        message: error.message || "An error occurred during streaming.",
+      });
+    }
+  },
+
+  handleStreamError: async (streamId, chatId, errorCode, errorMessage, ws) => {
+    const userId = ws.user.useruid;
+    console.error(
+      `Error in stream ${streamId} for chat ${chatId}: ${errorCode} - ${errorMessage}`
+    );
+
+    // Send error message to client
+    websocketService.sendMessage(userId, {
+      type: MESSAGE_TYPES.ERROR,
+      streamId,
+      chatId,
+      code: errorCode,
+      message: errorMessage || "An error occurred during streaming.",
+    });
+
+    // Potentially clean up any partial data in Redis related to the streamId and chatId.
+    try {
+      await redisService.deleteChunks(streamId, chatId);
+    } catch (cleanupError) {
+      console.error(
+        `Error cleaning up Redis chunks for stream ${streamId} and chat ${chatId}:`,
+        cleanupError
+      );
+    }
   },
 
   handleMessage: async (ws, message) => {
@@ -96,22 +185,15 @@ const websocketService = {
         // Get the formatted history for the model
         const history = await chatHistoryManager.buildHistory();
 
-        const { botResponse, updatedChatBot } =
-          await botResponseOrchestrator.generateResponse(
-            userId,
-            updatedChatUser._id,
-            message,
-            history
-          );
-
-        // Send the bot response back to the user, including chatId and chatname
-        websocketService.sendMessage(userId, {
-          type: MESSAGE_TYPES.TEXT,
-          message: botResponse,
-          role: MESSAGE_ROLES.BOT,
-          chatId: updatedChatBot._id,
-          chatname: updatedChatBot.chatname, // Include chatname
-        });
+        // Pass handleStream and handleStreamError as arguments
+        await botController.streamBotResponse(
+          message,
+          null,
+          history,
+          ws,
+          websocketService.handleStream,
+          websocketService.handleStreamError
+        );
       }
     } catch (error) {
       console.error('Error handling message:', error);
@@ -121,11 +203,6 @@ const websocketService = {
         code: error.code,
         message: error.message,
       });
-      if (error.code === ERROR_CODES.CONSECUTIVE_USER_MESSAGE) {
-      } else if (error.code === ERROR_CODES.EMPTY_MESSAGE) {
-      } else {
-        console.error('Unexpected error while handling message:', error);
-      }
     }
   },
 

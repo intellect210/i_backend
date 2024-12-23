@@ -1,6 +1,10 @@
+// FILE: config/constants.txt
 // FILE: config/constants.js
 const MESSAGE_TYPES = {
-  TEXT: 'text'
+  TEXT: 'text',
+  CHUNK: 'chunk',
+  CHUNK_END: 'chunk_end',
+  ERROR: 'error'
 };
 
 const MESSAGE_ROLES = {
@@ -17,9 +21,10 @@ const ERROR_CODES = {
     EMPTY_MESSAGE: 'EMPTY_MESSAGE',
     BOT_RESPONSE_TIMEOUT: 'BOT_RESPONSE_TIMEOUT',
     BOT_RESPONSE_ERROR: 'BOT_RESPONSE_ERROR',
+    STREAM_ERROR: 'STREAM_ERROR'
 };
 
-const BOT_RESPONSE_TIMEOUT_MS = 100000; // 10 seconds
+const BOT_RESPONSE_TIMEOUT_MS = 1000; // 1 seconds
 
 const MODELS = {
   GEMINI_PRO: "gemini-1.5-pro",

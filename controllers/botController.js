@@ -1,8 +1,10 @@
+// FILE: botController.txt
 const {
   GoogleGenerativeAI,
   HarmCategory,
   HarmBlockThreshold,
 } = require("@google/generative-ai");
+const { v4: uuidv4 } = require("uuid");
 const { CURRENT_MODEL } = require("../config/constants");
 const systemInstructions = require('../utils/systemInstructions');
 
@@ -17,6 +19,51 @@ const generationConfig = {
 };
 
 const botController = {
+
+  streamBotResponse: async (
+    message,
+    modelName,
+    history = [],
+    ws,
+    handleStream,
+    handleStreamError
+  ) => {
+    const model = genAI.getGenerativeModel({
+      model: modelName ? modelName : CURRENT_MODEL,
+    });
+
+    const chatSession = model.startChat({
+      generationConfig,
+      history,
+    });
+
+    const streamId = uuidv4(); // Generate streamId here
+    const chatId = message.chatId;
+
+    try {
+      const result = await chatSession.sendMessageStream(message.message);
+
+      for await (const item of result.stream) {
+        const chunkText = item.candidates[0].content.parts[0].text;
+        await handleStream(streamId, chatId, chunkText, false, ws);
+      }
+
+      // Signal the end of the stream
+      await handleStream(streamId, chatId, "", true, ws);
+    } catch (error) {
+      console.error("Error in streamBotResponse:", error);
+      let errorCode = "UNKNOWN_ERROR";
+
+      if (error.code) {
+        errorCode = error.code;
+      } else if (error.name) {
+        errorCode = error.name;
+      }
+
+      await handleStreamError(streamId, chatId, errorCode, error.message, ws);
+    }
+  },
+
   handleBotResponse: async (message, modelName, history = []) => {
     const model = genAI.getGenerativeModel({
       model: modelName ? modelName : CURRENT_MODEL,

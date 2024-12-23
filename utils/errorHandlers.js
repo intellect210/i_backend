@@ -1,3 +1,4 @@
+// FILE: utils/errorHandlers.txt
 const { ERROR_CODES } = require('../config/constants');
 const logger = require('./logger');
 const { removeUserSession } = require('../services/redisService');
@@ -61,7 +62,7 @@ const errorHandlers = {
           message: 'Invalid or expired token.',
         })
       );
-      ws.close(1008, 'Invalid token'); // Close the WebSocket connection
+      ws.close(4001, 'Invalid token'); // Close the WebSocket connection
     }
     if (userId) {
       websocketConnectionManager.removeConnection(userId);

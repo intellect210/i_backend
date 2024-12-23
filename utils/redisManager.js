@@ -1,3 +1,4 @@
+// FILE: utils/redisManager.txt
 // FILE: utils/redisManager.js
 const { redisClient } = require('../config/redisConfig');
 const { handleRedisError } = require('./errorHandlers');
@@ -54,6 +55,28 @@ const redisManager = {
         error
       );
       return false;
+    }
+  },
+  async rPush(key, value) {
+    try {
+      await redisClient.rPush(key, value);
+      console.log(`Successfully added value to list: ${key} in Redis`);
+      return true;
+    } catch (error) {
+      handleRedisError(error, ERROR_CODES.REDIS_ERROR);
+      console.error(`Error adding value to list: ${key} in Redis:`, error);
+      return false;
+    }
+  },
+  async lRange(key, start, stop) {
+    try {
+      const values = await redisClient.lRange(key, start, stop);
+      console.log(`Successfully retrieved values from list: ${key} in Redis`);
+      return values;
+    } catch (error) {
+      handleRedisError(error, ERROR_CODES.REDIS_ERROR);
+      console.error(`Error retrieving values from list: ${key} in Redis:`, error);
+      return [];
     }
   },
 };
