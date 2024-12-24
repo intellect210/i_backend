@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const PineconeService = require('../services/pineconeService');
+const {classify} = require('../services/classificationService');
 
 // Initialize PineconeService instance
 const pineconeService = new PineconeService();
@@ -37,5 +38,21 @@ router.post('/query', async (req, res) => {
     res.status(500).json({ error: 'Failed to query data' });
   }
 });
+
+// Test route to classify a message
+router.post('/classify', async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text) {
+      return res.status(400).json({ error: 'Text is required' });
+    }
+    const classification = await classify(text);
+    res.status(200).json({ classification });
+  } catch (error) {
+    console.error('Error classifying text:', error);
+    res.status(500).json({ error: 'Failed to classify text' });
+  }
+});
+
 
 module.exports = router;

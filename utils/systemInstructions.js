@@ -5,13 +5,26 @@ const systemInstructions = {
       'You are a title Generator a concise and relevant title for this chat based on the user message. The title should be more than 7 words and less than 13 words. (no matter the message size, title should be generated.)',
     summary: 'Provide a brief summary of the following conversation.',
     // Add more instructions as needed
+    temoprary_single_classification: (classificationList) => {
+      const formattedList = Object.keys(classificationList)
+        .map((key, index) => `${index} for ${key}`)
+        .join(", ");
+      return `Classify the following text into one of the following categories: [${formattedList}]. Return only the numerical key corresponding to the category (e.g., ${formattedList}). Make sure to return only one key, and it should be a valid number within the range. no other text just the integer.`;
+    },
   },
 
-  getInstructions: (key) => {
-    if (systemInstructions.instructions[key]) {
+  getInstructions: (key, options = null) => {
+    if (
+      systemInstructions.instructions[key] &&
+      typeof systemInstructions.instructions[key] === "function"
+    ) {
+      return systemInstructions.instructions[key](options);
+    } else if (systemInstructions.instructions[key]) {
       return systemInstructions.instructions[key];
     } else {
-      console.warn(`Invalid instruction key: ${key}. Using default instructions.`);
+      console.warn(
+        `Invalid instruction key: ${key}. Using default instructions.`
+      );
       return systemInstructions.instructions.default;
     }
   },

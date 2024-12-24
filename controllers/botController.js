@@ -78,21 +78,42 @@ const botController = {
     return result.response.text();
   },
 
-  sendMessageWithInstructions: async (message, instructionKey) => {
+  sendMessageWithInstructions: async (
+    message,
+    instructionKey,
+    instructionOptions = null,
+    curr_model = CURRENT_MODEL
+  ) => {
     const model = genAI.getGenerativeModel({
-      model: CURRENT_MODEL, // Use the same model as the main chat
+      model: curr_model ? curr_model : CURRENT_MODEL, // Use the same model as the main chat
       generationConfig, // Use the same generation config
     });
 
-    const instructions = systemInstructions.getInstructions(instructionKey);
-    const modifiedMessage = `${instructions}\n\nUser: ${message}`;
+    const instructions = systemInstructions.getInstructions(
+      instructionKey,
+      instructionOptions
+    );
+    const modifiedMessage = `Instructions: ${instructions}\n\nUser Query: ${message}`;
 
     try {
       const result = await model.generateContent(modifiedMessage);
       const response = result.response;
       return response.text();
     } catch (error) {
-      // console.error('Error generating content with instructions:', error);
+      console.error("Error generating content with instructions:", error);
+      throw error; // Re-throw to be handled by the caller
+    }
+  },
+
+  classifyText: async (text) => {
+    try {
+      const response = await botController.sendMessageWithInstructions(
+        text,
+        "temoprary_single_classification"
+      );
+      return response;
+    } catch (error) {
+      console.error("Error during text classification:", error);
       throw error; // Re-throw to be handled by the caller
     }
   },
