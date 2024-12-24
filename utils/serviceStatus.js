@@ -14,7 +14,7 @@ async function getServiceStatus() {
       return { status: true, message: "we are currently experiencing heavy load, try again later. we are working on it." };
     }
   } catch (error) {
-    console.error("Error fetching service status:", error);
+    // console.error("Error fetching service status:", error);
     return { status: true, message: "" }; // Default status on error
   }
 }

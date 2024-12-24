@@ -12,7 +12,7 @@ const redisService = {
         throw new Error('Failed to set user session in Redis');
       }
     } catch (error) {
-      console.error('Error setting user session in Redis:', error);
+      //console.error('Error setting user session in Redis:', error);
       throw { code: ERROR_CODES.REDIS_ERROR, message: error.message };
     }
   },
@@ -21,7 +21,7 @@ const redisService = {
     try {
       return await redisManager.get(`user:${userId}`);
     } catch (error) {
-      console.error('Error getting user session from Redis:', error);
+      //console.error('Error getting user session from Redis:', error);
       throw { code: ERROR_CODES.REDIS_ERROR, message: error.message };
     }
   },
@@ -34,7 +34,7 @@ const redisService = {
       }
       console.log('User session removed for userId:', userId);
     } catch (error) {
-      console.error('Error removing user session from Redis:', error);
+      //console.error('Error removing user session from Redis:', error);
       throw { code: ERROR_CODES.REDIS_ERROR, message: error.message };
     }
   },
@@ -46,7 +46,7 @@ const redisService = {
         throw new Error('Failed to store unsent message in Redis');
       }
     } catch (error) {
-      console.error('Error storing unsent message in Redis:', error);
+      //console.error('Error storing unsent message in Redis:', error);
       throw { code: ERROR_CODES.REDIS_ERROR, message: error.message };
     }
   },
@@ -57,7 +57,7 @@ const redisService = {
       await redisManager.del(`unsent:${userId}`); // Clear the list after retrieving
       return messages ? JSON.parse(messages) : [];
     } catch (error) {
-      console.error('Error getting unsent messages from Redis:', error);
+      //console.error('Error getting unsent messages from Redis:', error);
       throw { code: ERROR_CODES.REDIS_ERROR, message: error.message };
     }
   },
@@ -68,7 +68,7 @@ const redisService = {
       await redisManager.rPush(key, chunk);
       console.log(`Stored chunk for stream ${streamId}:chat ${chatId} in Redis`);
     } catch (error) {
-      console.error(`Error storing chunk for stream ${streamId} in Redis:`, error);
+      //console.error(`Error storing chunk for stream ${streamId} in Redis:`, error);
       throw { code: ERROR_CODES.REDIS_ERROR, message: error.message };
     }
   },
@@ -80,10 +80,10 @@ const redisService = {
       console.log(`Retrieved chunks for stream ${streamId}:chat ${chatId} from Redis`);
       return chunks.join("");
     } catch (error) {
-      console.error(
-        `Error retrieving chunks for stream ${streamId} from Redis:`,
-        error
-      );
+      //console.error(
+      //   `Error retrieving chunks for stream ${streamId} from Redis:`,
+      //   error
+      // );
       throw { code: ERROR_CODES.REDIS_ERROR, message: error.message };
     }
   },
@@ -94,10 +94,10 @@ const redisService = {
       await redisManager.del(key);
       console.log(`Deleted chunks for stream ${streamId}:chat ${chatId} from Redis`);
     } catch (error) {
-      console.error(
-        `Error deleting chunks for stream ${streamId} from Redis:`,
-        error
-      );
+      //console.error(
+      //   `Error deleting chunks for stream ${streamId} from Redis:`,
+      //   error
+      // );
       throw { code: ERROR_CODES.REDIS_ERROR, message: error.message };
     }
   },

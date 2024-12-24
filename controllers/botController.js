@@ -51,7 +51,7 @@ const botController = {
       // Signal the end of the stream
       await handleStream(streamId, chatId, "", true, ws);
     } catch (error) {
-      console.error("Error in streamBotResponse:", error);
+      // console.error("Error in streamBotResponse:", error);
       let errorCode = "UNKNOWN_ERROR";
 
       if (error.code) {
@@ -92,7 +92,7 @@ const botController = {
       const response = result.response;
       return response.text();
     } catch (error) {
-      console.error('Error generating content with instructions:', error);
+      // console.error('Error generating content with instructions:', error);
       throw error; // Re-throw to be handled by the caller
     }
   },

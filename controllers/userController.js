@@ -17,7 +17,7 @@ const createUser = async (req, res) => {
     console.log('New user created:', user);
     res.status(201).json(user);
   } catch (error) {
-    console.error('Error creating user:', error.message);
+    // console.error('Error creating user:', error.message);
     res.status(400).json({ error: error.message });
   }
 };
@@ -34,7 +34,7 @@ const getUser = async (req, res) => {
     console.log('User found:', user);
     res.json(user);
   } catch (error) {
-    console.error('Error getting user:', error.message);
+    // console.error('Error getting user:', error.message);
     res.status(500).json({ error: error.message });
   }
 };
@@ -55,7 +55,7 @@ const updateUser = async (req, res) => {
     console.log('User updated:', user);
     res.json(user);
   } catch (error) {
-    console.error('Error updating user:', error.message);
+    // console.error('Error updating user:', error.message);
     res.status(400).json({ error: error.message });
   }
 };
@@ -74,7 +74,7 @@ const deleteUser = async (req, res) => {
     console.log('User deleted:', user);
     res.json({ message: 'User deleted' });
   } catch (error) {
-    console.error('Error deleting user:', error.message);
+    // console.error('Error deleting user:', error.message);
     res.status(500).json({ error: error.message });
   }
 };

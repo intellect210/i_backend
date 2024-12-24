@@ -24,7 +24,7 @@ const authMiddleware = (req, res, next) => {
             req.user = decoded;
             return next(); // Proceed to the next middleware or route handler
         } catch (error) {
-            console.error('Token verification failed:', error.message);
+            // console.error('Token verification failed:', error.message);
             return res.status(401).json({ message: 'Unauthorized: Invalid token' });
         }
     }

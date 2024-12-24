@@ -11,7 +11,7 @@ const websocketAuthMiddleware = (ws, request, next) => {
   const authHeader = request.authHeaders['Authorization'];
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    console.error("Authentication error: No token provided or invalid format");
+    // console.error("Authentication error: No token provided or invalid format");
     ws.close(4001, "Unauthorized: No token provided or invalid format");
     return;
   }
@@ -25,7 +25,7 @@ const websocketAuthMiddleware = (ws, request, next) => {
     console.log("ws user", ws.user);
     next();
   } catch (error) {
-    console.error("Authentication error: Invalid token");
+    // console.error("Authentication error: Invalid token");
     ws.close(4001, "Unauthorized: Invalid token");
     return;
   }

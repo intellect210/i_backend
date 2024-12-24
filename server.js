@@ -42,6 +42,9 @@ app.use((err, req, res, next) => {
 app.use(express.json());
 
 // *** Mount your routes ***
+app.use('/', (req, res) => {
+  res.send('Hello World!');
+});
 app.use("/api/users", userRoutes);
 app.use("/api/sessions", sessionRoutes);
 app.use("/api/chats", chatRoutes);

@@ -51,7 +51,7 @@ const sessionManager = async (req, res) => {
     return res.status(201).json({ message: 'Session created', token });
   }
   } catch (error) {
-  console.error('Error in sessionManager:', error);
+  // console.error('Error in sessionManager:', error);
   res.status(500).json({ error: error.message });
   }
 };
@@ -80,7 +80,7 @@ const logout = async (req, res) => {
     res.status(404).json({ message: 'Session not found' });
   }
   } catch (error) {
-  console.error('Error in logout:', error);
+  // console.error('Error in logout:', error);
   res.status(500).json({ error: error.message });
   }
 };
@@ -109,7 +109,7 @@ const activateSession = async (req, res) => {
     res.status(404).json({ message: 'Session not found' });
   }
   } catch (error) {
-  console.error('Error in activateSession:', error);
+  // console.error('Error in activateSession:', error);
   res.status(500).json({ error: error.message });
   }
 };
@@ -138,7 +138,7 @@ const deactivateSession = async (req, res) => {
     res.status(404).json({ message: 'Session not found' });
   }
   } catch (error) {
-  console.error('Error in deactivateSession:', error);
+  // console.error('Error in deactivateSession:', error);
   res.status(500).json({ error: error.message });
   }
 };
@@ -158,7 +158,7 @@ const verifyJwt = (req, res) => {
   console.log('Token is valid:', decoded);
   res.status(200).json({ message: 'Token is valid', decoded });
   } catch (error) {
-  console.error('Error in verifyJwt:', error);
+  // console.error('Error in verifyJwt:', error);
   res.status(401).json({ message: 'Token is invalid' });
   }
 };
