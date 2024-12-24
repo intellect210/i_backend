@@ -23,6 +23,7 @@ const userRoutes = require("./routes/userRoutes");
 const sessionRoutes = require("./routes/sessionRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const messageRoutes = require("./routes/messageRoutes");
+const extraRoutes = require("./routes/extraRoutes");
 
 const app = express();
 const server = createServer(app);
@@ -45,6 +46,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/sessions", sessionRoutes);
 app.use("/api/chats", chatRoutes);
 app.use("/api/messages", messageRoutes);
+app.use('/api/status', extraRoutes);
 
 server.on('upgrade', (request, socket, head) => {
   console.log('upgrade event');
