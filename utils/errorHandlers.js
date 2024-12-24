@@ -15,6 +15,7 @@ const errorHandlers = {
         })
       );
     }
+    
     if (userId) {
       websocketConnectionManager.removeConnection(userId);
       removeUserSession(userId);
