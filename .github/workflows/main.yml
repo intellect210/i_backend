@@ -1,0 +1,46 @@
+name: Node.js CI/CD on Amazon Linux
+
+on:
+  push:
+    branches: [ "deploy/iit" ]  # Triggers only on deploy/iit branch
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - uses: actions/checkout@v2
+
+      # Create .env file from GitHub Secrets
+      - name: Create .env file
+        run: |
+          echo "Creating .env file..."
+          echo "${{ toJSON(secrets) }}" | jq -r 'to_entries | .[] | "\(.key)=\(.value)"' > .env
+          echo ".env file created successfully."
+
+      # Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Deploy application to AWS EC2
+      - name: Deploy to AWS EC2
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "./"  # This now correctly points to the current directory
+          target: "/var/www/i_backend"
+
+      # Restart the PM2 application
+      - name: Restart PM2 application
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/i_backend
+            pm2 reload all  # This command restarts your application
