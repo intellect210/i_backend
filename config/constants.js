@@ -1,4 +1,3 @@
-// FILE: config/constants.txt
 // FILE: config/constants.js
 const MESSAGE_TYPES = {
   TEXT: 'text',
@@ -33,10 +32,16 @@ const MODELS = {
   GEMINI_EXP_1206: "gemini-exp-1206",
   GEMINI_20_FLASH: "gemini-2.0-flash-exp",
   GEMINI_TUNED_I1_CONVO_T1: "tunedModels/i1convot1-njdey2vs1v7d",
+  VERTEX_MODEL_NAME: "text-embedding-004",
   // Add other models here
 };
 
 const CURRENT_MODEL = MODELS.GEMINI_105_FLASH;
+
+const PINECONE_INDEX_NAME = "i0-1";
+const DEFAULT_TOP_K = 5;
+const DEFAULT_INCLUDE_VALUES = true;
+const DEFAULT_INCLUDE_METADATA = true;
 
 module.exports = {
   MESSAGE_TYPES,
@@ -44,5 +49,9 @@ module.exports = {
   ERROR_CODES,
   BOT_RESPONSE_TIMEOUT_MS,
   MODELS,
-  CURRENT_MODEL
+  CURRENT_MODEL,
+  PINECONE_INDEX_NAME,
+  DEFAULT_TOP_K,
+  DEFAULT_INCLUDE_VALUES,
+  DEFAULT_INCLUDE_METADATA
 };

@@ -24,6 +24,7 @@ const sessionRoutes = require("./routes/sessionRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const extraRoutes = require("./routes/extraRoutes");
+const vectorRoutes = require("./routes/vectorRoutes");
 
 const app = express();
 const server = createServer(app);
@@ -42,14 +43,15 @@ app.use((err, req, res, next) => {
 app.use(express.json());
 
 // *** Mount your routes ***
-app.use('/', (req, res) => {
-  res.send('Hello World!');
-});
+// app.use('/', (req, res) => {
+//   res.send('Hello World!');
+// });
 app.use("/api/users", userRoutes);
 app.use("/api/sessions", sessionRoutes);
 app.use("/api/chats", chatRoutes);
 app.use("/api/messages", messageRoutes);
 app.use('/api/status', extraRoutes);
+app.use('/api/vector', vectorRoutes);
 
 server.on('upgrade', (request, socket, head) => {
   console.log('upgrade event');
