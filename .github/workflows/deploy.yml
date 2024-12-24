@@ -42,10 +42,3 @@ jobs:
           pm2 list
           # Restart the application
           pm2 restart i0 || pm2 start ecosystem.config.js --name i0
-          # Log the status of PM2 processes after restart
-          pm2 logs i0
-
-      # Optional: Clean up old PM2 processes (if necessary)
-      - name: Clean up old PM2 processes
-        run: |
-          pm2 delete i0 || echo "No old PM2 processes to clean up."
