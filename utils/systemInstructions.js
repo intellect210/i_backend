@@ -5,6 +5,7 @@ const systemInstructions = {
       'You are a title Generator a concise and relevant title for this chat based on the user message. The title should be more than 7 words and less than 13 words. (no matter the message size, title should be generated.)',
     summary: 'Provide a brief summary of the following conversation.',
     // Add more instructions as needed
+    dataInjection: "You are a chatbot that uses provided data to answer questions. When data is injected, prioritize it over your general knowledge. If you don't know the answer based on the provided data, just respond gracefully.",
     temoprary_single_classification: (classificationList) => {
       const formattedList = Object.keys(classificationList)
         .map((key, index) => `${index} for ${key}`)

@@ -1,5 +1,5 @@
 // services/classificationService.js
-const botController = require('../controllers/botController');
+const {sendMessageWithInstructions} = require('../controllers/botController');
 const { classifications } = require('../config/classifications');
 const { DEFAULT_CLASSIFICATION } = require('../config/constants');
 
@@ -7,7 +7,7 @@ const ClassificationService = {
    classify: async(text) => {
     try {
       const classificationKeys = Object.keys(classifications);
-      const classificationResult = await botController.sendMessageWithInstructions(
+      const classificationResult = await sendMessageWithInstructions(
         text,
         'temoprary_single_classification',
         classifications

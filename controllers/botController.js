@@ -1,11 +1,11 @@
-// FILE: botController.txt
+// controllers/botController.js
 const {
   GoogleGenerativeAI,
   HarmCategory,
   HarmBlockThreshold,
 } = require("@google/generative-ai");
 const { v4: uuidv4 } = require("uuid");
-const { CURRENT_MODEL } = require("../config/constants");
+const {  MODELS, CURRENT_MODEL } = require("../config/constants");
 const systemInstructions = require('../utils/systemInstructions');
 
 const apiKey = process.env.GEMINI_API_KEY;
@@ -19,7 +19,6 @@ const generationConfig = {
 };
 
 const botController = {
-
   streamBotResponse: async (
     message,
     modelName,
@@ -29,7 +28,7 @@ const botController = {
     handleStreamError
   ) => {
     const model = genAI.getGenerativeModel({
-      model: modelName ? modelName : CURRENT_MODEL,
+      model: modelName ? modelName : MODELS.GEMINI_105_FLASH_8B,
     });
 
     const chatSession = model.startChat({
@@ -51,7 +50,7 @@ const botController = {
       // Signal the end of the stream
       await handleStream(streamId, chatId, "", true, ws);
     } catch (error) {
-      // console.error("Error in streamBotResponse:", error);
+      console.error("Error in streamBotResponse:", error);
       let errorCode = "UNKNOWN_ERROR";
 
       if (error.code) {
@@ -65,8 +64,10 @@ const botController = {
   },
 
   handleBotResponse: async (message, modelName, history = []) => {
+    // Removed injectedData parameter
+    console.log("Model Name in handleBotResponse:", MODELS.GEMINI_105_FLASH_8B);
     const model = genAI.getGenerativeModel({
-      model: modelName ? modelName : CURRENT_MODEL,
+      model: MODELS.GEMINI_105_FLASH_8B,
     });
 
     const chatSession = model.startChat({
@@ -74,7 +75,7 @@ const botController = {
       history,
     });
 
-    const result = await chatSession.sendMessage(message.message);
+    const result = await chatSession.sendMessage(message);
     return result.response.text();
   },
 
