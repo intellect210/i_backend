@@ -17,32 +17,32 @@ const chatTitleService = {
         return; // Title already set
       }
 
-      let generatedTitle;
-      if (!newTitle) {
-        generatedTitle = await botController.sendMessageWithInstructions(
-          'Please generate a title for this chat.',
-          'chatTitleGeneration'
-        );
-      } else {
-        generatedTitle = await botController.sendMessageWithInstructions(
-          newTitle,
-          'chatTitleGeneration'
-        );
-      }
+      // let generatedTitle;
+      // if (!newTitle) {
+      //   generatedTitle = await botController.sendMessageWithInstructions(
+      //     'Please generate a title for this chat.',
+      //     'chatTitleGeneration'
+      //   );
+      // } else {
+      //   generatedTitle = await botController.sendMessageWithInstructions(
+      //     newTitle,
+      //     'chatTitleGeneration'
+      //   );
+      // }
 
-      if (!generatedTitle) {
-        logger.warn(
-          `Failed to generate chat title for chat: ${chatId}. Using default title.`
-        );
-        generatedTitle = `Chat with User ${userId}`;
-      }
+      // if (!generatedTitle) {
+      //   logger.warn(
+      //     `Failed to generate chat title for chat: ${chatId}. Using default title.`
+      //   );
+      //   generatedTitle = `Chat with User ${userId}`;
+      // }
 
-      console.log(`Generated chat title: ${generatedTitle}`);
+      // console.log(`Generated chat title: ${generatedTitle}`);
 
-      // Sanitize the generated title (e.g., remove extra quotes, limit length)
-      generatedTitle = generatedTitle.replace(/["']/g, '').substring(0, 100); // Example sanitization
+      // // Sanitize the generated title (e.g., remove extra quotes, limit length)
+      // generatedTitle = generatedTitle.replace(/["']/g, '').substring(0, 100); // Example sanitization
 
-      await chatRepository.updateChatTitle(chatId, generatedTitle);
+      await chatRepository.updateChatTitle(chatId, "temporary chats");
       logger.info(`Chat title updated for chat: ${chatId}`);
     } catch (error) {
       logger.error(`Error setting chat title for chat: ${chatId}`, error);

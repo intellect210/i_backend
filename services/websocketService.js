@@ -161,15 +161,15 @@ const websocketService = {
       }
 
       // Classify the message
-      let classificationKey;
-      try {
-        classificationKey = await ClassificationService.classify(text);
-      } catch (error) {
-        console.error('Error during classification:', error);
-        classificationKey = DEFAULT_CLASSIFICATION;
-      }
+      // let classificationKey;
+      // try {
+      //   classificationKey = await ClassificationService.classify(text);
+      // } catch (error) {
+      //   console.error('Error during classification:', error);
+      //   classificationKey = DEFAULT_CLASSIFICATION;
+      // }
 
-      console.log(classificationKey)
+      // console.log(classificationKey)
 
       // Get or create chat history
       let history;
@@ -191,7 +191,7 @@ const websocketService = {
       }
 
       // Conditional context building
-      if (classificationKey === 'require context') {
+      if (chatId) {
         let extra_content = '';
         try {
           const pineconeResults = await pineconeService.queryData(text);
