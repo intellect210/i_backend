@@ -1,4 +1,3 @@
-// FILE: services/websocketService.js
 const {
   MESSAGE_TYPES,
   ERROR_CODES,
@@ -21,8 +20,11 @@ const botResponseOrchestrator = new BotResponseOrchestrator();
 const botController = require('../controllers/botController');
 const PineconeService = require('../services/pineconeService');
 const ClassificationService = require('./classificationService');
+const PersonalizationService = require('./personalizationService');
+const { info } = require('winston');
 
 const pineconeService = new PineconeService();
+const personalizationService = new PersonalizationService();
 
 const websocketService = {
   handleNewConnection: async (ws, userId) => {
@@ -200,9 +202,30 @@ const websocketService = {
           }
           console.log(extra_content)
 
+           const personalisationInfo = await personalizationService.getPersonalizationInfo(userId);
+      const infoText = `Personalised Name: ${personalisationInfo.personalisedName}, Model Behaviour: ${personalisationInfo.modelBehaviour}, Personal Info: ${personalisationInfo.personalInfo}`;
+
+      
+
           // Modify history based on chatId
           if (!chatId) {
             history = [
+              {
+                role: 'user',
+                parts: [{text: systemInstructions.getInstructions('assistantBehaviorPrompt')}],
+              },
+              {
+                role: 'model',
+                parts: [{text: 'Understood. I will prioritize the provided data.'}],
+              },
+              {
+                role: 'user',
+                parts: [{text: infoText}],
+              },
+              {
+                role: 'model',
+                parts: [{text: 'Understood. I will keep these mind for this conversation'}],
+              },
               {
                 role: 'user',
                 parts: [{text: systemInstructions.getInstructions('dataInjection')}],
@@ -223,6 +246,22 @@ const websocketService = {
             ];
           } else {
             history.unshift(
+              {
+                role: 'user',
+                parts: [{text: systemInstructions.getInstructions('assistantBehaviorPrompt')}],
+              },
+              {
+                role: 'model',
+                parts: [{text: 'Understood. I will prioritize the provided data.'}],
+              },
+              {
+                role: 'user',
+                parts: [{text: infoText}],
+              },
+              {
+                role: 'model',
+                parts: [{text: 'Understood. I will keep these mind for this conversation'}],
+              },
               {
                 role: 'user',
                 parts: [{text: systemInstructions.getInstructions('dataInjection')}],
@@ -251,7 +290,24 @@ const websocketService = {
         }
       } else if (!chatId) {
         // New chat, no context required
-        history = [];
+        history = [
+          {
+            role: 'user',
+            parts: [{text: systemInstructions.getInstructions('assistantBehaviorPrompt')}],
+          },
+          {
+            role: 'model',
+            parts: [{text: 'Understood. I will prioritize the provided data.'}],
+          },
+          {
+            role: 'user',
+            parts: [{text: infoText}],
+          },
+          {
+            role: 'model',
+            parts: [{text: 'Understood. I will keep these mind for this conversation'}],
+          }
+        ];
       }
 
       // Rest of the existing logic for handling bot response...
