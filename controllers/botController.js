@@ -28,7 +28,7 @@ const botController = {
     handleStreamError
   ) => {
     const model = genAI.getGenerativeModel({
-      model: modelName ? modelName : MODELS.GEMINI_105_FLASH_8B,
+      model: modelName ? modelName : MODELS.GEMINI_105_FLASH,
     });
 
     const chatSession = model.startChat({
@@ -65,9 +65,9 @@ const botController = {
 
   handleBotResponse: async (message, modelName, history = []) => {
     // Removed injectedData parameter
-    console.log("Model Name in handleBotResponse:", MODELS.GEMINI_105_FLASH_8B);
+    console.log("Model Name in handleBotResponse:", MODELS.GEMINI_105_FLASH);
     const model = genAI.getGenerativeModel({
-      model: MODELS.GEMINI_105_FLASH_8B,
+      model: MODELS.GEMINI_105_FLASH,
     });
 
     const chatSession = model.startChat({
