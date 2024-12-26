@@ -68,6 +68,7 @@ server.on('upgrade', (request, socket, head) => {
   if (authHeaderIndex !== -1) {
     request.authHeaders['Authorization'] = request.rawHeaders[authHeaderIndex + 1];
   }
+  
 
   wss.handleUpgrade(request, socket, head, (ws) => {
     console.log('emit connection event');
