@@ -1,4 +1,4 @@
-// FILE: server.txt
+// FILE: server.js
 const { createServer } = require("http");
 const { Server } = require("ws");
 const express = require("express");
@@ -39,13 +39,19 @@ app.use((err, req, res, next) => {
   res.status(statusCode).json({ code, message: "Something broke!" });
 });
 
+// Middleware to log incoming API requests
+// app.use((req, res, next) => {
+//   logger.info(`Received API Request: ${req.method} ${req.url}`);
+//   if (Object.keys(req.body).length > 0) {
+//     logger.info(`Request Body: ${JSON.stringify(req.body)}`);
+//   }
+//   next();
+// });
+
 // *** IMPORTANT: Add middleware to parse JSON request bodies ***
 app.use(express.json());
 
 // *** Mount your routes ***
-// app.use('/', (req, res) => {
-//   res.send('Hello World!');
-// });
 app.use("/api/users", userRoutes);
 app.use("/api/sessions", sessionRoutes);
 app.use("/api/chats", chatRoutes);
@@ -98,7 +104,6 @@ const PORT = process.env.PORT || 3000;
 (async () => {
   await connectDB();
   await connectRedis();
-
   server.listen(PORT, () => {
     logger.info(`Server is running on port ${PORT}`);
   });
