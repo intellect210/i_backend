@@ -22,6 +22,7 @@ const PineconeService = require('../services/pineconeService');
 const ClassificationService = require('./classificationService');
 const PersonalizationService = require('./personalizationService');
 const { info } = require('winston');
+const dateTimeUtils = require('../utils/dateTimeUtils');
 
 const pineconeService = new PineconeService();
 const personalizationService = new PersonalizationService();
@@ -202,8 +203,10 @@ const websocketService = {
           }
           console.log(extra_content)
 
+          const currentDateTimeIST = dateTimeUtils.getCurrentDateTimeIST();
+
            const personalisationInfo = await personalizationService.getPersonalizationInfo(userId);
-      const infoText = `Personalised Name: ${personalisationInfo.personalisedName}, Model Behaviour: ${personalisationInfo.modelBehaviour}, Personal Info: ${personalisationInfo.personalInfo}`;
+      const infoText = `Personalised Name: ${personalisationInfo.personalisedName}, Model Behaviour: ${personalisationInfo.modelBehaviour}, Personal Info: ${personalisationInfo.personalInfo}, Current Date and time: ${currentDateTimeIST}`;
 
       
 
