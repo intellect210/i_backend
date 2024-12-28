@@ -207,7 +207,6 @@ const websocketService = {
 
            const personalisationInfo = await personalizationService.getPersonalizationInfo(userId);
       const infoText = `Personalised Name: ${personalisationInfo.personalisedName}, Model Behaviour: ${personalisationInfo.modelBehaviour}, Personal Info: ${personalisationInfo.personalInfo}, Current Date and time: ${currentDateTimeIST}`;
-
       
 
           // Modify history based on chatId
