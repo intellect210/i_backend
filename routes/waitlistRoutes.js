@@ -4,6 +4,7 @@ const router = express.Router();
 const Waitlist = require('../models/waitlistModel');
 const logger = require('../utils/logger');
 const EmailService = require('../services/emailService');
+const Feedback = require('../models/feedbackModel');
 
 const emailService = new EmailService();
 
@@ -128,5 +129,84 @@ router.post('/grantaccess', async (req, res) => {
         res.status(500).json({ message: 'Error granting access', error: error.message });
     }
 });
+
+// POST /api/waitlist/feedback
+router.post('/feedback', async (req, res) => {
+    try {
+        const { email, feedback } = req.body;
+  
+        if (!email) {
+            return res.status(400).json({ message: 'Email is required' });
+        }
+          
+        if (!feedback) {
+            return res.status(400).json({ message: 'Feedback is required' });
+        }
+      
+      const newFeedback = new Feedback({ email, feedback });
+      await newFeedback.save();
+      
+      const feedbackSubject = 'Feedback Received';
+const feedbackText = 'Thank you for your feedback! We greatly appreciate your input, as it helps us improve our services. Stay tuned for updates on our Play Store and website. We’re working hard to enhance your experience!';
+
+const feedbackHtml = `
+  <html>
+    <head>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          background-color: #f8f9fa;
+          color: #343a40;
+          padding: 20px;
+          margin: 0;
+        }
+        .container {
+          max-width: 600px;
+          margin: 0 auto;
+          background: #ffffff;
+          border-radius: 8px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          padding: 20px;
+        }
+        h1 {
+          color: #007bff;
+        }
+        p {
+          font-size: 16px;
+          line-height: 1.5;
+        }
+        .footer {
+          margin-top: 20px;
+          font-size: 14px;
+          color: #6c757d;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <h1>${feedbackSubject}</h1>
+        <p>${feedbackText}</p>
+        <div class="footer">
+          If you have any more questions or suggestions, feel free to reach out to us!
+        </div>
+      </div>
+    </body>
+  </html>
+`;
+
+  
+          try {
+             await emailService.sendEmail(email, feedbackSubject, feedbackText, feedbackHtml);
+              res.status(200).json({ message: 'Feedback submitted successfully, confirmation email sent.' });
+          } catch (emailError) {
+            console.error('Error sending feedback confirmation email:', emailError);
+            res.status(200).json({ message: 'Feedback submitted successfully'});
+        }
+  
+    } catch (error) {
+        console.error('Error submitting feedback:', error);
+        res.status(500).json({ message: 'Error submitting feedback', error: error.message });
+    }
+  });
 
 module.exports = router;
