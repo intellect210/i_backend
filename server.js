@@ -26,6 +26,8 @@ const messageRoutes = require("./routes/messageRoutes");
 const extraRoutes = require("./routes/extraRoutes");
 const vectorRoutes = require("./routes/vectorRoutes");
 const personalizationRoutes = require("./routes/personalizationRoutes");
+const waitlistRoutes = require("./routes/waitlistRoutes");
+
 
 const app = express();
 const server = createServer(app);
@@ -60,6 +62,7 @@ app.use("/api/messages", messageRoutes);
 app.use('/api/status', extraRoutes);
 app.use('/api/vector', vectorRoutes);
 app.use('/api/personalization', personalizationRoutes);
+app.use('/api/waitlist', waitlistRoutes);
 
 server.on('upgrade', (request, socket, head) => {
   console.log('upgrade event');
