@@ -16,6 +16,7 @@ router.post('/integration/info', authMiddleware, async (req, res) => {
 
     let personalization = await Personalization.findOne({ useruid });
 
+
     if (personalization) {
       console.log('[DEBUG] POST /integration/info - Existing personalization found');
       // Update existing document
