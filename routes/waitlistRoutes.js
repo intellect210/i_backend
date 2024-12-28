@@ -20,9 +20,9 @@ router.post('/join', async (req, res) => {
     const existingEntry = await Waitlist.findOne({ email });
 
     if (existingEntry) {
-          if (existingEntry.accessGranted) {
-              return res.status(200).json({ message: 'You might have received an email with a link to subscribe to the play store early access, check your inbox.' });
-          } else {
+      if (existingEntry.accessGranted) {
+        return res.status(200).json({ message: 'You might have received an email with a link to subscribe to the play store early access, check your inbox.' });
+      } else {
         return res.status(200).json({ message: 'You are already in the waitlist, keep checking your inbox if access is given.' });
       }
     }
@@ -30,15 +30,68 @@ router.post('/join', async (req, res) => {
     const waitlistEntry = new Waitlist({ email });
     await waitlistEntry.save();
 
-    res.status(201).json({ message: 'You have been added to the waitlist successfully' });
+    const joinSubject = 'Welcome to the Waitlist';
+    const joinText = 'Thank you for joining our waitlist! We will notify you once you have been granted access. Stay tuned!';
+    const joinHtml = `
+      <html>
+        <head>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              background-color: #f8f9fa;
+              color: #343a40;
+              padding: 20px;
+              margin: 0;
+            }
+            .container {
+              max-width: 600px;
+              margin: 0 auto;
+              background: #ffffff;
+              border-radius: 8px;
+              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+              padding: 20px;
+            }
+            h1 {
+              color: #007bff;
+            }
+            p {
+              font-size: 16px;
+              line-height: 1.5;
+            }
+            .footer {
+              margin-top: 20px;
+              font-size: 14px;
+              color: #6c757d;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h1>${joinSubject}</h1>
+            <p>${joinText}</p>
+            <div class="footer">
+              If you have any questions, feel free to reach out to us!
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    try {
+      await emailService.sendEmail(email, joinSubject, joinText, joinHtml);
+      res.status(201).json({ message: 'You have been added to the waitlist successfully, confirmation email sent.' });
+    } catch (emailError) {
+      console.error('Error sending join confirmation email:', emailError);
+      res.status(201).json({ message: 'You have been added to the waitlist successfully, but confirmation email could not be sent.' });
+    }
   } catch (error) {
     if (error.name === 'ValidationError') {
-         return res.status(400).json({ message: error.message });
-        } else if (error.code === 11000) {
-          return res.status(400).json({ message: 'Email address already exists in the waitlist' });
-        }
-     console.error('Error adding email to waitlist:', error);
-     res.status(500).json({ message: 'Error adding email to waitlist', error: error.message });
+      return res.status(400).json({ message: error.message });
+    } else if (error.code === 11000) {
+      return res.status(400).json({ message: 'Email address already exists in the waitlist' });
+    }
+    console.error('Error adding email to waitlist:', error);
+    res.status(500).json({ message: 'Error adding email to waitlist', error: error.message });
   }
 });
 
