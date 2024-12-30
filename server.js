@@ -51,7 +51,6 @@ app.use("/api/sessions", sessionRoutes);
 app.use("/api/chats", chatRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/status", extraRoutes);
-app.use("/api/vector", vectorRoutes);
 app.use("/api/personalization", personalizationRoutes);
 app.use("/api/waitlist", waitlistRoutes);
 

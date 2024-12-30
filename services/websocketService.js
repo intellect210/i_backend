@@ -163,17 +163,6 @@ const websocketService = {
         chatId = updatedChatUser._id.toString();
       }
 
-      // Classify the message
-      // let classificationKey;
-      // try {
-      //   classificationKey = await ClassificationService.classify(text);
-      // } catch (error) {
-      //   console.error('Error during classification:', error);
-      //   classificationKey = DEFAULT_CLASSIFICATION;
-      // }
-
-      // console.log(classificationKey)
-
       // Get or create chat history
       let history;
       if (!chatId) {
@@ -195,18 +184,13 @@ const websocketService = {
 
       // Conditional context building
       if (chatId) {
-        let extra_content = '';
         try {
-          const pineconeResults = await pineconeService.queryData(text);
-          if (pineconeResults && pineconeResults.length > 0) {
-            extra_content = pineconeResults.map((r) => r.text).join('');
-          }
-          console.log(extra_content)
+          
 
           const currentDateTimeIST = dateTimeUtils.getCurrentDateTimeIST();
 
-           const personalisationInfo = await personalizationService.getPersonalizationInfo(userId);
-      const infoText = `Personalised Name: ${personalisationInfo.personalisedName}, Model Behaviour: ${personalisationInfo.modelBehaviour}, Personal Info: ${personalisationInfo.personalInfo}, Current Date and time: ${currentDateTimeIST}`;
+          const personalisationInfo = await personalizationService.getPersonalizationInfo(userId);
+          const infoText = `Personalised Name: ${personalisationInfo.personalisedName}, Follow given Model Behaviour: ${personalisationInfo.modelBehaviour}, Personal Info to use whenever necessary: ${personalisationInfo.personalInfo}, Current Date and time (take this as a fact): ${currentDateTimeIST}`;
       
 
           // Modify history based on chatId
@@ -218,7 +202,7 @@ const websocketService = {
               },
               {
                 role: 'model',
-                parts: [{text: 'Understood. I will prioritize the provided data.'}],
+                parts: [{text: 'Understood. I follow the given model behaviour.'}],
               },
               {
                 role: 'user',
@@ -226,25 +210,8 @@ const websocketService = {
               },
               {
                 role: 'model',
-                parts: [{text: 'Understood. I will keep these mind for this conversation'}],
-              },
-              {
-                role: 'user',
-                parts: [{text: systemInstructions.getInstructions('dataInjection')}],
-              },
-              {
-                role: 'model',
-                parts: [{text: 'Understood. I will prioritize the provided data.'}],
-              },
-              {
-                role: 'user',
-                parts: [{text: extra_content}],
-              },
-              {
-                role: 'model',
-                parts:
-                 [{ text: 'ok i have kept the context for reference to use in future if possible'}],
-              },
+                parts: [{text: 'Understood. I will keep these in mind for this conversation.'}],
+              }
             ];
           } else {
             history.unshift(
@@ -254,7 +221,7 @@ const websocketService = {
               },
               {
                 role: 'model',
-                parts: [{text: 'Understood. I will prioritize the provided data.'}],
+                parts: [{text: 'Understood. I follow the given model behaviour.'}],
               },
               {
                 role: 'user',
@@ -262,24 +229,7 @@ const websocketService = {
               },
               {
                 role: 'model',
-                parts: [{text: 'Understood. I will keep these mind for this conversation'}],
-              },
-              {
-                role: 'user',
-                parts: [{text: systemInstructions.getInstructions('dataInjection')}],
-              },
-              {
-                role: 'model',
-                parts: [{text: 'Understood. I will prioritize the provided data.'}],
-              },
-              {
-                role: 'user',
-                parts:[{text: extra_content}],
-              },
-              {
-                role: 'model',
-                parts:
-                [{ text: 'ok i have kept the context for reference to use in future if possible'}],
+                parts: [{text: 'Understood. I will keep these in mind for this conversation'}],
               }
             );
           }
@@ -299,7 +249,7 @@ const websocketService = {
           },
           {
             role: 'model',
-            parts: [{text: 'Understood. I will prioritize the provided data.'}],
+            parts: [{text: 'Understood. I follow the given model behaviour.'}],
           },
           {
             role: 'user',
@@ -307,7 +257,7 @@ const websocketService = {
           },
           {
             role: 'model',
-            parts: [{text: 'Understood. I will keep these mind for this conversation'}],
+            parts: [{text: 'Understood. I will keep these in mind for this conversation'}],
           }
         ];
       }
