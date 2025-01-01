@@ -24,7 +24,7 @@ class ChatHistoryManager {
       }
       return chat.messages;
     } catch (error) {
-      console.error('Error fetching messages:', error);
+      console.log('Error fetching messages:', error);
       throw new Error(ERROR_CODES.DATABASE_ERROR);
     }
   }

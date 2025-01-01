@@ -10,7 +10,7 @@ class TokenManager {
         try {
             const user = await User.findOne({ useruid: useruid });
             if (!user) {
-                console.error('User not found for useruid:', useruid);
+                console.log('User not found for useruid:', useruid);
                 return null; // Handle user not found
             }
 
@@ -18,14 +18,14 @@ class TokenManager {
             console.log('AgentToken found:', agentToken);
 
             if (!agentToken) {
-                console.error('AgentToken not found for user');
+                console.log('AgentToken not found for user');
                 return null; // Handle AgentToken not found
             }
 
             if (agentToken[tokenField]) {
                 const decryptedToken = decrypt(agentToken[tokenField]);
                 if (decryptedToken === null) {
-                    console.error('Decryption failed for token:', tokenField);
+                    console.log('Decryption failed for token:', tokenField);
                     return null; // Handle decryption failure
                 }
                 return decryptedToken;
@@ -34,7 +34,7 @@ class TokenManager {
                 return null;
             }
         } catch (error) {
-            console.error('Error in _getToken:', error);
+            console.log('Error in _getToken:', error);
             return null; // Handle other errors
         }
     }
@@ -44,13 +44,13 @@ class TokenManager {
         try {
             const user = await User.findOne({ useruid: useruid });
             if (!user) {
-                console.error('User not found for useruid:', useruid);
+                console.log('User not found for useruid:', useruid);
                 return; // Handle user not found
             }
 
             const encryptedToken = encrypt(token);
             if (encryptedToken === null) {
-                console.error('Encryption failed for token:', tokenField);
+                console.log('Encryption failed for token:', tokenField);
                 return; // Handle encryption failure
             }
 
@@ -68,7 +68,7 @@ class TokenManager {
             await agentToken.save();
             console.log('Token saved successfully');
         } catch (error) {
-            console.error('Error in _setToken:', error);
+            console.log('Error in _setToken:', error);
         }
     }
 
@@ -77,7 +77,7 @@ class TokenManager {
         try {
             const user = await User.findOne({ useruid: useruid });
             if (!user) {
-                console.error('User not found for useruid:', useruid);
+                console.log('User not found for useruid:', useruid);
                 return; // Handle user not found
             }
 
@@ -88,12 +88,12 @@ class TokenManager {
             );
 
             if (!agentToken) {
-                console.error('AgentToken not found for user');
+                console.log('AgentToken not found for user');
                 return; // Handle AgentToken not found
             }
             console.log('Token reset successfully');
         } catch (error) {
-            console.error('Error in _resetToken:', error);
+            console.log('Error in _resetToken:', error);
         }
     }
 

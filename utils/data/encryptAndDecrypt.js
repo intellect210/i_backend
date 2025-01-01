@@ -15,7 +15,7 @@ function encrypt(text) {
         encrypted += cipher.final('hex');
         return iv.toString('hex') + ':' + encrypted;
     } catch (error) {
-        console.error('Encryption error:', error);
+        console.log('Encryption error:', error);
         return null; // Handle encryption failure gracefully
     }
 }
@@ -30,7 +30,7 @@ function decrypt(text) {
         decrypted += decipher.final('utf8');
         return decrypted;
     } catch (error) {
-        console.error('Decryption error:', error);
+        console.log('Decryption error:', error);
         return null; // Handle decryption failure gracefully
     }
 }

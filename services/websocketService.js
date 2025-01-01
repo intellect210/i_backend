@@ -43,7 +43,7 @@ const websocketService = {
         const parsedMessage = JSON.parse(message);
         await websocketService.handleMessage(ws, parsedMessage);
       } catch (error) {
-        console.error('Error handling message:', error);
+        console.log('Error handling message:', error);
       }
     });
 
@@ -95,7 +95,7 @@ const websocketService = {
         await redisService.deleteChunks(streamId, chatId);
       }
     } catch (error) {
-      console.error('Error handling stream:', error);
+      console.log('Error handling stream:', error);
       let errorCode = 'STREAM_ERROR';
 
       if (error.code) {
@@ -115,7 +115,7 @@ const websocketService = {
 
   handleStreamError: async (streamId, chatId, errorCode, errorMessage, ws) => {
     const userId = ws.user.useruid;
-    console.error(
+    console.log(
       `Error in stream ${streamId} for chat ${chatId}: ${errorCode} - ${errorMessage}`
     );
 
@@ -132,7 +132,7 @@ const websocketService = {
     try {
       await redisService.deleteChunks(streamId, chatId);
     } catch (cleanupError) {
-      console.error(
+      console.log(
         `Error cleaning up Redis chunks for stream ${streamId} and chat ${chatId}:`,
         cleanupError
       );
@@ -176,7 +176,7 @@ const websocketService = {
         try {
           history = await chatHistoryManager.buildHistory();
         } catch (error) {
-          console.error('Error building chat history:', error);
+          console.log('Error building chat history:', error);
           // Use an empty history if it cannot be loaded
           history = [];
         }
@@ -234,7 +234,7 @@ const websocketService = {
             );
           }
         } catch (error) {
-          console.error(
+          console.log(
             'Error querying Pinecone or modifying history:',
             error
           );
@@ -300,7 +300,7 @@ const websocketService = {
         );
       }
     } catch (error) {
-      console.error('Error handling message:', error);
+      console.log('Error handling message:', error);
       websocketService.sendMessage(userId, {
         type: 'error',
         code: error.code,
@@ -339,7 +339,7 @@ const websocketService = {
             redisService.storeUnsentMessage(userId, message);
           }
         } catch (error) {
-          console.error(
+          console.log(
             `Error sending message to user ${userId} on socket ${socketId}:`,
             error
           );
