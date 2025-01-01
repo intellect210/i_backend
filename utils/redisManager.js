@@ -7,12 +7,11 @@ const { ERROR_CODES } = require('../config/constants');
 const redisManager = {
   async set(key, value) {
     try {
-      await redisClient.set(key, value);
-      console.log(`Successfully set value for key: ${key} in Redis`);
+      await redisClient.set(key, value, { EX: 6000 }); // Set key with a timeout of 2 minutes (120 seconds)
+      console.log(`Successfully set value for key: ${key} in Redis with a timeout of 2 minutes`);
       return true;
     } catch (error) {
       handleRedisError(error, ERROR_CODES.REDIS_ERROR);
-      //console.error(`Error setting value for key: ${key} in Redis:`, error);
       return false;
     }
   },
