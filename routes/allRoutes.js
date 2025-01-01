@@ -14,5 +14,6 @@ router.use('/messages', messageRoutes);
 router.use('/sessions', sessionRoutes);
 router.use('/users', userRoutes);
 router.use('/agents', agentRoutes);
+router.use('/personalization', require('./personalizationRoutes'));
 
 module.exports = router;
