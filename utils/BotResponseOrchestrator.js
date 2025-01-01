@@ -44,7 +44,7 @@ class BotResponseOrchestrator {
       // Upon completion, clear status from Redis
       const statusDeleted = await redisManager.del(redisKey);
       if (!statusDeleted) {
-        console.error('Failed to clear bot processing status in Redis');
+        //console.error('Failed to clear bot processing status in Redis');
       }
       console.log(`Bot response generation completed for ${userId}:${chatId}`);
 
@@ -58,7 +58,7 @@ class BotResponseOrchestrator {
 
       // Clear status from Redis on error
       await redisManager.del(redisKey);
-      console.error(`Bot response generation failed for ${userId}:${chatId}:`, error);
+      //console.error(`Bot response generation failed for ${userId}:${chatId}:`, error);
       throw error; // Re-throw the error after handling it
     }
   }
@@ -74,7 +74,7 @@ class BotResponseOrchestrator {
         // Currently, we just clear the status.
         const statusDeleted = await redisManager.del(redisKey);
         if (!statusDeleted) {
-          console.error('Failed to clear bot processing status in Redis');
+          //console.error('Failed to clear bot processing status in Redis');
         }
         console.log(`Bot response generation cancelled for ${userId}:${chatId}`);
         return true; // Indicate that cancellation was attempted
@@ -85,7 +85,7 @@ class BotResponseOrchestrator {
     } catch (error) {
       // Use centralized error handler with error code
       handleRedisError(error, ERROR_CODES.REDIS_ERROR, null, userId);
-      console.error(`Error cancelling bot response for ${userId}:${chatId}:`, error);
+      //console.error(`Error cancelling bot response for ${userId}:${chatId}:`, error);
       throw error; // Re-throw the error after handling it
     }
   }
@@ -116,7 +116,7 @@ class BotResponseOrchestrator {
         console.log(`Chat ${chatId} has no messages.`);
       }
     } catch (error) {
-      console.error(`Error replacing user message in chat ${chatId}:`, error);
+      //console.error(`Error replacing user message in chat ${chatId}:`, error);
       throw error;
     }
   }

@@ -1,11 +1,11 @@
-// FILE: botController.txt
+// controllers/botController.js
 const {
   GoogleGenerativeAI,
   HarmCategory,
   HarmBlockThreshold,
 } = require("@google/generative-ai");
 const { v4: uuidv4 } = require("uuid");
-const { CURRENT_MODEL } = require("../config/constants");
+const {  MODELS, CURRENT_MODEL } = require("../config/constants");
 const systemInstructions = require('../utils/systemInstructions');
 
 const apiKey = process.env.GEMINI_API_KEY;
@@ -19,7 +19,6 @@ const generationConfig = {
 };
 
 const botController = {
-
   streamBotResponse: async (
     message,
     modelName,
@@ -29,7 +28,7 @@ const botController = {
     handleStreamError
   ) => {
     const model = genAI.getGenerativeModel({
-      model: modelName ? modelName : CURRENT_MODEL,
+      model: modelName ? modelName : MODELS.GEMINI_105_FLASH,
     });
 
     const chatSession = model.startChat({
@@ -65,8 +64,10 @@ const botController = {
   },
 
   handleBotResponse: async (message, modelName, history = []) => {
+    // Removed injectedData parameter
+    console.log("Model Name in handleBotResponse:", MODELS.GEMINI_105_FLASH);
     const model = genAI.getGenerativeModel({
-      model: modelName ? modelName : CURRENT_MODEL,
+      model: MODELS.GEMINI_105_FLASH,
     });
 
     const chatSession = model.startChat({
@@ -74,25 +75,46 @@ const botController = {
       history,
     });
 
-    const result = await chatSession.sendMessage(message.message);
+    const result = await chatSession.sendMessage(message);
     return result.response.text();
   },
 
-  sendMessageWithInstructions: async (message, instructionKey) => {
+  sendMessageWithInstructions: async (
+    message,
+    instructionKey,
+    instructionOptions = null,
+    curr_model = CURRENT_MODEL
+  ) => {
     const model = genAI.getGenerativeModel({
-      model: CURRENT_MODEL, // Use the same model as the main chat
+      model: curr_model ? curr_model : CURRENT_MODEL, // Use the same model as the main chat
       generationConfig, // Use the same generation config
     });
 
-    const instructions = systemInstructions.getInstructions(instructionKey);
-    const modifiedMessage = `${instructions}\n\nUser: ${message}`;
+    const instructions = systemInstructions.getInstructions(
+      instructionKey,
+      instructionOptions
+    );
+    const modifiedMessage = `Instructions: ${instructions}\n\nUser Query: ${message}`;
 
     try {
       const result = await model.generateContent(modifiedMessage);
       const response = result.response;
       return response.text();
     } catch (error) {
-      console.error('Error generating content with instructions:', error);
+      console.error("Error generating content with instructions:", error);
+      throw error; // Re-throw to be handled by the caller
+    }
+  },
+
+  classifyText: async (text) => {
+    try {
+      const response = await botController.sendMessageWithInstructions(
+        text,
+        "temoprary_single_classification"
+      );
+      return response;
+    } catch (error) {
+      console.error("Error during text classification:", error);
       throw error; // Re-throw to be handled by the caller
     }
   },

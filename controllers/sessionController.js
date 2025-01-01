@@ -51,7 +51,7 @@ const sessionManager = async (req, res) => {
     return res.status(201).json({ message: 'Session created', token });
   }
   } catch (error) {
-  console.error('Error in sessionManager:', error);
+  // console.error('Error in sessionManager:', error);
   res.status(500).json({ error: error.message });
   }
 };
@@ -59,29 +59,25 @@ const sessionManager = async (req, res) => {
 // Function to handle user logout
 const logout = async (req, res) => {
   try {
-  const { useruid } = req.body;
-  console.log('Logout called with useruid:', useruid);
+    const useruid = req.user.useruid; // Get useruid from verified token
+    console.log('Logout called for useruid:', useruid);
 
-  if (!useruid) {
-    console.log('useruid is missing');
-    return res.status(400).json({ message: 'useruid is required' });
-  }
+    const session = await Session.findOne({ useruid });
 
-  const session = await Session.findOne({ useruid });
-  console.log('Session found:', session);
-
-  if (session) {
-    session.isActive = false;
-    await session.save();
-    console.log('Logged out successfully');
-    res.status(200).json({ message: 'Logged out successfully' });
-  } else {
-    console.log('Session not found for user:', useruid);
-    res.status(404).json({ message: 'Session not found' });
-  }
+    if (session) {
+      // Deactivate the session
+      session.isActive = false;
+      await session.save();
+      console.log('Session deactivated for user:', useruid);
+      res.status(200).json({ message: 'Logged out successfully' });
+    } else {
+      console.log('Session not found for user:', useruid);
+      // You can decide to return a 404 or a 200 here, based on your preference
+      res.status(200).json({ message: 'Session not found, already logged out' }); //  200 OK since user is effectively logged out
+    }
   } catch (error) {
-  console.error('Error in logout:', error);
-  res.status(500).json({ error: error.message });
+    console.error('Error during logout:', error);
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -109,7 +105,7 @@ const activateSession = async (req, res) => {
     res.status(404).json({ message: 'Session not found' });
   }
   } catch (error) {
-  console.error('Error in activateSession:', error);
+  // console.error('Error in activateSession:', error);
   res.status(500).json({ error: error.message });
   }
 };
@@ -138,7 +134,7 @@ const deactivateSession = async (req, res) => {
     res.status(404).json({ message: 'Session not found' });
   }
   } catch (error) {
-  console.error('Error in deactivateSession:', error);
+  // console.error('Error in deactivateSession:', error);
   res.status(500).json({ error: error.message });
   }
 };
@@ -158,7 +154,7 @@ const verifyJwt = (req, res) => {
   console.log('Token is valid:', decoded);
   res.status(200).json({ message: 'Token is valid', decoded });
   } catch (error) {
-  console.error('Error in verifyJwt:', error);
+  // console.error('Error in verifyJwt:', error);
   res.status(401).json({ message: 'Token is invalid' });
   }
 };

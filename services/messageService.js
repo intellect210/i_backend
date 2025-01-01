@@ -77,7 +77,7 @@ const messageService = {
         return { chat: updatedChat, message: 'Message stored successfully' };
       }
     } catch (error) {
-      console.error('Error in storeMessage:', error);
+      // console.error('Error in storeMessage:', error);
       logger.error('Error storing message:', error);
 
       let errorCode = ERROR_CODES.DATABASE_ERROR;

@@ -1,9 +1,9 @@
-// FILE: services/websocketService.txt
 const {
   MESSAGE_TYPES,
   ERROR_CODES,
   MESSAGE_ROLES,
   MODELS,
+  DEFAULT_CLASSIFICATION,
 } = require('../config/constants');
 const messageService = require('./messageService');
 const redisService = require('./redisService');
@@ -11,12 +11,21 @@ const BotResponseOrchestrator = require('../utils/BotResponseOrchestrator');
 const websocketConnectionManager = require('../utils/websocketConnectionManager');
 const ChatHistoryManager = require('../utils/data/ChatHistoryManager');
 const chatRepository = require('../utils/data/chatRepository');
-const { handleRedisError } = require('../utils/errorHandlers');
+const { handleRedisError, handleDatabaseError } = require('../utils/errorHandlers');
 const redisManager = require('../utils/redisManager');
-const { v4: uuidv4 } = require("uuid");
+const { v4: uuidv4 } = require('uuid');
+const systemInstructions = require('../utils/systemInstructions');
 
 const botResponseOrchestrator = new BotResponseOrchestrator();
 const botController = require('../controllers/botController');
+const PineconeService = require('../services/pineconeService');
+const ClassificationService = require('./classificationService');
+const PersonalizationService = require('./personalizationService');
+const { info } = require('winston');
+const dateTimeUtils = require('../utils/dateTimeUtils');
+
+const pineconeService = new PineconeService();
+const personalizationService = new PersonalizationService();
 
 const websocketService = {
   handleNewConnection: async (ws, userId) => {
@@ -53,7 +62,7 @@ const websocketService = {
       if (!isStreamEnd) {
         // Store chunk in Redis with chatId
         await redisService.storeChunk(streamId, chatId, chunk);
-  
+
         // Send chunk to client
         websocketService.sendMessage(userId, {
           type: MESSAGE_TYPES.CHUNK,
@@ -64,11 +73,8 @@ const websocketService = {
       } else {
         // End of stream
         // Retrieve and combine chunks from Redis
-        const fullMessage = await redisService.combineChunks(
-          streamId,
-          chatId
-        );
-  
+        const fullMessage = await redisService.combineChunks(streamId, chatId);
+
         // Store full message in MongoDB using the correct chatId
         const botMessageResult = await messageService.storeMessage(
           userId,
@@ -77,21 +83,21 @@ const websocketService = {
           MESSAGE_ROLES.BOT,
           chatId // Use the chatId passed to the function
         );
-  
+
         // Send end of stream message to client
         websocketService.sendMessage(userId, {
           type: MESSAGE_TYPES.CHUNK_END,
           streamId: streamId,
           chatId: chatId,
         });
-  
+
         // Remove chunks from Redis
         await redisService.deleteChunks(streamId, chatId);
       }
     } catch (error) {
-      console.error("Error handling stream:", error);
-      let errorCode = "STREAM_ERROR";
-  
+      console.error('Error handling stream:', error);
+      let errorCode = 'STREAM_ERROR';
+
       if (error.code) {
         errorCode = error.code;
       } else if (error.name) {
@@ -102,7 +108,7 @@ const websocketService = {
         streamId,
         chatId,
         code: errorCode,
-        message: error.message || "An error occurred during streaming.",
+        message: error.message || 'An error occurred during streaming.',
       });
     }
   },
@@ -119,7 +125,7 @@ const websocketService = {
       streamId,
       chatId,
       code: errorCode,
-      message: errorMessage || "An error occurred during streaming.",
+      message: errorMessage || 'An error occurred during streaming.',
     });
 
     // Potentially clean up any partial data in Redis related to the streamId and chatId.
@@ -149,11 +155,114 @@ const websocketService = {
         MESSAGE_ROLES.USER,
         chatId // This may be null or an existing chatId
       );
-      const { chat: updatedChatUser } = userMessageResult;
 
-      // Use the returned chatId (either existing or new)
-      chatId = updatedChatUser._id.toString();
+      let updatedChatUser;
 
+      if (userMessageResult && userMessageResult.chat) {
+        updatedChatUser = userMessageResult.chat;
+        chatId = updatedChatUser._id.toString();
+      }
+
+      // Get or create chat history
+      let history;
+      if (!chatId) {
+        // New chat scenario, create a temporary history
+        history = [];
+      } else {
+        const chatHistoryManager = new ChatHistoryManager(
+          chatId,
+          chatRepository
+        );
+        try {
+          history = await chatHistoryManager.buildHistory();
+        } catch (error) {
+          console.error('Error building chat history:', error);
+          // Use an empty history if it cannot be loaded
+          history = [];
+        }
+      }
+
+      // Conditional context building
+      if (chatId) {
+        try {
+          
+
+          const currentDateTimeIST = dateTimeUtils.getCurrentDateTimeIST();
+
+          const personalisationInfo = await personalizationService.getPersonalizationInfo(userId);
+          const infoText = `Personalised Name: ${personalisationInfo.personalisedName}, Follow given Model Behaviour: ${personalisationInfo.modelBehaviour}, Personal Info to use whenever necessary: ${personalisationInfo.personalInfo}, Current Date and time (take this as a fact): ${currentDateTimeIST}`;
+      
+
+          // Modify history based on chatId
+          if (!chatId) {
+            history = [
+              {
+                role: 'user',
+                parts: [{text: systemInstructions.getInstructions('assistantBehaviorPrompt')}],
+              },
+              {
+                role: 'model',
+                parts: [{text: 'Understood. I follow the given model behaviour.'}],
+              },
+              {
+                role: 'user',
+                parts: [{text: infoText}],
+              },
+              {
+                role: 'model',
+                parts: [{text: 'Understood. I will keep these in mind for this conversation.'}],
+              }
+            ];
+          } else {
+            history.unshift(
+              {
+                role: 'user',
+                parts: [{text: systemInstructions.getInstructions('assistantBehaviorPrompt')}],
+              },
+              {
+                role: 'model',
+                parts: [{text: 'Understood. I follow the given model behaviour.'}],
+              },
+              {
+                role: 'user',
+                parts: [{text: infoText}],
+              },
+              {
+                role: 'model',
+                parts: [{text: 'Understood. I will keep these in mind for this conversation'}],
+              }
+            );
+          }
+        } catch (error) {
+          console.error(
+            'Error querying Pinecone or modifying history:',
+            error
+          );
+          // Proceed with an empty history or handle as appropriate for your use case
+        }
+      } else if (!chatId) {
+        // New chat, no context required
+        history = [
+          {
+            role: 'user',
+            parts: [{text: systemInstructions.getInstructions('assistantBehaviorPrompt')}],
+          },
+          {
+            role: 'model',
+            parts: [{text: 'Understood. I follow the given model behaviour.'}],
+          },
+          {
+            role: 'user',
+            parts: [{text: infoText}],
+          },
+          {
+            role: 'model',
+            parts: [{text: 'Understood. I will keep these in mind for this conversation'}],
+          }
+        ];
+      }
+
+      // Rest of the existing logic for handling bot response...
       const redisKey = `bot_processing:${userId}:${chatId}`;
       const isBotProcessing = await redisManager.exists(redisKey);
 
@@ -175,26 +284,10 @@ const websocketService = {
         }
       }
 
-      // Store the user message
-      // const userMessageResult = await messageService.storeMessage(
-      //   userId,
-      //   text,
-      //   messageType,
-      //   MESSAGE_ROLES.USER,
-      //   chatId
-      // );
-      // const { chat: updatedChatUser } = userMessageResult;
-      // console.log(`Stored message from user ${userId} in the database`);
-
       // Handle bot response only if the message is intended for the bot
       if (role === 'user') {
         console.log(`Message is for bot, processing with bot controller`);
-
-        const chatHistoryManager = new ChatHistoryManager(
-          updatedChatUser._id,
-          chatRepository
-        );
-        const history = await chatHistoryManager.buildHistory();
+        console.log("history", history);
 
         // Pass updated chatId to streamBotResponse
         await botController.streamBotResponse(

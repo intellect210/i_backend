@@ -20,7 +20,7 @@ router.get('/verify-token', sessionController.verifyJwt);
 
 router.use(authMiddleware);
 
-router.post('/logout', sessionController.logout);
+router.post('/logout', authMiddleware, sessionController.logout);
 
 
 module.exports = router;

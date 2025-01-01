@@ -12,7 +12,7 @@ const redisManager = {
       return true;
     } catch (error) {
       handleRedisError(error, ERROR_CODES.REDIS_ERROR);
-      console.error(`Error setting value for key: ${key} in Redis:`, error);
+      //console.error(`Error setting value for key: ${key} in Redis:`, error);
       return false;
     }
   },
@@ -24,7 +24,7 @@ const redisManager = {
       return value;
     } catch (error) {
       handleRedisError(error, ERROR_CODES.REDIS_ERROR);
-      console.error(`Error getting value for key: ${key} from Redis:`, error);
+      //console.error(`Error getting value for key: ${key} from Redis:`, error);
       return null;
     }
   },
@@ -36,7 +36,7 @@ const redisManager = {
       return true;
     } catch (error) {
       handleRedisError(error, ERROR_CODES.REDIS_ERROR);
-      console.error(`Error deleting key: ${key} from Redis:`, error);
+      //console.error(`Error deleting key: ${key} from Redis:`, error);
       return false;
     }
   },
@@ -50,10 +50,10 @@ const redisManager = {
       return exists === 1;
     } catch (error) {
       handleRedisError(error, ERROR_CODES.REDIS_ERROR);
-      console.error(
-        `Error checking existence of key: ${key} in Redis:`,
-        error
-      );
+      //console.error(
+        // `Error checking existence of key: ${key} in Redis:`,
+        // error
+      // );
       return false;
     }
   },
@@ -64,7 +64,7 @@ const redisManager = {
       return true;
     } catch (error) {
       handleRedisError(error, ERROR_CODES.REDIS_ERROR);
-      console.error(`Error adding value to list: ${key} in Redis:`, error);
+      //console.error(`Error adding value to list: ${key} in Redis:`, error);
       return false;
     }
   },
@@ -75,7 +75,7 @@ const redisManager = {
       return values;
     } catch (error) {
       handleRedisError(error, ERROR_CODES.REDIS_ERROR);
-      console.error(`Error retrieving values from list: ${key} in Redis:`, error);
+      //console.error(`Error retrieving values from list: ${key} in Redis:`, error);
       return [];
     }
   },

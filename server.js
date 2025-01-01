@@ -58,6 +58,7 @@ server.on('upgrade', (request, socket, head) => {
     });
 });
 
+// WebSocket connection handling
 wss.on("connection", async (ws, request) => {
     // Generate a unique socket ID
     ws.id = uuidv4();
