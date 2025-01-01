@@ -6,6 +6,9 @@ const userController = require('../controllers/userController');
 // POST / - Create a new user
 router.post('/', userController.createUser);
 
+// GET /generateTestToken/:useruid - Generate a test token for a given useruid
+// router.get('/generateTestToken/:useruid', userController.generateTestToken);
+
 // Apply authentication middleware to all subsequent routes
 router.use(authMiddleware);
 

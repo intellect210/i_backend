@@ -1,98 +1,115 @@
-// FILE: server.txt
-const { createServer } = require("http");
-const { Server } = require("ws");
-const express = require("express");
-const dotenv = require('dotenv');
-const { v4: uuidv4 } = require("uuid");
-dotenv.config();
-
-const connectDB = require("./config/dbConfig");
-const { connectRedis } = require("./config/redisConfig");
-const websocketAuthMiddleware = require("./middleware/websocketAuthMiddleware");
-const websocketService = require("./services/websocketService");
-const {
-  handleDatabaseError,
-  handleRedisError,
-  handleInvalidTokenError,
-  handleWebsocketError,
-} = require("./utils/errorHandlers");
-const logger = require("./utils/logger");
-
-// Import your existing routes
-const userRoutes = require("./routes/userRoutes");
-const sessionRoutes = require("./routes/sessionRoutes");
-const chatRoutes = require("./routes/chatRoutes");
-const messageRoutes = require("./routes/messageRoutes");
+// I_BACKEND/server.js
+const config = require('./config/config'); // Import config
+const express = require('express');
+const mongoose = require('mongoose');
+const winston = require('winston');
+const { createServer } = require('http');
+const { Server } = require('ws');
+const { v4: uuidv4 } = require('uuid');
+const { NODE_ENV } = require('./config/constants');
+const routes = require('./routes/allRoutes');
+const dbConfig = require('./config/dbConfig');
+const websocketService = require('./services/websocketService');
+const websocketAuthMiddleware = require('./middleware/websocketAuthMiddleware');
+const { connectRedis } = require('./config/redisConfig');
 
 const app = express();
-const server = createServer(app);
+const PORT = config.port; // Use config.port
 
-const wss = new Server({ noServer: true });
-
-// Error handling middleware (example)
-app.use((err, req, res, next) => {
-  logger.error(err.stack);
-  const statusCode = err.statusCode || 500;
-  const code = err.code || 'INTERNAL_SERVER_ERROR'; // Assign a code to the error
-  res.status(statusCode).json({ code, message: "Something broke!" });
+// Setup Winston logger
+const logger = winston.createLogger({
+    level: 'info',
+    format: winston.format.json(),
+    defaultMeta: { service: 'user-service' },
+    transports: [
+        new winston.transports.File({ filename: 'error.log', level: 'error' }),
+        new winston.transports.File({ filename: 'combined.log' }),
+    ],
 });
 
-// *** IMPORTANT: Add middleware to parse JSON request bodies ***
+if (NODE_ENV !== 'production') {
+    logger.add(new winston.transports.Console({
+        format: winston.format.simple(),
+    }));
+}
+
+// Middleware
 app.use(express.json());
 
-// *** Mount your routes ***
-app.use("/api/users", userRoutes);
-app.use("/api/sessions", sessionRoutes);
-app.use("/api/chats", chatRoutes);
-app.use("/api/messages", messageRoutes);
+// API Routes
+app.use('/api', routes);
+
+const server = createServer(app);
+const wss = new Server({ noServer: true });
 
 server.on('upgrade', (request, socket, head) => {
-  console.log('upgrade event');
+    console.log('upgrade event');
 
-  // Create a new object to store authentication-related headers
-  request.authHeaders = {};
-  const authHeaderIndex = request.rawHeaders.indexOf('Authorization');
-  if (authHeaderIndex !== -1) {
-    request.authHeaders['Authorization'] = request.rawHeaders[authHeaderIndex + 1];
-  }
+    // Create a new object to store authentication-related headers
+    request.authHeaders = {};
+    const authHeaderIndex = request.rawHeaders.indexOf('Authorization');
+    if (authHeaderIndex !== -1) {
+        request.authHeaders['Authorization'] = request.rawHeaders[authHeaderIndex + 1];
+    }
 
-  wss.handleUpgrade(request, socket, head, (ws) => {
-    console.log('emit connection event');
-    wss.emit('connection', ws, request);
-  });
+    wss.handleUpgrade(request, socket, head, (ws) => {
+        console.log('emit connection event');
+        wss.emit('connection', ws, request);
+    });
 });
 
 wss.on("connection", async (ws, request) => {
-  // Generate a unique socket ID
-  ws.id = uuidv4();
+    // Generate a unique socket ID
+    ws.id = uuidv4();
 
-  websocketAuthMiddleware(ws, request, async (err) => {
-    if (err) {
-      handleInvalidTokenError(err, ws);
-    } else {
-      // Authentication successful, proceed with connection
-      const userId = ws.user.useruid;
-      console.log("userId", userId);
+    websocketAuthMiddleware(ws, request, async (err) => {
+        if (err) {
+            handleInvalidTokenError(err, ws);
+        } else {
+            // Authentication successful, proceed with connection
+            const userId = ws.user.useruid;
+            console.log("userId", userId);
 
-      // Send initial message with authentication details (e.g., token)
-      const initialMessage = {
-        type: 'auth',
-        token: ws.token, // Assuming the token is stored in ws.token by the middleware
-      };
+            // Send initial message with authentication details (e.g., token)
+            const initialMessage = {
+                type: 'auth',
+                token: ws.token, // Assuming the token is stored in ws.token by the middleware
+            };
 
-      // Pass the initial message to handleNewConnection
-      await websocketService.handleNewConnection(ws, userId, initialMessage);
-    }
-  });
+            // Pass the initial message to handleNewConnection
+            await websocketService.handleNewConnection(ws, userId, initialMessage);
+        }
+    });
 });
 
-const PORT = process.env.PORT || 3000;
-
+// Start the server
 (async () => {
-  await connectDB();
-  await connectRedis();
-
-  server.listen(PORT, () => {
-    logger.info(`Server is running on port ${PORT}`);
-  });
+    await dbConfig.connectDB(); // Ensure MongoDB connection is established
+    await connectRedis();
+    server.listen(PORT, () => {
+        logger.info(`Server is running on port ${PORT}`);
+    });
 })();
+
+// Error handling
+process.on('unhandledRejection', (reason, promise) => {
+    logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    // Application specific logging, throwing an error, or other logic here
+});
+
+process.on('uncaughtException', (error) => {
+    logger.error('Uncaught Exception thrown', error);
+    process.exit(1);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+    logger.info('SIGTERM signal received: closing HTTP server');
+    server.close(() => {
+        logger.info('HTTP server closed');
+        mongoose.connection.close(false, () => {
+            logger.info('MongoDb connection closed.');
+            process.exit(0);
+        });
+    });
+});

@@ -1,17 +1,20 @@
 const User = require('../models/userModel');
+const jwt = require('jsonwebtoken');
 
-// Create a new user
+// Create a new user or return an existing one
 const createUser = async (req, res) => {
   try {
     console.log('Create user request received:', req.body);
     const { username, useremail } = req.body;
 
+    // Check if the user already exists
     const existingUser = await User.findOne({ useremail: useremail });
     if (existingUser) {
       console.log('User already exists:', existingUser);
       return res.status(201).json(existingUser);
     }
 
+    // Create a new user if one does not exist
     const user = new User(req.body);
     await user.save();
     console.log('New user created:', user);
@@ -79,9 +82,34 @@ const deleteUser = async (req, res) => {
   }
 };
 
+// Function to generate a JWT token for testing
+const generateTestToken = (req, res) => {
+  try {
+    const useruid = req.params.useruid;
+    console.log('generateTestToken called');
+    console.log('useruid:', useruid);
+
+    if (!useruid) {
+      return res.status(400).json({ message: 'User UID is required' });
+    }
+
+    // Generate a JWT token
+    const token = jwt.sign({ useruid: useruid }, process.env.JWT_SECRET, {
+      expiresIn: '1h', // Token expires in 1 hour
+    });
+
+    console.log('Generated token in userController:', token);
+    res.status(200).json({ token });
+  } catch (error) {
+    console.error('Error generating test token:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   createUser,
   getUser,
   updateUser,
   deleteUser,
+  generateTestToken
 };
