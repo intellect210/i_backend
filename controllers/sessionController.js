@@ -10,6 +10,7 @@ const generateJwt = (useruid) => {
   const token = jwt.sign({ useruid }, process.env.JWT_SECRET, {
     expiresIn: '30d', // Token expires in 30 days
   });
+  console.log('JWT generated:', token);
   return token;
 };
 

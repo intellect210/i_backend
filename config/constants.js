@@ -46,6 +46,15 @@ const MODELS = {
   // Add other models here
 };
 
+// Define preference keys
+const PREFERENCE_KEYS = {
+  ENABLE_NOTIFICATIONS: 'ENABLE_NOTIFICATIONS',
+  DARK_MODE: 'DARK_MODE',
+  GMAIL_PERMISSION: 'GMAIL_PERMISSION',
+  PERSONAL_MODE: 'PERSONAL_MODE',
+  // Add more preference keys here
+};
+
 const CURRENT_MODEL = MODELS.GEMINI_105_FLASH;
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
@@ -57,5 +66,6 @@ module.exports = {
   BOT_RESPONSE_TIMEOUT_MS,
   MODELS,
   CURRENT_MODEL,
-  NODE_ENV
+  NODE_ENV,
+  PREFERENCE_KEYS
 };
