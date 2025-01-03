@@ -1,3 +1,4 @@
+// FILE: websocketService.txt
 const {
   MESSAGE_TYPES,
   ERROR_CODES,
@@ -15,7 +16,7 @@ const { handleRedisError, handleDatabaseError } = require('../utils/errorHandler
 const redisManager = require('../utils/redisManager');
 const { v4: uuidv4 } = require('uuid');
 const systemInstructions = require('../utils/systemInstructions');
-
+const DataInjector = require('../utils/data/dataInjector');
 const botResponseOrchestrator = new BotResponseOrchestrator();
 const botController = require('../controllers/botController');
 const PineconeService = require('../services/pineconeService');
@@ -26,8 +27,104 @@ const dateTimeUtils = require('../utils/dateTimeUtils');
 
 const pineconeService = new PineconeService();
 const personalizationService = new PersonalizationService();
+const dataInjector = new DataInjector();
 
 const websocketService = {
+  
+//=====================================================================================================
+
+  handleMessage: async (ws, message) => {
+    const user = ws.user;
+    const userId = user.useruid;
+    let { messageType, message: text, chatId, role } = message;
+
+    console.log(`Handling message from user ${userId}:`, message);
+
+    try {
+      // Store the user message and update chatId
+      const userMessageResult = await messageService.storeMessage(
+        userId,
+        text,
+        messageType,
+        MESSAGE_ROLES.USER,
+        chatId
+      );
+
+      if (userMessageResult?.chat) {
+        chatId = userMessageResult.chat._id.toString();
+      }
+
+      // Build chat history
+      let history = [];
+
+      try {
+        if (chatId) {
+          const chatHistoryManager = new ChatHistoryManager(chatId, chatRepository);
+          history = await chatHistoryManager.buildHistory();
+        }
+
+        const personalizationInfo = await personalizationService.getPersonalizationInfo(userId);
+        const currentDateTimeIST = dateTimeUtils.getCurrentDateTimeIST();
+
+        const infoText = `Personalised Name: ${personalizationInfo.personalisedName}, Follow given Model Behaviour: ${personalizationInfo.modelBehaviour}, Personal Info to use whenever necessary: ${personalizationInfo.personalInfo}, Current Date and time (take this as a fact): ${currentDateTimeIST}`;
+
+        // Inject system instructions and personalization info into history
+        history = dataInjector.injectData(
+          history,
+          systemInstructions.getInstructions('assistantBehaviorPrompt'),
+          'Understood. I follow the given model behaviour.'
+        );
+
+        history = dataInjector.injectData(
+          history,
+          infoText,
+          'Understood. I will keep these in mind for this conversation.'
+        );
+      } catch (error) {
+        console.log('Error building chat history or injecting data:', error);
+        // Default to an empty history if errors occur
+      }
+
+
+
+      // Handle bot response if the message is from a user
+      if (role === 'user') {
+        console.log(`Processing message for bot with history:`, history);
+
+        // Check and update bot processing status
+        const redisKey = `bot_processing:${userId}:${chatId}`;
+        const isBotProcessing = await redisManager.exists(redisKey);
+
+        if (isBotProcessing) {
+          console.log(`Bot is already processing a message for ${userId}:${chatId}. Canceling...`);
+          await botResponseOrchestrator.cancelResponse(userId, chatId);
+          await botResponseOrchestrator.replaceUserMessage(userId, chatId, text);
+          await redisManager.set(redisKey, Date.now());
+        }
+
+        // Stream bot response
+        await botController.streamBotResponse(
+          { ...message, chatId },
+          null,
+          history,
+          ws,
+          websocketService.handleStream,
+          websocketService.handleStreamError
+        );
+      }
+    } catch (error) {
+      console.error('Error handling message:', error);
+      websocketService.sendMessage(userId, {
+        type: 'error',
+        code: error.code,
+        message: error.message,
+      });
+    }
+  },
+
+//=====================================================================================================
+
+
   handleNewConnection: async (ws, userId) => {
     console.log('New WebSocket connection established');
     const socketId = ws.id; // Get the socket ID
@@ -139,176 +236,6 @@ const websocketService = {
     }
   },
 
-  handleMessage: async (ws, message) => {
-    const user = ws.user;
-    const userId = user.useruid;
-    let { messageType, message: text, chatId, role } = message;
-
-    console.log(`Handling message from user ${userId}:`, message);
-
-    try {
-      // Store the user message and get the updated chat
-      const userMessageResult = await messageService.storeMessage(
-        userId,
-        text,
-        messageType,
-        MESSAGE_ROLES.USER,
-        chatId // This may be null or an existing chatId
-      );
-
-      let updatedChatUser;
-
-      if (userMessageResult && userMessageResult.chat) {
-        updatedChatUser = userMessageResult.chat;
-        chatId = updatedChatUser._id.toString();
-      }
-
-      // Get or create chat history
-      let history;
-      if (!chatId) {
-        // New chat scenario, create a temporary history
-        history = [];
-      } else {
-        const chatHistoryManager = new ChatHistoryManager(
-          chatId,
-          chatRepository
-        );
-        try {
-          history = await chatHistoryManager.buildHistory();
-        } catch (error) {
-          console.log('Error building chat history:', error);
-          // Use an empty history if it cannot be loaded
-          history = [];
-        }
-      }
-
-      // Conditional context building
-      if (chatId) {
-        try {
-          
-
-          const currentDateTimeIST = dateTimeUtils.getCurrentDateTimeIST();
-
-          const personalisationInfo = await personalizationService.getPersonalizationInfo(userId);
-          const infoText = `Personalised Name: ${personalisationInfo.personalisedName}, Follow given Model Behaviour: ${personalisationInfo.modelBehaviour}, Personal Info to use whenever necessary: ${personalisationInfo.personalInfo}, Current Date and time (take this as a fact): ${currentDateTimeIST}`;
-      
-
-          // Modify history based on chatId
-          if (!chatId) {
-            history = [
-              {
-                role: 'user',
-                parts: [{text: systemInstructions.getInstructions('assistantBehaviorPrompt')}],
-              },
-              {
-                role: 'model',
-                parts: [{text: 'Understood. I follow the given model behaviour.'}],
-              },
-              {
-                role: 'user',
-                parts: [{text: infoText}],
-              },
-              {
-                role: 'model',
-                parts: [{text: 'Understood. I will keep these in mind for this conversation.'}],
-              }
-            ];
-          } else {
-            history.unshift(
-              {
-                role: 'user',
-                parts: [{text: systemInstructions.getInstructions('assistantBehaviorPrompt')}],
-              },
-              {
-                role: 'model',
-                parts: [{text: 'Understood. I follow the given model behaviour.'}],
-              },
-              {
-                role: 'user',
-                parts: [{text: infoText}],
-              },
-              {
-                role: 'model',
-                parts: [{text: 'Understood. I will keep these in mind for this conversation'}],
-              }
-            );
-          }
-        } catch (error) {
-          console.log(
-            'Error querying Pinecone or modifying history:',
-            error
-          );
-          // Proceed with an empty history or handle as appropriate for your use case
-        }
-      } else if (!chatId) {
-        // New chat, no context required
-        history = [
-          {
-            role: 'user',
-            parts: [{text: systemInstructions.getInstructions('assistantBehaviorPrompt')}],
-          },
-          {
-            role: 'model',
-            parts: [{text: 'Understood. I follow the given model behaviour.'}],
-          },
-          {
-            role: 'user',
-            parts: [{text: infoText}],
-          },
-          {
-            role: 'model',
-            parts: [{text: 'Understood. I will keep these in mind for this conversation'}],
-          }
-        ];
-      }
-
-      // Rest of the existing logic for handling bot response...
-      const redisKey = `bot_processing:${userId}:${chatId}`;
-      const isBotProcessing = await redisManager.exists(redisKey);
-
-      if (isBotProcessing) {
-        console.log(
-          `Bot is currently processing a message for ${userId}:${chatId}. Cancelling...`
-        );
-
-        // Signal cancellation to the BotResponseOrchestrator
-        await botResponseOrchestrator.cancelResponse(userId, chatId);
-
-        // Replace the last user message in the chat history
-        await botResponseOrchestrator.replaceUserMessage(userId, chatId, text);
-
-        // Update status for new message processing
-        const statusSet = await redisManager.set(redisKey, Date.now());
-        if (!statusSet) {
-          throw new Error('Failed to set bot processing status in Redis');
-        }
-      }
-
-      // Handle bot response only if the message is intended for the bot
-      if (role === 'user') {
-        console.log(`Message is for bot, processing with bot controller`);
-        console.log("history", history);
-
-        // Pass updated chatId to streamBotResponse
-        await botController.streamBotResponse(
-          { ...message, chatId }, // Pass chatId to the bot controller
-          null,
-          history,
-          ws,
-          websocketService.handleStream,
-          websocketService.handleStreamError
-        );
-      }
-    } catch (error) {
-      console.log('Error handling message:', error);
-      websocketService.sendMessage(userId, {
-        type: 'error',
-        code: error.code,
-        message: error.message,
-      });
-    }
-  },
-
   handleDisconnection: async (userId, socketId) => {
     console.log(
       `Handling disconnection for user ${userId} with socket ID ${socketId}`
@@ -320,7 +247,6 @@ const websocketService = {
 
   sendMessage: async (userId, message) => {
     console.log(`Sending message to user ${userId}:`, message);
-
     const userConnections = websocketConnectionManager.getConnection(userId);
 
     if (userConnections) {

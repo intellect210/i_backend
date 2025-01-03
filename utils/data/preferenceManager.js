@@ -73,24 +73,12 @@ class PreferenceManager {
     }
 
     async getPreference(useruid, preferenceKey) {
-       if (!this.isValidPreferenceKey(preferenceKey)) {
-         console.log(`[DEBUG: PreferenceManager] Invalid preference key: ${preferenceKey}`);
-         return false; // Or throw an error
-      }
       return this._getPreference(useruid, preferenceKey);
     }
 
 
     async setPreference(useruid, preferenceKey, value) {
-        if (!this.isValidPreferenceKey(preferenceKey)) {
-            console.log(`[DEBUG: PreferenceManager] Invalid preference key: ${preferenceKey}`);
-            throw {code: ERROR_CODES.INVALID_REQUEST, message: `Invalid preference key: ${preferenceKey}`};
-        }
         return this._setPreference(useruid, preferenceKey, value);
-    }
-
-    isValidPreferenceKey(preferenceKey) {
-        return Object.values(PREFERENCE_KEYS).includes(preferenceKey);
     }
 
     async getAllPreferences(useruid) {
