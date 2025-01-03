@@ -37,7 +37,7 @@ const messageService = {
           role: role,
           createdAt: new Date(),
         });
-        console.log('New chat created:', chat);
+        // console.log('New chat created:', chat);
 
         // Set chat title for new chat
         await chatTitleService.setChatTitle(chat._id, userId, message);
@@ -71,7 +71,7 @@ const messageService = {
           role: role,
           createdAt: new Date(),
         };
-        console.log('Adding message to chat:', newMessage);
+        // console.log('Adding message to chat:', newMessage);
         const updatedChat = await addMessageToChat(chat._id, newMessage);
         console.log('Message added to chat successfully');
         return { chat: updatedChat, message: 'Message stored successfully' };

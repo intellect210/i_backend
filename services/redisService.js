@@ -66,7 +66,7 @@ const redisService = {
     const key = `stream:${streamId}:${chatId}`;
     try {
       await redisManager.rPush(key, chunk);
-      console.log(`Stored chunk for stream ${streamId}:chat ${chatId} in Redis`);
+      // console.log(`Stored chunk for stream ${streamId}:chat ${chatId} in Redis`);
     } catch (error) {
       //console.error(`Error storing chunk for stream ${streamId} in Redis:`, error);
       throw { code: ERROR_CODES.REDIS_ERROR, message: error.message };

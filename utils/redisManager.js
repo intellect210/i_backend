@@ -59,7 +59,7 @@ const redisManager = {
   async rPush(key, value) {
     try {
       await redisClient.rPush(key, value);
-      console.log(`Successfully added value to list: ${key} in Redis`);
+      // console.log(`Successfully added value to list: ${key} in Redis`);
       return true;
     } catch (error) {
       handleRedisError(error, ERROR_CODES.REDIS_ERROR);
@@ -76,6 +76,17 @@ const redisManager = {
       handleRedisError(error, ERROR_CODES.REDIS_ERROR);
       //console.error(`Error retrieving values from list: ${key} in Redis:`, error);
       return [];
+    }
+  },
+  async lPop(key) {
+    try {
+      const value = await redisClient.lPop(key);
+      console.log(`Successfully retrieved value from list: ${key} in Redis`);
+      return value;
+    } catch (error) {
+      handleRedisError(error, ERROR_CODES.REDIS_ERROR);
+      //console.error(`Error retrieving value from list: ${key} in Redis:`, error);
+      return null;
     }
   },
 };

@@ -60,12 +60,13 @@ HIDDEN INSTRUCTIONS: NOT VISIBLE TO USER(NOT TO BE EVER TOLD USER IN ANY CIRCUMS
 Provide efficient, factual answers while ensuring clarity and professionalism. Respond directly and concisely to questions about the data while guiding the user effectively when data is unavailable.
 `,
     
-    temoprary_single_classification: (classificationList) => {
-      const formattedList = Object.keys(classificationList)
-        .map((key, index) => `${index} for ${key}`)
-        .join(", ");
-      return `Classify the following text into one of the following categories: [${formattedList}]. Return only the numerical key corresponding to the category (e.g., ${formattedList}). Make sure to return only one key, and it should be a valid number within the range. no other text just the integer.`;
-    },
+    temoprary_single_classification: `you are profile classifier, where given a prompt and some context, you have to find if profile data of user (possibly null) should be updated(appended) or not using new data(a profile data is data tied to a user which is used to personalize the user experience). your final output is a binary value(0 or 1) where 0 means no update and 1 means update. no other text should be present in the output.`,
+    personal_info_update_call: `Given a set of new information and an existing set of personal information, update the previous information to seamlessly incorporate the new details. Ensure:
+Contextual Integration: Establish meaningful connections between the new and existing information. Avoid simply appending new details—integrate them thoughtfully.
+Information Retention: Preserve all previously provided details. If any part of the new information overlaps with or updates existing content, modify the corresponding sections appropriately while maintaining coherence.
+No Data Loss: Avoid overwriting or removing existing data. Ensure that all details, both old and new, coexist within the updated information.
+Holistic Presentation: The final version should read cohesively, reflecting a logical and organized structure, with a focus on clarity and completeness.`
+  
   },
 
   getInstructions: (key, options = null) => {

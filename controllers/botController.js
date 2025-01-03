@@ -18,6 +18,25 @@ const generationConfig = {
   maxOutputTokens: 4200,
 };
 
+const generationConfigWithStructure = {
+  temperature: 1,
+  topP: 0.95,
+  topK: 40,
+  maxOutputTokens: 4200,
+  responseMimeType: "application/json",
+  responseSchema: {
+    type: "object",
+    properties: {
+      final_edited_info_only: {
+        type: "string"
+      }
+    },
+    required: [
+      "final_edited_info_only"
+    ]
+  },
+};
+
 const botController = {
   streamBotResponse: async (
     message,
@@ -63,21 +82,21 @@ const botController = {
     }
   },
 
-  handleBotResponse: async (message, modelName, history = []) => {
-    // Removed injectedData parameter
-    console.log("Model Name in handleBotResponse:", MODELS.GEMINI_105_FLASH);
-    const model = genAI.getGenerativeModel({
-      model: MODELS.GEMINI_105_FLASH,
-    });
+    handleBotResponse: async (message, modelName, history = []) => {
+      // Removed injectedData parameter
+      console.log("Model Name in handleBotResponse:", MODELS.GEMINI_105_FLASH);
+      const model = genAI.getGenerativeModel({
+        model: MODELS.GEMINI_105_FLASH,
+      });
 
-    const chatSession = model.startChat({
-      generationConfig,
-      history,
-    });
+      const chatSession = model.startChat({
+        generationConfig,
+        history,
+      });
 
-    const result = await chatSession.sendMessage(message);
-    return result.response.text();
-  },
+      const result = await chatSession.sendMessage(message);
+      return result.response.text();
+    },
 
   sendMessageWithInstructions: async (
     message,
@@ -85,21 +104,64 @@ const botController = {
     instructionOptions = null,
     curr_model = CURRENT_MODEL
   ) => {
-    const model = genAI.getGenerativeModel({
-      model: curr_model ? curr_model : CURRENT_MODEL, // Use the same model as the main chat
-      generationConfig, // Use the same generation config
-    });
 
     const instructions = systemInstructions.getInstructions(
       instructionKey,
       instructionOptions
     );
-    const modifiedMessage = `Instructions: ${instructions}\n\nUser Query: ${message}`;
+
+    const model = genAI.getGenerativeModel({
+      model: curr_model ? curr_model : CURRENT_MODEL, // Use the same model as the main chat
+      systemInstruction: instructions,
+      generationConfig, // Use the same generation config
+    });
+
+     
+     const modifiedMessage = `User Query: ${message}`;
+
 
     try {
       const result = await model.generateContent(modifiedMessage);
       const response = result.response;
-      return response.text();
+        return response.text();
+    } catch (error) {
+      console.error("Error generating content with instructions:", error);
+      throw error; // Re-throw to be handled by the caller
+    }
+  },
+
+  sendMessageWithInstructionsWithStructure: async (
+    message,
+    instructionKey,
+    instructionOptions = null,
+    curr_model = CURRENT_MODEL
+  ) => {
+    const instructions = systemInstructions.getInstructions(
+      instructionKey,
+      instructionOptions
+    );
+
+    const model = genAI.getGenerativeModel({
+      model: curr_model ? curr_model : CURRENT_MODEL, // Use the same model as the main chat
+      systemInstruction : instructions
+    });
+
+     
+     const modifiedMessage = `User Query: ${message}`;
+
+
+    try {
+
+      const chatSession = model.startChat({
+        generationConfig: generationConfigWithStructure,
+      });
+    
+      const result = await chatSession.sendMessage(modifiedMessage);
+      console.log(result.response.text());
+
+      // const result = await model.generateContent(modifiedMessage);
+      const response = result.response;
+        return response.text();
     } catch (error) {
       console.error("Error generating content with instructions:", error);
       throw error; // Re-throw to be handled by the caller
