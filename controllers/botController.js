@@ -118,9 +118,10 @@ const botController = {
    * @param {Object} [instructionOptions] - Additional options for instruction customization.
    * @param {string} [curr_model] - The name of the model to use.
    * @param {Object} [customStructure] - Custom response structure for generation.
+   * @param {Array} [history] - The chat history to provide context for the response.
    * @returns {Promise<string>} - The response text from the model.
    */
-  sendMessageWithInstructionsWithStructure: async (message, instructionKey, instructionOptions = null, curr_model = CURRENT_MODEL, customStructure = null) => {
+  sendMessageWithInstructionsWithStructure: async (message, instructionKey, instructionOptions = null, curr_model = CURRENT_MODEL, customStructure = null, history = []) => {
     const instructions = systemInstructions.getInstructions(instructionKey, instructionOptions);
 
     const generationConfigToUse = customStructure
@@ -137,6 +138,7 @@ const botController = {
     try {
       const chatSession = model.startChat({
         generationConfig: generationConfigToUse,
+        history,
       });
 
       const result = await chatSession.sendMessage(modifiedMessage);

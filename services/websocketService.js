@@ -121,7 +121,8 @@ handleMessage: async (ws, message) => {
               'personal_info_update_call',
               null,
               MODELS.GEMINI_105_FLASH,
-              personalInfoUpdateStructure
+              personalInfoUpdateStructure,
+              history // Pass the history here
           );
 
           console.log(`[DEBUG:] Bot response for personal info update:`, botResponse);
