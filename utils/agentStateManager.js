@@ -1,6 +1,6 @@
-// FILE: utils/agentStateManager.txt
 const redisManager = require('./redisManager');
 const { ERROR_CODES } = require('../config/constants');
+
 
 class AgentStateManager {
     constructor(sendMessage) {
@@ -9,7 +9,7 @@ class AgentStateManager {
         processingInput: 'processing input',
         updatingPersonalInfo: 'updating personal information',
         waitingForUserInput: 'waiting for user input',
-        awaitingBotResponse: 'awaiting bot response',
+        awaitingBotResponse: 'awaiting response',
         actionInProgress: 'action in progress',
         actionCompleted: 'action completed',
         handlingConflict: 'handling conflict',
@@ -22,14 +22,14 @@ class AgentStateManager {
     
         this.stateQueueKey = 'agent_state_queue';
         this.sendMessage = sendMessage;
-
     }
 
-    async setState(userId, state, errorMessage = null) {
+    async setState(userId, state, messageId, errorMessage = null) {
          const stateData = {
             state: state,
             timestamp: Date.now(),
              errorMessage: errorMessage,
+             messageId: messageId,
          };
 
       try{
