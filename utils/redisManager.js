@@ -1,14 +1,16 @@
-// FILE: utils/redisManager.txt
 // FILE: utils/redisManager.js
 const { redisClient } = require('../config/redisConfig');
 const { handleRedisError } = require('./errorHandlers');
 const { ERROR_CODES } = require('../config/constants');
 
 const redisManager = {
-  async set(key, value) {
+  async set(key, value, options = {}) {
     try {
-      await redisClient.set(key, value, { EX: 6000 }); // Set key with a timeout of 2 minutes (120 seconds)
-      console.log(`Successfully set value for key: ${key} in Redis with a timeout of 2 minutes`);
+      await redisClient.set(key, value, options);
+      console.log(
+        `Successfully set value for key: ${key} in Redis with options:`,
+        options
+      );
       return true;
     } catch (error) {
       handleRedisError(error, ERROR_CODES.REDIS_ERROR);
@@ -43,15 +45,13 @@ const redisManager = {
   async exists(key) {
     try {
       const exists = await redisClient.exists(key);
-      console.log(
-        `Successfully checked existence of key: ${key} in Redis`
-      );
+      console.log(`Successfully checked existence of key: ${key} in Redis`);
       return exists === 1;
     } catch (error) {
       handleRedisError(error, ERROR_CODES.REDIS_ERROR);
       //console.error(
-        // `Error checking existence of key: ${key} in Redis:`,
-        // error
+      // `Error checking existence of key: ${key} in Redis:`,
+      // error
       // );
       return false;
     }

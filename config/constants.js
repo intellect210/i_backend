@@ -38,7 +38,8 @@ const BOT_RESPONSE_TIMEOUT_MS = 1000; // 1 seconds
 const MODELS = {
   GEMINI_PRO: "gemini-1.5-pro",
   GEMINI_105_FLASH_8B: "gemini-1.5-flash-8b",
-  GEMINI_105_FLASH: "gemini-1.5-flash",
+  GEMINI_105_FLASH: "gemini-2.0-flash-exp",
+  // GEMINI_105_FLASH: "gemini-1.5-flash",
   GEMINI_EXP_1206: "gemini-exp-1206",
   GEMINI_20_FLASH: "gemini-2.0-flash-exp",
   GEMINI_TUNED_I1_CONVO_T1: "tunedModels/i1convot1-njdey2vs1v7d",

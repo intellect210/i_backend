@@ -2,9 +2,9 @@ const {
   GoogleGenerativeAI,
   HarmCategory,
   HarmBlockThreshold,
-} = require("@google/generative-ai");
-const { v4: uuidv4 } = require("uuid");
-const { MODELS, CURRENT_MODEL } = require("../config/constants");
+} = require('@google/generative-ai');
+const { v4: uuidv4 } = require('uuid');
+const { MODELS, CURRENT_MODEL } = require('../config/constants');
 const systemInstructions = require('../utils/systemInstructions');
 const CustomGenerationConfig = require('../utils/CustomGenerationConfig');
 const { personalInfoUpdateStructure } = require('../utils/structureDefinitions');
@@ -16,7 +16,7 @@ const genAI = new GoogleGenerativeAI(apiKey);
 const botController = {
   /**
    * Streams responses from the bot in real-time.
-   * 
+   *
    * @param {Object} message - The user message object containing details like chatId and text.
    * @param {string} modelName - The name of the generative AI model to use.
    * @param {Array} history - The chat history to provide context for the response.
@@ -24,7 +24,14 @@ const botController = {
    * @param {Function} handleStream - Callback for handling streamed text chunks.
    * @param {Function} handleStreamError - Callback for handling stream errors.
    */
-  streamBotResponse: async (message, modelName, history = [], ws, handleStream, handleStreamError) => {
+  streamBotResponse: async (
+    message,
+    modelName,
+    history = [],
+    ws,
+    handleStream,
+    handleStreamError
+  ) => {
     const model = genAI.getGenerativeModel({
       model: modelName || MODELS.GEMINI_105_FLASH,
     });
@@ -47,26 +54,26 @@ const botController = {
       }
 
       // Indicate the end of the stream
-      await handleStream(streamId, chatId, "", true, ws);
+      await handleStream(streamId, chatId, '', true, ws);
     } catch (error) {
-      console.error("Error in streamBotResponse:", error);
+      console.error('Error in streamBotResponse:', error);
 
       // Identify the error code and send it via the error handler
-      const errorCode = error.code || error.name || "UNKNOWN_ERROR";
+      const errorCode = error.code || error.name || 'UNKNOWN_ERROR';
       await handleStreamError(streamId, chatId, errorCode, error.message, ws);
     }
   },
 
   /**
    * Handles synchronous bot responses.
-   * 
+   *
    * @param {Object} message - The user message object containing details like text.
    * @param {string} modelName - The name of the generative AI model to use.
    * @param {Array} history - The chat history to provide context for the response.
    * @returns {Promise<string>} - The response text from the model.
    */
   handleBotResponse: async (message, modelName, history = []) => {
-    console.log("Model Name in handleBotResponse:", MODELS.GEMINI_105_FLASH);
+    console.log('Model Name in handleBotResponse:', MODELS.GEMINI_105_FLASH);
 
     const model = genAI.getGenerativeModel({
       model: MODELS.GEMINI_105_FLASH,
@@ -83,15 +90,23 @@ const botController = {
 
   /**
    * Sends a message with system instructions.
-   * 
+   *
    * @param {string} message - The user message text.
    * @param {string} instructionKey - The key to retrieve specific instructions.
    * @param {Object} [instructionOptions] - Additional options for instruction customization.
    * @param {string} [curr_model] - The name of the model to use.
    * @returns {Promise<string>} - The response text from the model.
    */
-  sendMessageWithInstructions: async (message, instructionKey, instructionOptions = null, curr_model = CURRENT_MODEL) => {
-    const instructions = systemInstructions.getInstructions(instructionKey, instructionOptions);
+  sendMessageWithInstructions: async (
+    message,
+    instructionKey,
+    instructionOptions = null,
+    curr_model = CURRENT_MODEL
+  ) => {
+    const instructions = systemInstructions.getInstructions(
+      instructionKey,
+      instructionOptions
+    );
 
     const model = genAI.getGenerativeModel({
       model: curr_model || CURRENT_MODEL,
@@ -105,14 +120,14 @@ const botController = {
       const result = await model.generateContent(modifiedMessage);
       return result.response.text();
     } catch (error) {
-      console.error("Error generating content with instructions:", error);
+      console.error('Error generating content with instructions:', error);
       throw error;
     }
   },
 
-  /**
+   /**
    * Sends a message with system instructions and a custom response structure.
-   * 
+   *
    * @param {string} message - The user message text.
    * @param {string} instructionKey - The key to retrieve specific instructions.
    * @param {Object} [instructionOptions] - Additional options for instruction customization.
@@ -121,8 +136,18 @@ const botController = {
    * @param {Array} [history] - The chat history to provide context for the response.
    * @returns {Promise<string>} - The response text from the model.
    */
-  sendMessageWithInstructionsWithStructure: async (message, instructionKey, instructionOptions = null, curr_model = CURRENT_MODEL, customStructure = null, history = []) => {
-    const instructions = systemInstructions.getInstructions(instructionKey, instructionOptions);
+   sendMessageWithInstructionsWithStructure: async (
+    message,
+    instructionKey,
+    instructionOptions = null,
+    curr_model = CURRENT_MODEL,
+    customStructure = null,
+    history = []
+  ) => {
+    const instructions = systemInstructions.getInstructions(
+      instructionKey,
+      instructionOptions
+    );
 
     const generationConfigToUse = customStructure
       ? CustomGenerationConfig.getConfigWithStructure(customStructure)
@@ -146,7 +171,52 @@ const botController = {
 
       return result.response.text();
     } catch (error) {
-      console.error("Error generating content with instructions:", error);
+      console.error('Error generating content with instructions:', error);
+      throw error;
+    }
+  },
+
+  sendMessageWithInstructionsWithoutOptions: async (
+    message,
+    instructionKey,
+    curr_model = CURRENT_MODEL,
+    customStructure = null,
+    history = []
+  ) => {
+    // Retrieve the instructions without passing instructionOptions
+    const instructions = systemInstructions.getInstructions(instructionKey);
+
+    // Use the provided custom structure or the base configuration
+    const generationConfigToUse = customStructure
+      ? CustomGenerationConfig.getConfigWithStructure(customStructure)
+      : CustomGenerationConfig.getBaseConfig();
+
+    // Get the generative model with the specified model and system instructions
+    const model = genAI.getGenerativeModel({
+      model: curr_model || CURRENT_MODEL,
+      systemInstruction: instructions,
+    });
+
+    // Modify the message to indicate it's a user query
+    const modifiedMessage = `User Query: ${message}`;
+
+    try {
+      // Start a chat session with the specified generation configuration and history
+      const chatSession = model.startChat({
+        generationConfig: generationConfigToUse,
+        history,
+      });
+
+      // Send the modified message and get the response
+      const result = await chatSession.sendMessage(modifiedMessage);
+      console.log(result.response.text());
+
+      return result.response.text();
+    } catch (error) {
+      console.error(
+        'Error generating content with instructions (without options):',
+        error
+      );
       throw error;
     }
   },

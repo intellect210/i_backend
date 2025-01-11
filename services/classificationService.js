@@ -1,33 +1,56 @@
-// services/classificationService.js
-const {sendMessageWithInstructions} = require('../controllers/botController');
+// I_BACKEND/services/classificationService.txt
+const { sendMessageWithInstructionsWithStructure } = require('../controllers/botController');
 const { classifications } = require('../config/classifications');
-const { DEFAULT_CLASSIFICATION } = require('../config/constants');
+const { DEFAULT_CLASSIFICATION, MODELS } = require('../config/constants');
+const systemInstructions = require('../utils/systemInstructions');
+const { classificationResultStructure } = require('../utils/structureDefinitions');
+const agentUtils = require('../utils/agentUtils');
 
-const ClassificationService = {
-   classify: async(text) => {
-    try {
-      const classificationKeys = Object.keys(classifications);
-      const classificationResult = await sendMessageWithInstructions(
-        text,
-        'temoprary_single_classification',
-        classifications
-      );
+const classificationService = {
+    sanitizeOutput: (output) => {
+        try {
+            // Remove any text before the first opening curly brace and after the last closing curly brace
+            const jsonString = output.substring(output.indexOf('{'), output.lastIndexOf('}') + 1);
+            JSON.parse(jsonString);
+            return jsonString;
+        } catch (error) {
+            console.error('Error sanitizing output:', error);
+            return JSON.stringify({ payload: { classification: "no_action_needed" } });
+        }
+    },
+    classify: async (text, history) => {
+        try {
+            const agentConfig = await agentUtils.getAgentConfig();
+            const result = await sendMessageWithInstructionsWithStructure(
+                `Current user message: ${text}.`,
+                'classify_and_act',
+                { agentConfig },
+                MODELS.GEMINI_105_FLASH,
+                classificationResultStructure,
+                [
+                    ...history,
+                    {
+                        role: 'user',
+                        parts: [{ text: `Current agent configuration: ${JSON.stringify(agentConfig)}` }],
+                    },
+                    {
+                        role: 'model',
+                        parts: [{ text: 'Understood. I will classify based on provided agent configuration.' }],
+                    },
+                ]
+            );
 
-      const key = parseInt(classificationResult);
+            console.log("Classification result before sanitization:", result);
+            const sanitizedResult = classificationService.sanitizeOutput(result);
+            console.log("Classification result after sanitization:", sanitizedResult);
 
-      if (!isNaN(key) && key >= 0 && key < classificationKeys.length) {
-        return classificationKeys[key];
-      } else {
-        console.warn(
-          `Invalid classification result: ${classificationResult}. Using default classification.`
-        );
-        return DEFAULT_CLASSIFICATION;
-      }
-    } catch (error) {
-      console.error('Error during classification:', error);
-      return DEFAULT_CLASSIFICATION;
-    }
-  }
-}
+            return JSON.parse(sanitizedResult);
 
-module.exports = ClassificationService;
+        } catch (error) {
+            console.error('Error during classification:', error);
+            return { payload: { classification: "no_action_needed" } };
+        }
+    },
+};
+
+module.exports = classificationService;

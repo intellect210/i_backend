@@ -1,3 +1,27 @@
+// I_BACKEND/utils/structureDefinitions.txt
+const classificationResultStructure = {
+  type: 'object',
+  properties: {
+    payload: {
+      type: 'object',
+      properties: {
+        classification: { type: 'string' },
+        data: {
+          type: 'object',
+          properties: {
+            final_edited_info_only: { type: 'string' },
+          },
+          required: ['final_edited_info_only'],
+        },
+        actionType: { type: 'string'}
+      },
+      required: ['classification', 'data'],
+    },
+  },
+  required: ['payload'],
+};
+
+
 const personalInfoUpdateStructure = {
   type: 'object',
   properties: {
@@ -16,5 +40,6 @@ const classificationResultBoolStructure = {
 
 module.exports = {
   personalInfoUpdateStructure,
-  classificationResultBoolStructure
+  classificationResultBoolStructure,
+  classificationResultStructure
 };

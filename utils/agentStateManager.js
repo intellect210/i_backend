@@ -18,7 +18,7 @@ class AgentStateManager {
             finalizing: 'finalizing execution',
             completed: 'completed',
         };
-        
+
         this.stateQueueKey = 'agent_state_queue';
         this.sendMessage = sendMessage;
     }
@@ -37,6 +37,8 @@ class AgentStateManager {
             errorMessage: errorMessage,
             messageId: messageId,
         };
+
+        console.log("setting state:", userId, stateData);
 
         try {
             await this.enqueueState(userId, stateData);
