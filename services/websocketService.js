@@ -186,6 +186,7 @@ const websocketService = {
         websocketService.handleStream,
         websocketService.handleStreamError
       );
+      
     } else {
       console.log(
         `Agent action needed: ${classificationResult.payload.classification}`
