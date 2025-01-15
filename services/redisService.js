@@ -7,12 +7,11 @@ const redisService = {
   setUserSession: async (userId, socketId) => {
     try {
       console.log('Setting user session in Redis:', userId, socketId);
-      const success = await redisManager.set(`user:${userId}`, socketId);
+      const success = await redisManager.set(`user:${userId}`, socketId, { EX: 600 }); // Set TTL to 10 minutes
       if (!success) {
         throw new Error('Failed to set user session in Redis');
       }
     } catch (error) {
-      //console.error('Error setting user session in Redis:', error);
       throw { code: ERROR_CODES.REDIS_ERROR, message: error.message };
     }
   },
@@ -21,7 +20,6 @@ const redisService = {
     try {
       return await redisManager.get(`user:${userId}`);
     } catch (error) {
-      //console.error('Error getting user session from Redis:', error);
       throw { code: ERROR_CODES.REDIS_ERROR, message: error.message };
     }
   },
@@ -34,7 +32,6 @@ const redisService = {
       }
       console.log('User session removed for userId:', userId);
     } catch (error) {
-      //console.error('Error removing user session from Redis:', error);
       throw { code: ERROR_CODES.REDIS_ERROR, message: error.message };
     }
   },

@@ -75,26 +75,28 @@ const websocketService = {
           await personalizationService.getPersonalizationInfo(userId);
         const currentDateTimeIST = dateTimeUtils.getCurrentDateTimeIST();
 
-        const infoText = `Personalised Name: ${
+        const infoText = `SYSTEM GIVEN INFO - , Current Date and time (take this as a fact): ${currentDateTimeIST}
+        ,Model personalised Name: ${
           personalizationInfo.personalisedName
         }, Follow given Model Behaviour: ${
           personalizationInfo.modelBehaviour
-        }, Personal Info to use whenever necessary: ${
+        }, Personal Info of user to use whenever necessary: ${
           personalizationInfo.personalInfo
-        }, Current Date and time (take this as a fact): ${currentDateTimeIST}`;
+        }`;
 
         // Inject system instructions and personalization info into history
         history = dataInjector.injectData(
           history,
           systemInstructions.getInstructions('assistantBehaviorPrompt'),
-          'Understood. I follow the given model behaviour.'
+          'Understood. I follow the given instructions.'
         );
 
         history = dataInjector.injectData(
           history,
           infoText,
-          'Understood. I will keep these in mind for this conversation.'
+          'Understood. I will keep these in mind for conversations.'
         );
+        
       } catch (error) {
         console.log(
           'Error building chat history or injecting data:',
