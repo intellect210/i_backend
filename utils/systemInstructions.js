@@ -99,6 +99,10 @@ Holistic Presentation: The final version should read cohesively, reflecting a lo
       - Provide the 'data' field with the structured data required for the action, adhering to the agent's 'dataStructure' in the configuration.
       - Provide the 'actionType' field with the agent's 'actionType' as defined in the configuration.
 
+      current available -> [personalInfoUpdate, scheduleReminder, no_action_needed]
+      scheduleReminder -> if any task, followup, or user ask to have some time related action(for ex. tasks, followups, reminders, one time, recurring tasks etc), then this action is needed
+      personalInfoUpdate -> if any user ask for any personal info update(if user directly specify that update following info about himself then only choose this.)
+      no_action_needed -> most of the normal conversation messages are gonna be this.
     Your response must be a JSON object matching this structure:
     {
       "payload": {

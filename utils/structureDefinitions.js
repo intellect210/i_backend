@@ -5,15 +5,16 @@ const classificationResultStructure = {
     payload: {
       type: 'object',
       properties: {
-        classification: { type: 'string' },
+        classification: { type: 'string', description: 'The classification of the user message' },
         data: {
           type: 'object',
+          description: 'Data required for the action',
           properties: {
-            final_edited_info_only: { type: 'string' },
+            final_edited_info_only: { type: 'string', description: 'The final edited personal information' },
           },
           required: ['final_edited_info_only'],
         },
-        actionType: { type: 'string'}
+        actionType: { type: 'string', description: 'The type of action to perform' }
       },
       required: ['classification', 'data'],
     },
@@ -113,10 +114,12 @@ const remindersStructure = {
       "nullable": true,
       "properties": {
         "taskDescription": {
-          "type": "string"
+          "type": "string",
+          description: "Description of the task or reminder"
         },
         "time": {
-          "type": "string"
+          "type": "string",
+          description: "Time for the task or reminder"
         },
         "recurrence": {
           "type": "object",
@@ -130,7 +133,8 @@ const remindersStructure = {
                 "daily",
                 "weekly",
                 "limited"
-              ]
+              ],
+              description: "Type of recurrence"
             },
             "days": {
               "type": "array",
@@ -144,7 +148,8 @@ const remindersStructure = {
                   "friday",
                   "saturday",
                   "sunday"
-                ]
+                ],
+                  description: "Days for the weekly recurrence"
               }
             },
             "ends": {
@@ -157,15 +162,18 @@ const remindersStructure = {
                   "enum": [
                     "after_repetitions",
                     "on_date"
-                  ]
+                  ],
+                  description: "Type of end condition for the recurrence"
                 },
                 "value": {
-                  "type": "string"
+                  "type": "string",
+                  description: "Value of the end condition"
                 }
               }
             },
             "start_date": {
-              "type": "string"
+              "type": "string",
+              description: "Start date for the recurrence"
             },
             "one_time_date": {
               "type": "string",
@@ -188,8 +196,9 @@ const remindersStructure = {
 
 const personalInfoUpdateStructure = {
   type: 'object',
+   description: 'Structure for personal information update action',
   properties: {
-    final_edited_info_only: { type: 'string' }
+    final_edited_info_only: { type: 'string', description: 'Final edited personal info string' }
   },
   required: ['final_edited_info_only']
 };
@@ -197,9 +206,130 @@ const personalInfoUpdateStructure = {
 const classificationResultBoolStructure = {
   type: 'object',
   properties: {
-    classification: { type: 'boolean' }
+    classification: { type: 'boolean', description: 'Boolean classification result' }
   },
   required: ['classification']
+};
+
+const combinedActionStructure = {
+  "type": "object",
+  "description": "Structure for combined actions: no action, personal info update, or schedule reminder/followups/time-related schedulers",
+  "properties": {
+    "payload": {
+      "type": "object",
+      "description": "Payload containing action details",
+      "properties": {
+        "classification": {
+          "type": "string",
+          "description": "Classification for the action type",
+          "enum": [
+            "no_action_needed",
+            "personalInfoUpdate",
+            "scheduleReminder"
+          ]
+        },
+        "data": {
+          "type": "object",
+          "description": "Data for the action based on classification",
+          "properties": {
+            "final_edited_info_only": {
+              "type": "string",
+              "description": "Final edited personal info string"
+            },
+            "task": {
+              "type": "object",
+              "description": "Details of the extracted task or reminder or followups or task.",
+              "nullable": true,
+              "properties": {
+                "taskDescription": {
+                  "type": "string",
+                  "description": "Description of the task or reminder or followup in details"
+                },
+                "time": {
+                  "type": "string",
+                  "description": "Time for the task or reminder in HH:mm format"
+                },
+                "recurrence": {
+                  "type": "object",
+                  "description": "Information about how often the task should repeat.",
+                  "nullable": true,
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "description": "Type of recurrence",
+                      "enum": [
+                        "once",
+                        "daily",
+                        "weekly",
+                        "limited"
+                      ]
+                    },
+                    "days": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "description": "Days for the weekly recurrence",
+                        "enum": [
+                          "monday",
+                          "tuesday",
+                          "wednesday",
+                          "thursday",
+                          "friday",
+                          "saturday",
+                          "sunday"
+                        ]
+                      }
+                    },
+                    "ends": {
+                      "type": "object",
+                      "description": "Specifies when the recurrence ends, if applicable.",
+                      "nullable": true,
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "description": "Type of end condition for the recurrence",
+                          "enum": [
+                            "after_repetitions",
+                            "on_date"
+                          ]
+                        },
+                        "value": {
+                          "type": "string",
+                          "description": "Value of the end condition"
+                        }
+                      }
+                    },
+                    "start_date": {
+                      "type": "string",
+                      "description": "Start date for the recurrence in YYYY-MM-DD format"
+                    },
+                    "one_time_date": {
+                      "type": "string",
+                      "description": "If only time is given by user then one_time_date is necessary to schedule the reminder so either ask user or use today's date in YYYY-MM-DD format"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "one_time_date"
+                  ]
+                }
+              },
+              "required": [
+                "taskDescription",
+                "recurrence"
+              ]
+            }
+          }
+        }
+      },
+      "required": [
+        "classification"
+      ]
+    }
+  },
+  "required": [
+    "payload"
+  ]
 };
 
 module.exports = {
@@ -208,4 +338,5 @@ module.exports = {
   classificationResultStructure,
   automationFollowupStructure,
   remindersStructure,
+    combinedActionStructure
 };

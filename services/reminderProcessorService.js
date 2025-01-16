@@ -6,7 +6,8 @@ const logger = require('../utils/logger');
 const reminderProcessorService = {
     processReminder: async (reminderJson) => {
       try {
-        // logger.info(`Processing reminder: ${reminderJson}`);
+        logger.info(`[DEBUG]Processing reminder:`, reminderJson);
+
             const parsedReminder = JSON.parse(reminderJson);
 
             // Validate the structure against remindersStructure

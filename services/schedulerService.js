@@ -13,6 +13,7 @@ class SchedulerService {
 
     async scheduleReminder(userId, task, options) {
         try {
+            console.log("[DEBUG: task]", task);
             const processedReminder = await reminderProcessorService.processReminder(task);
 
             if (!processedReminder.success) {

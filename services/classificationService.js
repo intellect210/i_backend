@@ -3,7 +3,7 @@ const { sendMessageWithInstructionsWithStructure } = require('../controllers/bot
 const { classifications } = require('../config/classifications');
 const { DEFAULT_CLASSIFICATION, MODELS } = require('../config/constants');
 const systemInstructions = require('../utils/systemInstructions');
-const { classificationResultStructure } = require('../utils/structureDefinitions');
+const { classificationResultStructure, combinedActionStructure } = require('../utils/structureDefinitions');
 const agentUtils = require('../utils/agentUtils');
 
 const classificationService = {
@@ -26,7 +26,7 @@ const classificationService = {
                 'classify_and_act',
                 { agentConfig },
                 MODELS.GEMINI_105_FLASH,
-                classificationResultStructure,
+                 combinedActionStructure,
                 [
                     ...history,
                     {

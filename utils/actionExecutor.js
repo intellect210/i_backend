@@ -5,6 +5,9 @@ const botController = require('../controllers/botController');
 const AgentStateManager = require('../utils/agentStateManager');
 const websocketService = require('../services/websocketService');
 const agentStateManager = new AgentStateManager(websocketService.sendMessage);
+const SchedulerService = require('../services/schedulerService');
+const schedulerService = new SchedulerService();
+
 
 class ActionExecutor {
     constructor() {
@@ -16,6 +19,8 @@ class ActionExecutor {
             switch (actionType) {
                 case 'personalInfoUpdate':
                     return await this.handlePersonalInfoUpdateAction(payload, userId, messageId);
+                case 'scheduleReminder':
+                    return await this.handleScheduleReminderAction(payload, userId, messageId);
                 default:
                     console.log("unrecognized action type, stopping agent execution")
                     return { success: false, message: 'Unrecognized action type.' };
@@ -48,5 +53,31 @@ class ActionExecutor {
                 return { success: false, message: "Failed to update personal info", originalError: error };
             }
         }
+    
+    async handleScheduleReminderAction(payload, userId, messageId) {
+        try {
+
+            // if (!payload || typeof payload !== 'object' || !payload.task) {
+            //   throw new Error("Invalid payload for schedule reminder.");
+            // }
+
+            const scheduleResult = await schedulerService.scheduleReminder(userId, payload);
+          
+           if(scheduleResult.success){
+             return {
+                success: true,
+               message: `Reminder scheduled successfully with job ID: ${scheduleResult.reminderId}`,
+              };
+           }else {
+             return {
+                success: false,
+                message: `Reminder scheduling failed, due to: ${scheduleResult.message}.`,
+                };
+           }
+         }  catch (error) {
+               console.error('Error scheduling reminder:', error);
+            return { success: false, message: "Failed to schedule reminder.", originalError: error };
+          }
     }
+}
     module.exports = ActionExecutor;
