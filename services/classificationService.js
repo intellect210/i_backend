@@ -40,9 +40,9 @@ const classificationService = {
                 ]
             );
 
-            console.log("Classification result before sanitization:", result);
+            // console.log("Classification result before sanitization:", result);
             const sanitizedResult = classificationService.sanitizeOutput(result);
-            console.log("Classification result after sanitization:", sanitizedResult);
+            // console.log("Classification result after sanitization:", sanitizedResult);
 
             return JSON.parse(sanitizedResult);
 

@@ -168,13 +168,19 @@ const remindersStructure = {
               "type": "string"
             },
             "one_time_date": {
-              "type": "string"
+              "type": "string",
+              "description": "If only time is given by user then one_time_date is necessary to schedule the reminder so either ask user or use todays date"
             }
-          }
+          },
+          "required": [
+            "type",
+            "one_time_date"
+          ]
         }
       },
       "required": [
-        "taskDescription"
+        "taskDescription",
+        "recurrence"
       ]
     }
   }

@@ -115,24 +115,27 @@ Holistic Presentation: The final version should read cohesively, reflecting a lo
     }
 
     Ensure the output is valid JSON, removing any non-json text from the response.`,
+
+        //==================================================================================================================
+
+        automationFollowupInstructions: `YOU ARE A SYSTEM DESIGNED TO CREATE STRUCTURED EXECUTION PLANS IN THE BACKEND.
+        Your role is to receive a task, analyze it, and break it down into a clear and actionable structured plan. Each plan consists of a series of well-defined actions executed sequentially or conditionally by the backend system.
+        Key Requirements:
+        Task Breakdown:
+        Decompose the given task into discrete, logical steps (actions).
+        Ensure each action aligns with the task’s objectives and specifies any dependencies on outputs from previous actions.
+        Structured Output:
+        Follow a strict schema for defining actions.`,
+    
+    //==================================================================================================================
+    
+      tasksClassificationInstruction:  `Identify if the user's message contains a request to create a task or reminder. The message should clearly indicate an action and a specific time or repetitive schedule for that action. Allowed Task Parameters: Time Specification: The task must include a specific time of day. Acceptable formats: "8 pm", "8:00 AM", "at 6 in the morning", "21:00". If the time is ambiguous (e.g., "evening"), prompt the user for clarification. Repetitive Schedules (Mutually Exclusive): A task can have one of the following repetitive schedules: Daily at a Specific Time: "every day at 7 am", "daily at 9:30 pm". Specific Days of the Week: "every Monday at 10 am", "on Sundays at 6 pm", "every Tuesday and Thursday at 2 pm". Limited Repetitions: "every day at 8 pm for the next 5 days" (requires a start date, which defaults to the current day). "every Sunday at 11 am for the next 3 Sundays". "every Wednesday at 4 pm until [Date]". One-Time Task: "remind me tomorrow at 10 am", "set a reminder for July 15th at 3 pm". Prohibited Task Parameters: Disallowed Repetition: The following repetition patterns are not allowed: Multiple Times per Day: "remind me at 9 am and 5 pm every day". Short, Frequent Intervals: "remind me every 10 minutes", "every hour". Vague or Undefined Repetition: "remind me sometimes", "remind me periodically". Output Format: Structured Output: When a valid task is identified, output the task information in a structured format containing the following: Action: (The task description - e.g., "buy milk") Time: (The specific time of day - e.g., "20:00") Repetition: (The repetition pattern - e.g., "daily", "weekly on Monday", "limited for 3 days", "one-time on 2024-07-15") Repetition Details (if applicable): For daily: (None or "everyday") For specific days: (e.g., "Monday", "Tuesday, Thursday") For limited: (e.g., "for 5 days", "until 2024-08-01") For one-time: (The specific date - e.g., "2024-07-16")`,    
+
     },
-
-//==================================================================================================================
-
-    automationFollowupInstructions: `YOU ARE A SYSTEM DESIGNED TO CREATE STRUCTURED EXECUTION PLANS IN THE BACKEND.
-    Your role is to receive a task, analyze it, and break it down into a clear and actionable structured plan. Each plan consists of a series of well-defined actions executed sequentially or conditionally by the backend system.
-    Key Requirements:
-    Task Breakdown:
-    Decompose the given task into discrete, logical steps (actions).
-    Ensure each action aligns with the task’s objectives and specifies any dependencies on outputs from previous actions.
-    Structured Output:
-    Follow a strict schema for defining actions.`,
-
-//==================================================================================================================
-
-  tasksClassificationInstruction:  `Identify if the user's message contains a request to create a task or reminder. The message should clearly indicate an action and a specific time or repetitive schedule for that action. Allowed Task Parameters: Time Specification: The task must include a specific time of day. Acceptable formats: "8 pm", "8:00 AM", "at 6 in the morning", "21:00". If the time is ambiguous (e.g., "evening"), prompt the user for clarification. Repetitive Schedules (Mutually Exclusive): A task can have one of the following repetitive schedules: Daily at a Specific Time: "every day at 7 am", "daily at 9:30 pm". Specific Days of the Week: "every Monday at 10 am", "on Sundays at 6 pm", "every Tuesday and Thursday at 2 pm". Limited Repetitions: "every day at 8 pm for the next 5 days" (requires a start date, which defaults to the current day). "every Sunday at 11 am for the next 3 Sundays". "every Wednesday at 4 pm until [Date]". One-Time Task: "remind me tomorrow at 10 am", "set a reminder for July 15th at 3 pm". Prohibited Task Parameters: Disallowed Repetition: The following repetition patterns are not allowed: Multiple Times per Day: "remind me at 9 am and 5 pm every day". Short, Frequent Intervals: "remind me every 10 minutes", "every hour". Vague or Undefined Repetition: "remind me sometimes", "remind me periodically". Output Format: Structured Output: When a valid task is identified, output the task information in a structured format containing the following: Action: (The task description - e.g., "buy milk") Time: (The specific time of day - e.g., "20:00") Repetition: (The repetition pattern - e.g., "daily", "weekly on Monday", "limited for 3 days", "one-time on 2024-07-15") Repetition Details (if applicable): For daily: (None or "everyday") For specific days: (e.g., "Monday", "Tuesday, Thursday") For limited: (e.g., "for 5 days", "until 2024-08-01") For one-time: (The specific date - e.g., "2024-07-16")`,
+    
 
 //==================================================================================================================  
+
   getInstructions: (key, options = null) => {
     if (
       systemInstructions.instructions[key] &&
@@ -178,5 +181,6 @@ Holistic Presentation: The final version should read cohesively, reflecting a lo
     }
   },
 };
+
 
 module.exports = systemInstructions;

@@ -38,7 +38,7 @@ class AgentStateManager {
             messageId: messageId,
         };
 
-        console.log("setting state:", userId, stateData);
+        // console.log("setting state:", userId, stateData);
 
         try {
             await this.enqueueState(userId, stateData);
