@@ -183,7 +183,7 @@ const {
             );
             await agentStateManager.setState(
                 userId,
-                agentStateManager.states.PREPARING_BOT_RESPONSE,
+                agentStateManager.states.awaitingBotResponse,
                 messageId
             );
             await botController.streamBotResponse(
@@ -202,16 +202,15 @@ const {
                 // Set state to action in progress
                 await agentStateManager.setState(
                     userId,
-                    agentStateManager.states.ACTION_DETECTED,
+                    agentStateManager.states.actionDetected,
                     messageId
                 );
-  
-
+                
                 let actionResult;
                 
-  
                 if (classificationResult.payload.classification === 'scheduleReminder') {
-                    await agentStateManager.setState(userId, agentStateManager.states.followUpStates.CREATING_FOLLOWUP, messageId);
+                    await agentStateManager.setState(userId, agentStateManager.states.scheduleFollowup, messageId);
+
                    actionResult = await actionExecutor.executeAction(
                         classificationResult.payload.classification,
                         JSON.stringify(classificationResult.payload.data),
@@ -220,7 +219,8 @@ const {
                    )
                  }
                 else {
-                    await agentStateManager.setState(userId, agentStateManager.states.UPDATING_PROFILE_INFO, messageId);
+                    await agentStateManager.setState(userId, agentStateManager.states.updatingPersonalInfo, messageId);
+
                    actionResult = await actionExecutor.executeAction(
                         classificationResult.payload.classification,
                         classificationResult.payload.data,
@@ -229,11 +229,12 @@ const {
                   );
                 }
   
+  
                 if (!actionResult.success) {
                     // Set state to error during action
                     await agentStateManager.setState(
                         userId,
-                        agentStateManager.states.ERROR_DURING_ACTION,
+                        agentStateManager.states.errorDuringAction,
                         messageId,
                         actionResult.message
                     );
@@ -241,9 +242,8 @@ const {
                     // Set state to action completed
                     await agentStateManager.setState(
                         userId,
-                        agentStateManager.states.ACTION_COMPLETED,
-                        messageId,
-                        actionResult.message
+                        agentStateManager.states.actionCompleted,
+                        messageId
                     );
                 }
   
@@ -261,7 +261,7 @@ const {
                 // Proceed with normal bot response, including agent status
                 await agentStateManager.setState(
                     userId,
-                    agentStateManager.states.PREPARING_BOT_RESPONSE,
+                    agentStateManager.states.awaitingBotResponse,
                     messageId
                 );
                 await botController.streamBotResponse(
@@ -276,7 +276,7 @@ const {
                 console.error('Error during agent action execution:', error);
                 await agentStateManager.setState(
                     userId,
-                    agentStateManager.states.AGENT_ERROR,
+                    agentStateManager.states.error,
                     messageId,
                     'Error during agent action execution.'
                 );
@@ -324,7 +324,7 @@ const {
      * Handles a streaming response by sending chunks to the client and storing them if needed.
      */
     handleStream: async (streamId, chatId, chunk, isStreamEnd, ws) => {
-        const userId = ws.user.useruid;
+       const userId = ws.user.useruid;
   
         try {
             if (!isStreamEnd) {
@@ -472,4 +472,3 @@ const {
   };
   
   module.exports = websocketService;
-  

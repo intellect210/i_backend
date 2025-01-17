@@ -45,6 +45,10 @@ const chatSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
       },
+      agentStates: [{
+         type: mongoose.Schema.Types.ObjectId,
+          ref: 'AgentState',
+      }],
     },
   ],
   createdAt: {
