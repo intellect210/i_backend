@@ -183,7 +183,7 @@ const {
             );
             await agentStateManager.setState(
                 userId,
-                agentStateManager.states.awaitingBotResponse,
+                agentStateManager.states.PREPARING_BOT_RESPONSE,
                 messageId
             );
             await botController.streamBotResponse(
@@ -202,14 +202,16 @@ const {
                 // Set state to action in progress
                 await agentStateManager.setState(
                     userId,
-                    agentStateManager.states.actionInProgress,
+                    agentStateManager.states.ACTION_DETECTED,
                     messageId
                 );
   
+
                 let actionResult;
                 
   
                 if (classificationResult.payload.classification === 'scheduleReminder') {
+                    await agentStateManager.setState(userId, agentStateManager.states.followUpStates.CREATING_FOLLOWUP, messageId);
                    actionResult = await actionExecutor.executeAction(
                         classificationResult.payload.classification,
                         JSON.stringify(classificationResult.payload.data),
@@ -218,6 +220,7 @@ const {
                    )
                  }
                 else {
+                    await agentStateManager.setState(userId, agentStateManager.states.UPDATING_PROFILE_INFO, messageId);
                    actionResult = await actionExecutor.executeAction(
                         classificationResult.payload.classification,
                         classificationResult.payload.data,
@@ -226,12 +229,11 @@ const {
                   );
                 }
   
-  
                 if (!actionResult.success) {
                     // Set state to error during action
                     await agentStateManager.setState(
                         userId,
-                        agentStateManager.states.errorDuringAction,
+                        agentStateManager.states.ERROR_DURING_ACTION,
                         messageId,
                         actionResult.message
                     );
@@ -239,7 +241,7 @@ const {
                     // Set state to action completed
                     await agentStateManager.setState(
                         userId,
-                        agentStateManager.states.actionCompleted,
+                        agentStateManager.states.ACTION_COMPLETED,
                         messageId,
                         actionResult.message
                     );
@@ -259,7 +261,7 @@ const {
                 // Proceed with normal bot response, including agent status
                 await agentStateManager.setState(
                     userId,
-                    agentStateManager.states.awaitingBotResponse,
+                    agentStateManager.states.PREPARING_BOT_RESPONSE,
                     messageId
                 );
                 await botController.streamBotResponse(
@@ -274,7 +276,7 @@ const {
                 console.error('Error during agent action execution:', error);
                 await agentStateManager.setState(
                     userId,
-                    agentStateManager.states.error,
+                    agentStateManager.states.AGENT_ERROR,
                     messageId,
                     'Error during agent action execution.'
                 );
@@ -470,3 +472,4 @@ const {
   };
   
   module.exports = websocketService;
+  

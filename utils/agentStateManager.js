@@ -4,19 +4,25 @@ const { ERROR_CODES } = require('../config/constants');
 class AgentStateManager {
     constructor(sendMessage) {
         this.states = {
-            initializing: 'initializing',
-            processingInput: 'processing input',
-            updatingPersonalInfo: 'updating personal information',
-            waitingForUserInput: 'waiting for user input',
-            awaitingBotResponse: 'awaiting response',
-            actionInProgress: 'action in progress',
-            actionCompleted: 'action completed',
-            handlingConflict: 'handling conflict',
-            error: 'error',
-            errorDuringAction: 'error during action',
-            executionPaused: 'execution paused',
-            finalizing: 'finalizing execution',
-            completed: 'completed',
+            INIT_SESSION: 'Initializing session...',
+            PROCESSING_INPUT: 'Analyzing user input...',
+            WAITING_FOR_INPUT: 'Waiting for user input...',
+            PREPARING_BOT_RESPONSE: 'Preparing bot response...',
+            ACTION_ONGOING: 'Agent action ongoing...',
+            ACTION_COMPLETED: 'Agent action completed...',
+            CONFLICT_RESOLUTION: 'Resolving conflict...',
+            AGENT_ERROR: 'Agent encountered an error...',
+            ERROR_DURING_ACTION: 'Error occurred while performing an action...',
+            EXECUTION_PAUSED: 'Execution paused...',
+            FINALIZING: 'Finalizing execution...',
+            COMPLETED: 'All tasks completed...',
+            ACTION_DETECTED: 'Action detected, performing actions...',
+            
+            UPDATING_PROFILE_INFO: 'Updating profile information...',
+
+            followUpStates: {
+                CREATING_FOLLOWUP: 'Creating a follow-up...'
+            }
         };
 
         this.stateQueueKey = 'agent_state_queue';
