@@ -194,6 +194,8 @@ const {
                 websocketService.handleStream,
                 websocketService.handleStreamError
             );
+            
+            await agentStateManager.setState(userId, agentStateManager.states.completed, messageId);
         } else {
              console.log(
                 `Agent action needed: ${classificationResult.payload.classification} and actionType is ${classificationResult.payload.classification}`
@@ -272,6 +274,8 @@ const {
                     websocketService.handleStream,
                     websocketService.handleStreamError
                 );
+
+                await agentStateManager.setState(userId, agentStateManager.states.completed, messageId);
             } catch (error) {
                 console.error('Error during agent action execution:', error);
                 await agentStateManager.setState(
