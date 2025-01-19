@@ -9,6 +9,8 @@ const userRoutes = require('./userRoutes');
 const agentRoutes = require('./agentRoutes');
 const testRoutes = require('./testRoute');
 const preferenceRoutes = require('./preferenceRoutes');
+const reminderRoutes = require('./reminderRoutes');
+
 // Use the routes
 router.use('/chats', chatRoutes);
 router.use('/messages', messageRoutes);
@@ -17,6 +19,7 @@ router.use('/users', userRoutes);
 router.use('/agents', agentRoutes);
 router.use('/personalization', require('./personalizationRoutes'));
 router.use('/preferences', preferenceRoutes);
+router.use('/reminders', reminderRoutes);
 // router.use('/test', testRoutes); // Use test routes
 
 

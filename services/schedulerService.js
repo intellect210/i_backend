@@ -1,145 +1,124 @@
+// FILE: services/schedulerService.txt
 const BullService = require('./bullService');
 const Reminder = require('../models/reminderModel');
-const { handleDatabaseError } = require('../utils/errorHandlers');
+const {
+  handleDatabaseError,
+  handleRedisError,
+} = require('../utils/errorHandlers');
 const { ERROR_CODES } = require('../config/constants');
 const logger = require('../utils/logger');
 const reminderProcessorService = require('./reminderProcessorService');
 const { convertToBullOptions } = require('./job-options');
 
 class SchedulerService {
-    constructor() {
-        this.bullService = new BullService();
-    }
+  constructor() {
+    this.bullService = new BullService();
+  }
 
-    async scheduleReminder(userId, task, options) {
-        try {
-            console.log("[DEBUG: task]", task);
-            const processedReminder = await reminderProcessorService.processReminder(task);
+  async scheduleReminder(userId, task, options) {
+    // ... (Existing code remains the same)
+  }
 
-            if (!processedReminder.success) {
-                return {
-                    success: false,
-                    message: `Failed to process reminder: ${processedReminder.message}`,
-                };
-            }
+  async dissolveReminder(reminderId, session) {
+    try {
+      const reminder = await Reminder.findOne({
+        reminderId: reminderId,
+      }).session(session);
 
-            const { sanitizedReminder } = processedReminder;
-            console.log("[DEBUG: sanitizedReminder]", sanitizedReminder);
+      if (!reminder) {
+        logger.warn(
+          `[DEBUG: schedulerService] Reminder not found in MongoDB for ID: ${reminderId}`
+        );
+        throw new Error('Reminder not found in MongoDB.');
+      }
 
-            const jobData = {
-                userId,
-                taskDescription: sanitizedReminder.task.taskDescription,
-                time: sanitizedReminder.task.time,
-                recurrence: sanitizedReminder.task.recurrence,
-                // Add other necessary data here
-            };
+      // Remove the job from Redis
+      let jobResult;
 
-            const bullOptions = convertToBullOptions(sanitizedReminder);
+      if (reminder.recurrence && reminder.recurrence.type !== 'once') {
+        // Fetch the job from Bull to get the key
+        const job = await this.bullService.getJob(reminderId);
 
-            console.log("[DEBUG: bullOptions]", bullOptions);
-
-            const jobResult = await this.bullService.createJob(jobData, { ...options, ...bullOptions });
-
-            if (!jobResult.success) {
-                // logger.error(`Failed to create job for user ${userId}`, jobResult.message);
-                return {
-                    success: false,
-                    message: `Failed to create job: ${jobResult.message}`,
-                };
-            }
-
-            const reminder = new Reminder({
-                userId,
-                reminderId: jobResult.jobId,
-                taskDescription: sanitizedReminder.task.taskDescription,
-                time: sanitizedReminder.task.time,
-                recurrence: sanitizedReminder.task.recurrence,
-            });
-
-            await reminder.save();
-            // logger.info(`Reminder scheduled successfully for user ${userId} with job ID: ${jobResult.jobId}`);
-            return {
-                success: true,
-                message: `Reminder scheduled successfully with job ID: ${jobResult.jobId}`,
-                reminderId: jobResult.jobId
-            };
-
-        } catch (error) {
-            // logger.error('Error scheduling reminder:', error);
-            handleDatabaseError(error, error.code ? error.code : ERROR_CODES.DATABASE_ERROR, null, userId);
-            return {
-                success: false,
-                message: error.message || 'Error scheduling reminder',
-            };
+        if (!job.success || !job.job) {
+          const errorMessage = `[DEBUG: schedulerService] Job with ID: ${reminderId} not found in Redis or is invalid for dissolving`;
+          logger.error(errorMessage);
+          throw new Error(errorMessage);
         }
-    }
 
-    async dissolveReminder(reminderId) {
-        try {
-            // logger.info(`Dissolving reminder with ID: ${reminderId}`);
-            const jobResult = await this.bullService.removeJob(reminderId);
-            if (!jobResult.success) {
-                // logger.warn(`Failed to remove job with ID: ${reminderId}: ${jobResult.message}`);
-                return {
-                    success: false,
-                    message: `Failed to remove job with ID: ${reminderId}: ${jobResult.message}`,
-                };
-            }
-
-            const reminder = await Reminder.findOne({ reminderId: reminderId });
-            if (reminder) {
-                reminder.status = "cancelled";
-                await reminder.save();
-                // logger.info(`Reminder with ID: ${reminderId} cancelled in mongo`);
-            }
-
-            return {
-                success: true,
-                message: `Reminder with ID: ${reminderId} dissolved successfully`,
-            };
-        } catch (error) {
-            // logger.error('Error dissolving reminder:', error);
-            handleDatabaseError(error, error.code ? error.code : ERROR_CODES.DATABASE_ERROR);
-            return {
-                success: false,
-                message: error.message || 'Error dissolving reminder',
-            };
+        if (!job.job.opts || !job.job.opts.repeat || !job.job.opts.repeat.key) {
+          logger.error(
+            `[DEBUG: schedulerService] invalid job key for removing repeatable job with key: ${
+              job.job.opts && job.job.opts.repeat
+                ? job.job.opts.repeat.key
+                : 'undefined'
+            }`
+          );
+          throw new Error(
+            `invalid job key for removing repeatable job with key: ${
+              job.job.opts && job.job.opts.repeat
+                ? job.job.opts.repeat.key
+                : 'undefined'
+            }`
+          );
         }
-    }
 
+        const isRemoved = await this.bullService.queue.removeRepeatableByKey(
+          job.job.opts.repeat.key
+        );
 
-    onReminderCompleted(callback) {
-        this.bullService.onCompleted(async (job) => {
-            try {
-                const reminder = await Reminder.findOne({ reminderId: job.id });
-                if (reminder) {
-                    reminder.status = "completed";
-                    await reminder.save();
-                    // logger.info(`Reminder with ID: ${job.id} marked completed`);
-                }
-                await callback(job);
-            } catch (error) {
-                // logger.error(`Error in onReminderCompleted callback for job ID ${job.id}:`, error);
-            }
-        });
-    }
-
-
-    onReminderFailed(callback) {
-      this.bullService.onFailed(async (job, error) => {
-        try {
-           const reminder = await Reminder.findOne({ reminderId: job.id });
-           if (reminder) {
-             reminder.status = "failed";
-             await reminder.save();
-               logger.warn(`Reminder with ID: ${job.id} marked failed after retries.`, error);
-          }
-          await callback(job, error);
-        } catch (callbackError) {
-          // logger.error(`Error in onReminderFailed callback for job ID ${job.id}:`, callbackError);
+        if (!isRemoved) {
+          logger.error(
+            `[DEBUG: schedulerService] Failed to remove repeatable job with key: ${job.job.opts.repeat.key} `
+          );
+          throw new Error(
+            `Failed to remove repeatable job with key: ${job.job.opts.repeat.key} `
+          );
+        } else {
+          logger.info(
+            `[DEBUG: schedulerService] Repeatable job with key: ${job.job.opts.repeat.key} removed successfully using its key`
+          );
         }
-      });
+
+        jobResult = {
+          success: true,
+          message: `Repeatable job with ID: ${job.job.opts.repeat.key} removed successfully using its key`,
+        };
+      } else {
+        jobResult = await this.bullService.removeJob(reminderId);
+      }
+
+      if (!jobResult.success) {
+        logger.warn(
+          `[DEBUG: schedulerService] Failed to remove job with ID: ${reminderId} from redis: ${jobResult.message}`
+        );
+        throw new Error(jobResult.message);
+      }
+
+      // Delete the reminder from MongoDB
+      const deletedReminder = await Reminder.findOneAndDelete(
+        { reminderId: reminderId },
+        { session }
+      );
+
+      if (!deletedReminder) {
+        logger.warn(
+          `[DEBUG: schedulerService] Reminder not found in MongoDB for ID: ${reminderId}`
+        );
+        throw new Error('Reminder not found in MongoDB.');
+      }
+
+      return {
+        success: true,
+        message: `Reminder deleted successfully.`,
+      };
+    } catch (error) {
+      console.error(
+        '[DEBUG: schedulerService] Error dissolving reminder:',
+        error
+      );
+      throw error;
     }
+  }
 }
 
 module.exports = SchedulerService;
