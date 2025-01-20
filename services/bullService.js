@@ -173,7 +173,7 @@ class BullService {
       };
     }
   }
-
+  
   // Called in onComplete and onFailed, abstracted logic into it
   async updateReminderJobId(oldJobId, newJobId) {
     if (newJobId && oldJobId !== newJobId) {
@@ -190,43 +190,27 @@ class BullService {
 
   async removeRepeatableJob(jobId) {
     try {
-      const job = await this.queue.getRepeatableJobs();
+      const jobs = await this.queue.getRepeatableJobs();
+      const jobToBeDeleted = jobs.find((job) => job.id === jobId || job.key.includes(jobId));
 
-      const jobTobeDeleted = job.filter((e) => {
-        return e.id == jobId;
-      });
-
-      if (jobTobeDeleted.length == 0) {
-        logger.error(
-          `[DEBUG: schedulerService] Failed to remove repeatable job with ID: ${jobId} for rescheduling`
-        );
-        throw new Error(
-          `Failed to remove job with ID: ${jobId} for rescheduling`
-        );
+      if (!jobToBeDeleted) {
+        logger.error(`[DEBUG: bullService] Failed to find repeatable job with ID: ${jobId}`);
+        throw new Error(`Failed to find repeatable job with ID: ${jobId}`);
       }
 
-      const isRemoved = await this.queue.removeRepeatableByKey(
-        jobTobeDeleted[0].key
-      );
-
+      const isRemoved = await this.queue.removeRepeatableByKey(jobToBeDeleted.key);
       if (!isRemoved) {
-        logger.error(
-          `[DEBUG: schedulerService] Failed to remove repeatable job with ID: ${jobId} for rescheduling`
-        );
-        throw new Error(
-          `Failed to remove job with ID: ${jobId} for rescheduling`
-        );
-      } else {
-        logger.info(
-          `[DEBUG: schedulerService] Repeatable job with ID: ${jobId} removed successfully using its key`
-        );
+        logger.error(`[DEBUG: bullService] Failed to remove repeatable job with ID: ${jobId}`);
+        throw new Error(`Failed to remove repeatable job with ID: ${jobId}`);
       }
 
+      logger.info(`[DEBUG: bullService] Repeatable job with ID: ${jobId} removed successfully`);
       return {
         success: true,
-        message: `Repeatable job with ID: ${jobId} removed successfully using its key`,
+        message: `Repeatable job with ID: ${jobId} removed successfully`,
       };
     } catch (error) {
+      logger.error(`[DEBUG: bullService] Error removing repeatable job with ID: ${jobId}`, error);
       return {
         success: false,
         message: error.message,

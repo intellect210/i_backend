@@ -43,73 +43,41 @@ const reminderController = {
   async deleteSchedule(req, res) {
     const session = await Reminder.startSession();
     try {
-      const { _id } = req.params; // Using _id now
+      const { _id } = req.params;
 
       if (!_id) {
-        console.log(
-          '[DEBUG: reminderController] Reminder ID is missing for deletion.'
-        );
-        return res
-          .status(400)
-          .json({ status: 'error', message: 'Reminder ID is required.' });
+        console.log('[DEBUG: reminderController] Reminder ID is missing for deletion.');
+        return res.status(400).json({ status: 'error', message: 'Reminder ID is required.' });
       }
 
-      console.log(
-        `[DEBUG: reminderController] Deleting reminder with ID: ${_id}`
-      );
+      console.log(`[DEBUG: reminderController] Deleting reminder with ID: ${_id}`);
 
       session.startTransaction();
 
       const reminder = await Reminder.findOne({ _id }).session(session);
-
       if (!reminder) {
-        console.log(
-          `[DEBUG: reminderController] Reminder not found for ID: ${_id}`
-        );
+        console.log(`[DEBUG: reminderController] Reminder not found for ID: ${_id}`);
         await session.abortTransaction();
         session.endSession();
-        return res.status(404).json({
-          status: 'error',
-          message: 'Reminder not found.',
-        });
+        return res.status(404).json({ status: 'error', message: 'Reminder not found.' });
       }
 
-      // Use reminderId from the document for dissolveReminder
-      const result = await schedulerService.dissolveReminder(
-        reminder.reminderId,
-        session
-      );
-
+      const result = await schedulerService.dissolveReminder(reminder.reminderId, session);
       if (!result.success) {
-        // If dissolveReminder fails, the transaction will be aborted,
-        // and the error will be handled in the catch block.
         throw new Error(result.message);
       }
 
       await session.commitTransaction();
       session.endSession();
-      res
-        .status(200)
-        .json({ status: 'success', message: 'Reminder deleted successfully.' });
+      res.status(200).json({ status: 'success', message: 'Reminder deleted successfully.' });
     } catch (error) {
       if (session) {
         await session.abortTransaction();
         session.endSession();
       }
-      console.error(
-        `[DEBUG: reminderController] Error deleting reminder:`,
-        error
-      );
-      handleDatabaseError(
-        error,
-        error.code ? error.code : ERROR_CODES.DATABASE_ERROR,
-        null,
-        req.user ? req.user.useruid : null
-      );
-      return res.status(500).json({
-        status: 'error',
-        message: 'Error deleting reminder.',
-      });
+      console.error(`[DEBUG: reminderController] Error deleting reminder:`, error);
+      handleDatabaseError(error, error.code ? error.code : ERROR_CODES.DATABASE_ERROR, null, req.user ? req.user.useruid : null);
+      return res.status(500).json({ status: 'error', message: 'Error deleting reminder.' });
     }
   },
   
