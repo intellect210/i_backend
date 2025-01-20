@@ -1,3 +1,4 @@
+
 // FILE: controllers/reminderController.txt
 const Reminder = require('../models/reminderModel');
 const {
@@ -62,7 +63,7 @@ const reminderController = {
         return res.status(404).json({ status: 'error', message: 'Reminder not found.' });
       }
 
-      const result = await schedulerService.dissolveReminder(reminder.reminderId, session);
+      const result = await schedulerService.dissolveReminder(reminder.reminderId);
       if (!result.success) {
         throw new Error(result.message);
       }
@@ -80,7 +81,7 @@ const reminderController = {
       return res.status(500).json({ status: 'error', message: 'Error deleting reminder.' });
     }
   },
-  
+
 };
 
 module.exports = reminderController;

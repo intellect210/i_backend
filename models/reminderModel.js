@@ -33,10 +33,18 @@ const reminderSchema = new Schema({
      required: true,
      unique: true,
    },
-   jobKey: {  // ADD THIS LINE
+   jobKey: {
       type: String,
       required: false, // Set to false because it is not required for one-time jobs.
    },
+   bullInternalJobId: {
+    type: String,
+    required: false,
+  },
+    repeatJobKey: {  // Add this line
+        type: String,
+        required: false,
+    },
    taskDescription: {
      type: String,
      required: true,
@@ -152,6 +160,10 @@ const reminderSchema = new Schema({
      type: Date,
      default: Date.now,
    },
+  bullRepeatOptions: { // Add this field to store Bull's repeat options
+    type: Object,
+    required: false,
+  },
 });
 const Reminder = mongoose.model('Reminder', reminderSchema);
 module.exports = Reminder;

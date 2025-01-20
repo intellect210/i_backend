@@ -61,13 +61,15 @@ class BullService {
 
   async createJob(jobData, options) {
     try {
-      const jobId = uuidv4();
-      const job = await this.queue.add(jobData, { ...options, jobId });
-      logger.info(`Job created with ID: ${job.id}`);
+      const bullJobId = uuidv4(); // Generate a UUID for bullJobId
+       const job = await this.queue.add(jobData, { ...options, jobId: bullJobId }); // Use jobId to store UUID
+      logger.info(`Job created with Bull internal ID: ${job.id}, our Bull Job ID: ${bullJobId}`);
       return {
         success: true,
-        jobId: job.id,
-        message: `Job created with ID: ${job.id}`,
+        bullJobId: bullJobId, // Return the UUID
+        bullInternalJobId: job.id, // Return Bull's internal Job ID
+         repeatJobKey: job.repeatJobKey, // Return the repeatable job key
+        message: `Job created with Bull internal ID: ${job.id}, our Bull Job ID: ${bullJobId}`,
       };
     } catch (error) {
       logger.error('Error creating job:', error);
@@ -79,17 +81,17 @@ class BullService {
     }
   }
 
-  async getJob(jobId) {
+  async getJob(bullJobId) {
     try {
-      const job = await this.queue.getJob(jobId);
+      const job = await this.queue.getJob(bullJobId);
       if (!job) {
-        logger.warn(`Job not found with ID: ${jobId}`);
+        logger.warn(`Job not found with Bull internal ID: ${bullJobId}`);
         return {
           success: false,
-          message: `Job not found with ID: ${jobId}`,
+          message: `Job not found with Bull internal ID: ${bullJobId}`,
         };
       }
-      logger.info(`Job retrieved with ID: ${jobId}`);
+      logger.info(`Job retrieved with Bull internal ID: ${bullJobId}`);
       return {
         success: true,
         job,
@@ -104,21 +106,21 @@ class BullService {
     }
   }
 
-  async removeJob(jobId) {
+  async removeJob(bullJobId) {
     try {
-      const job = await this.queue.getJob(jobId);
+      const job = await this.queue.getJob(bullJobId);
       if (!job) {
-        logger.warn(`Job not found with ID: ${jobId}, cannot remove`);
+        logger.warn(`Job not found with Bull internal ID: ${bullJobId}, cannot remove`);
         return {
           success: false,
-          message: `Job not found with ID: ${jobId}, cannot remove`,
+          message: `Job not found with Bull internal ID: ${bullJobId}, cannot remove`,
         };
       }
       await job.remove();
-      logger.info(`Job removed with ID: ${jobId}`);
+      logger.info(`Job removed with Bull internal ID: ${bullJobId}`);
       return {
         success: true,
-        message: `Job removed with ID: ${jobId}`,
+        message: `Job removed with Bull internal ID: ${bullJobId}`,
       };
     } catch (error) {
       logger.error('Error removing job:', error);
@@ -130,21 +132,21 @@ class BullService {
     }
   }
 
-  async updateJob(jobId, updateData) {
+  async updateJob(bullJobId, updateData) {
     try {
-      const job = await this.queue.getJob(jobId);
+      const job = await this.queue.getJob(bullJobId);
       if (!job) {
-        logger.warn(`Job not found with ID: ${jobId}, cannot update`);
+        logger.warn(`Job not found with Bull internal ID: ${bullJobId}, cannot update`);
         return {
           success: false,
-          message: `Job not found with ID: ${jobId}, cannot update`,
+          message: `Job not found with Bull internal ID: ${bullJobId}, cannot update`,
         };
       }
       await job.update(updateData);
-      logger.info(`Job updated with ID: ${jobId}`);
+      logger.info(`Job updated with Bull internal ID: ${bullJobId}`);
       return {
         success: true,
-        message: `Job updated with ID: ${jobId}`,
+        message: `Job updated with Bull internal ID: ${bullJobId}`,
       };
     } catch (error) {
       logger.error('Error updating job:', error);
@@ -173,7 +175,7 @@ class BullService {
       };
     }
   }
-  
+
   // Called in onComplete and onFailed, abstracted logic into it
   async updateReminderJobId(oldJobId, newJobId) {
     if (newJobId && oldJobId !== newJobId) {
@@ -188,29 +190,24 @@ class BullService {
     }
   }
 
-  async removeRepeatableJob(jobId) {
-    try {
-      const jobs = await this.queue.getRepeatableJobs();
-      const jobToBeDeleted = jobs.find((job) => job.id === jobId || job.key.includes(jobId));
-
-      if (!jobToBeDeleted) {
-        logger.error(`[DEBUG: bullService] Failed to find repeatable job with ID: ${jobId}`);
-        throw new Error(`Failed to find repeatable job with ID: ${jobId}`);
+  async removeRepeatableJob(repeatJobKey) {
+       try {
+      const removed = await this.queue.removeRepeatableByKey(repeatJobKey);
+      if (removed) {
+        logger.info(`Repeatable job with key: ${repeatJobKey} removed successfully`);
+        return {
+          success: true,
+          message: `Repeatable job removed successfully`,
+        };
+      } else {
+        logger.warn(`Repeatable job with key: ${repeatJobKey} not found`);
+        return {
+          success: false,
+          message: `Repeatable job not found`,
+        };
       }
-
-      const isRemoved = await this.queue.removeRepeatableByKey(jobToBeDeleted.key);
-      if (!isRemoved) {
-        logger.error(`[DEBUG: bullService] Failed to remove repeatable job with ID: ${jobId}`);
-        throw new Error(`Failed to remove repeatable job with ID: ${jobId}`);
-      }
-
-      logger.info(`[DEBUG: bullService] Repeatable job with ID: ${jobId} removed successfully`);
-      return {
-        success: true,
-        message: `Repeatable job with ID: ${jobId} removed successfully`,
-      };
     } catch (error) {
-      logger.error(`[DEBUG: bullService] Error removing repeatable job with ID: ${jobId}`, error);
+      logger.error(`Error removing repeatable job with key: ${repeatJobKey}`, error);
       return {
         success: false,
         message: error.message,

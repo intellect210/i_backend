@@ -1,34 +1,56 @@
+
 const { isValid, parse } = require('date-fns');
 
 function convertToBullOptions(jobInput) {
     console.log("[DEBUG: jobInput]", jobInput);
 
-    // 1. Handle missing jobInput or task
     if (!jobInput || !jobInput.task) {
         console.error("Invalid input: jobInput or task is missing.");
         return {};
     }
 
     const task = jobInput.task;
+    const bullOptions = {};
 
-    // 2. Handle missing recurrence
-    if (!task.recurrence) {
-        console.error("Invalid input: recurrence is missing.");
-        return {};
+    // Handle one-time jobs
+    if (!task.recurrence || Object.keys(task.recurrence).length === 0) {
+        const { time } = task;
+        if (!time) {
+            console.error("Invalid input: time is missing for one-time job.");
+            return {};
+        }
+        const isValidTimeString = (timeString) => {
+            if (!timeString) return false;
+            const regex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+            return regex.test(timeString);
+        };
+        if (!isValidTimeString(time)) {
+            console.error(`Invalid Time string format, valid format: HH:mm`);
+            return {};
+        }
+        const [hours, minutes] = time.split(':').map(Number);
+        const now = new Date();
+        const targetTime = new Date(now);
+        targetTime.setHours(hours);
+        targetTime.setMinutes(minutes);
+        targetTime.setSeconds(0);
+        if (targetTime <= now) {
+            targetTime.setDate(now.getDate() + 1); // Schedule for next day
+        }
+        const delay = targetTime.getTime() - now.getTime();
+        bullOptions.delay = delay;
+        return bullOptions;
     }
 
+    // Handle repeatable jobs
     const { recurrence, time } = task;
     const { type, days, ends, start_date, one_time_date } = recurrence;
 
-    const bullOptions = {};
-
-    // 3. Handle missing time
     if (!time) {
-        console.error("Invalid input: time is missing.");
+        console.error("Invalid input: time is missing for repeatable job.");
         return {};
     }
 
-    // 4. Validate time format (HH:mm)
     const isValidTimeString = (timeString) => {
         if (!timeString) return false;
         const regex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
@@ -40,9 +62,8 @@ function convertToBullOptions(jobInput) {
         return {};
     }
 
-    const [hours, minutes] = time.split(':').map(Number); // Convert to numbers
+    const [hours, minutes] = time.split(':').map(Number);
 
-    // 5. Helper function to safely parse dates
     const safeParseDate = (dateString, defaultValue = new Date()) => {
         if (!dateString) {
             return defaultValue;
@@ -56,12 +77,10 @@ function convertToBullOptions(jobInput) {
         }
     };
 
-    // 6. Function to get task date based on recurrence type
     const getTaskDate = () => {
         if (type === 'once') {
             return safeParseDate(one_time_date);
         }
-
         if (type === 'limited') {
             return safeParseDate(start_date);
         }
@@ -84,28 +103,23 @@ function convertToBullOptions(jobInput) {
             bullOptions.delay = delay;
             break;
         }
-
         case 'daily': {
             const cronTime = `${minutes} ${hours} * * *`;
             bullOptions.repeat = { cron: cronTime };
             break;
         }
-
         case 'weekly': {
             if (!days || !Array.isArray(days) || days.length === 0) {
                 console.error('Weekly recurrence requires a valid array of days.');
                 return {};
             }
-
             const validDays = days.filter(day =>
                 ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].includes(day.toLowerCase())
             );
-
             if (validDays.length === 0) {
                 console.error('Weekly recurrence requires at least one valid day.');
                 return {};
             }
-
             const cronDays = validDays.map(day => {
                 switch (day.toLowerCase()) {
                     case 'monday': return 1;
@@ -118,22 +132,18 @@ function convertToBullOptions(jobInput) {
                     default: return null;
                 }
             }).join(',');
-
             const cronTime = `${minutes} ${hours} * * ${cronDays}`;
             bullOptions.repeat = { cron: cronTime };
             break;
         }
-
         case 'limited': {
             if (!start_date) {
                 console.error('Limited recurrence requires a start_date.');
                 return {};
             }
-
             const cronTime = `${minutes} ${hours} * * *`; // daily
             const jobStart = taskDate.getTime();
             let jobEnd;
-
             if (ends) {
                 if (ends.type === 'after_repetitions') {
                     console.warn('After Repetitions is currently not supported.');
@@ -146,27 +156,22 @@ function convertToBullOptions(jobInput) {
                     }
                     endDate.setHours(hours);
                     endDate.setMinutes(minutes);
-
                     if (endDate.getTime() <= jobStart) {
                         console.error('Invalid input: end_date must be after start_date.');
                         return {};
                     }
-
                     jobEnd = endDate.getTime();
                 }
             }
-
             bullOptions.repeat = {
                 cron: cronTime,
                 startDate: new Date(jobStart),
             };
-
             if (jobEnd) {
                 bullOptions.repeat.endDate = new Date(jobEnd);
             }
             break;
         }
-
         default:
             console.error('Invalid recurrence type.');
             return {};
