@@ -1,4 +1,3 @@
-```markdown
 # API Route Documentation
 
 This document provides a detailed overview of all API routes available in the `i_backend` project. Each route is described with its method, endpoint, purpose, request body (if any), and a sample response.
