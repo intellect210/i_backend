@@ -1,8 +1,8 @@
 // FILE: utils/errorHandlers.txt
-const { ERROR_CODES } = require('../config/config-constants');
+const { ERROR_CODES } = require('../../config/config-constants');
 const logger = require('./logger');
-const { removeUserSession } = require('../services/redisService');
-const websocketConnectionManager = require('./websocketConnectionManager');
+const { removeUserSession } = require('../../services/redisService');
+const websocketConnectionManager = require('../respositories/websocketConnectionManager');
 
 const errorHandlers = {
   handleDatabaseError: (error, code = ERROR_CODES.DATABASE_ERROR, ws = null, userId = null) => {

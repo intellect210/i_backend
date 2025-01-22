@@ -1,6 +1,6 @@
 const redisService = require('./redisService');
 const Personalization = require('../models/personalizationModel');
-const logger = require('../utils/logger');
+const logger = require('../utils/helpers/logger');
 
 class PersonalizationService {
   async getPersonalizationInfo(userId) {

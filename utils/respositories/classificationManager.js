@@ -1,6 +1,6 @@
 const { MODELS } = require('../../config/config-constants');
 const botController = require('../../controllers/controller-bot');
-const { classificationResultBoolStructure } = require('../../utils/structureDefinitions');
+const { classificationResultBoolStructure } = require('../../config/config-structureDefinitions');
 
 /**
  * Manages message classification using the botController.

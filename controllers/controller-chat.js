@@ -1,6 +1,6 @@
 const Chat = require('../models/chatModel');
-const { findChatById } = require('../utils/data/chatRepository');
-const { handleDatabaseError } = require('../utils/errorHandlers');
+const { findChatById } = require('../utils/respositories/chatRepository');
+const { handleDatabaseError } = require('../utils/helpers/error-handlers');
 
 const chatController = {
   getAllChats: async (req, res) => {

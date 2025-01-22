@@ -1,14 +1,14 @@
 // FILE: utils/BotResponseOrchestrator.txt
-const redisManager = require('./redisManager');
-const botController = require('../controllers/controller-bot');
-const ChatHistoryManager = require('./data/ChatHistoryManager');
-const chatRepository = require('./data/chatRepository');
+const redisManager = require('../respositories/redisManager');
+const botController = require('../../controllers/controller-bot');
+const ChatHistoryManager = require('../respositories/ChatHistoryManager');
+const chatRepository = require('../respositories/chatRepository');
 const {
   handleBotResponseError,
   handleRedisError,
-} = require('../utils/errorHandlers');
-const { MESSAGE_TYPES, MESSAGE_ROLES, ERROR_CODES } = require('../config/config-constants');
-const messageService = require('../services/messageService');
+} = require('../helpers/error-handlers');
+const { MESSAGE_TYPES, MESSAGE_ROLES, ERROR_CODES } = require('../../config/config-constants');
+const messageService = require('../../services/messageService');
 
 class BotResponseOrchestrator {
   async generateResponse(userId, chatId, message, history) {

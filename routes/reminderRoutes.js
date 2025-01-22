@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const reminderController = require('../controllers/controller-reminder');
-const authMiddleware = require('../middleware/authMiddleware');
+const authMiddleware = require('../middleware/middleware-auth');
 
 // Get all schedules for a user
 router.get('/', authMiddleware, reminderController.getAllSchedules);

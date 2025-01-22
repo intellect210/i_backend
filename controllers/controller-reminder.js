@@ -4,11 +4,11 @@ const Reminder = require('../models/reminderModel');
 const {
   handleDatabaseError,
   handleRedisError,
-} = require('../utils/errorHandlers');
+} = require('../utils/helpers/error-handlers');
 const { ERROR_CODES } = require('../config/config-constants');
 const SchedulerService = require('../services/schedulerService');
 const schedulerService = new SchedulerService();
-const logger = require('../utils/logger');
+const logger = require('../utils/helpers/logger');
 
 const reminderController = {
   async getAllSchedules(req, res) {

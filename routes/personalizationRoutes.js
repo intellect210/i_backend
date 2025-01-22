@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const authMiddleware = require('../middleware/authMiddleware');
+const authMiddleware = require('../middleware/middleware-auth');
 const Personalization = require('../models/personalizationModel');
-const logger = require('../utils/logger');
+const logger = require('../utils/helpers/logger');
 
 // POST /personalization/integration/info
 router.post('/integration/info', authMiddleware, async (req, res) => {

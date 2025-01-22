@@ -5,9 +5,9 @@ const {
 } = require('@google/generative-ai');
 const { v4: uuidv4 } = require('uuid');
 const { MODELS, CURRENT_MODEL } = require('../config/config-constants');
-const systemInstructions = require('../utils/systemInstructions');
-const CustomGenerationConfig = require('../utils/CustomGenerationConfig');
-const { personalInfoUpdateStructure } = require('../utils/structureDefinitions');
+const systemInstructions = require('../utils/agents/system-instructions');
+const CustomGenerationConfig = require('../config/config-customGeneration');
+const { personalInfoUpdateStructure } = require('../config/config-structureDefinitions');
 
 // Initialize the generative AI instance using the provided API key
 const apiKey = process.env.GEMINI_API_KEY;

@@ -1,7 +1,7 @@
-const redisManager = require('./redisManager');
-const { ERROR_CODES } = require('../config/config-constants');
-const AgentState = require('../models/agentStateModel');
-const Chat = require('../models/chatModel');
+const redisManager = require('../respositories/redisManager');
+const { ERROR_CODES } = require('../../config/config-constants');
+const AgentState = require('../../models/agentStateModel');
+const Chat = require('../../models/chatModel');
 const { v4: uuidv4 } = require('uuid');
 
 class AgentStateManager {

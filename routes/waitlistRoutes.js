@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const Waitlist = require('../models/waitlistModel');
-const logger = require('../utils/logger');
+const logger = require('../utils/helpers/logger');
 const EmailService = require('../services/emailService');
 const Feedback = require('../models/feedbackModel');
 

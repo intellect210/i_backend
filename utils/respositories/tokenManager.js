@@ -1,6 +1,6 @@
 // I_BACKEND/utils/data/tokenManager.js
 const AgentToken = require('../../models/agentTokenModel');
-const { encrypt, decrypt } = require('./encryptAndDecrypt'); // Import from encryptAndDecrypt.js
+const { encrypt, decrypt } = require('../helpers/encryption-helper'); // Import from encryptAndDecrypt.js
 const User = require('../../models/userModel');
 
 class TokenManager {

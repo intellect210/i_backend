@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const sessionController = require('../controllers/controller-session');
-const authMiddleware = require('../middleware/authMiddleware');
+const authMiddleware = require('../middleware/middleware-auth');
 
 
 // POST /login - Handle user login

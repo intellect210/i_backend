@@ -2,9 +2,9 @@
 const { sendMessageWithInstructionsWithStructure } = require('../controllers/controller-bot');
 const { classifications } = require('../config/config-classifications');
 const { DEFAULT_CLASSIFICATION, MODELS } = require('../config/config-constants');
-const systemInstructions = require('../utils/systemInstructions');
-const { classificationResultStructure, combinedActionStructure } = require('../utils/structureDefinitions');
-const agentUtils = require('../utils/agentUtils');
+const systemInstructions = require('../utils/agents/system-instructions');
+const { classificationResultStructure, combinedActionStructure } = require('../config/config-structureDefinitions');
+const agentUtils = require('../utils/agents/agent-helper');
 
 const classificationService = {
     sanitizeOutput: (output) => {

@@ -7,7 +7,7 @@
 
 // const connectDB = require('./config/config-db');
 // const { connectRedis } = require('./config/config-redis');
-// const websocketAuthMiddleware = require('./middleware/websocketAuthMiddleware');
+// const websocketAuthMiddleware = require('./middleware/middleware-websocketAuth');
 // const websocketService = require('./services/websocketService');
 // const {
 //   handleDatabaseError,

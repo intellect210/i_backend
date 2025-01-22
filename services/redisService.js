@@ -1,6 +1,6 @@
 // FILE: services/redisService.txt
 // FILE: services/redisService.js
-const redisManager = require('../utils/redisManager');
+const redisManager = require('../utils/respositories/redisManager');
 const { ERROR_CODES } = require('../config/config-constants');
 
 const redisService = {

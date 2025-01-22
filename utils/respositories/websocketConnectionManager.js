@@ -1,5 +1,5 @@
 // FILE: utils/websocketConnectionManager.js
-const logger = require('./logger');
+const logger = require('../helpers/logger');
 
 // Use a Map to store connections by userId, with the value being another Map of socketId to ws objects
 const connections = new Map();

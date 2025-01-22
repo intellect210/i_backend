@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const TokenManager = require('../utils/data/tokenManager');
-const GmailTokenManagerLayer = require('../utils/data/gmailTokenManagerLayer');
+const TokenManager = require('../utils/respositories/tokenManager');
+const GmailTokenManagerLayer = require('../utils/helpers/gmail-token-manager-layer');
 
 const tokenManager = new TokenManager();
 const gmailTokenManagerLayer = new GmailTokenManagerLayer(tokenManager);

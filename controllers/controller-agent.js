@@ -1,7 +1,7 @@
 // I_BACKEND/controllers/controller-agent.js
 const User = require('../models/userModel');
 const AgentToken = require('../models/agentTokenModel');
-const { encrypt, decrypt } = require('../utils/data/encryptAndDecrypt');
+const { encrypt, decrypt } = require('../utils/helpers/encryption-helper');
 const { ERROR_CODES } = require('../config/config-constants');
 
 const setGmailTokens = async (req, res) => {

@@ -7,41 +7,41 @@ const {
   } = require('../config/config-constants');
   const messageService = require('./messageService');
   const redisService = require('./redisService');
-  const BotResponseOrchestrator = require('../utils/BotResponseOrchestrator');
-  const websocketConnectionManager = require('../utils/websocketConnectionManager');
-  const ChatHistoryManager = require('../utils/data/ChatHistoryManager');
-  const chatRepository = require('../utils/data/chatRepository');
+  const BotResponseOrchestrator = require('../utils/agents/bot-response-orchestrator');
+  const websocketConnectionManager = require('../utils/respositories/websocketConnectionManager');
+  const ChatHistoryManager = require('../utils/respositories/ChatHistoryManager');
+  const chatRepository = require('../utils/respositories/chatRepository');
   const {
     handleRedisError,
     handleDatabaseError,
-  } = require('../utils/errorHandlers');
-  const redisManager = require('../utils/redisManager');
+  } = require('../utils/helpers/error-handlers');
+  const redisManager = require('../utils/respositories/redisManager');
   const { v4: uuidv4 } = require('uuid');
-  const systemInstructions = require('../utils/systemInstructions');
-  const DataInjector = require('../utils/data/dataInjector');
+  const systemInstructions = require('../utils/agents/system-instructions');
+  const DataInjector = require('../utils/helpers/data-injector');
   const botResponseOrchestrator = new BotResponseOrchestrator();
   const botController = require('../controllers/controller-bot');
   const PineconeService = require('../services/pineconeService');
   const ClassificationService = require('./classificationService');
   const PersonalizationService = require('./personalizationService');
   const { info } = require('winston');
-  const dateTimeUtils = require('../utils/dateTimeUtils');
-  const ClassificationManager = require('../utils/data/classificationManager');
-  const AgentStateManager = require('../utils/agentStateManager');
-  const ActionExecutor = require('../utils/actionExecutor');
+  const dateTimeUtils = require('../utils/helpers/data-time-helper');
+  const ClassificationManager = require('../utils/respositories/classificationManager');
+  const AgentStateManager = require('../utils/agents/agent-state-manager');
+  const ActionExecutor = require('../utils/agents/action-executor');
   const pineconeService = new PineconeService();
   const personalizationService = new PersonalizationService();
   const dataInjector = new DataInjector();
   const actionExecutor = new ActionExecutor();
-  const { personalInfoUpdateStructure, remindersStructure } = require('../utils/structureDefinitions');
+  const { personalInfoUpdateStructure, remindersStructure } = require('../config/config-structureDefinitions');
   const classificationService = require('./classificationService');
-  const PreferenceManager = require('../utils/data/preferenceManager');
+  const PreferenceManager = require('../utils/respositories/preferenceManager');
   const SchedulerService = require('./schedulerService');
   const reminderProcessorService = require('./reminderProcessorService');
   const preferenceManager = new PreferenceManager();
   const schedulerService = new SchedulerService();
   const Reminder = require('../models/reminderModel');
-  const logger = require('../utils/logger');
+  const logger = require('../utils/helpers/logger');
   
   const websocketService = {
   //=====================================================================================================

@@ -10,7 +10,7 @@ const { NODE_ENV } = require('./config/config-constants');
 const routes = require('./routes/allRoutes');
 const dbConfig = require('./config/config-db');
 const websocketService = require('./services/websocketService');
-const websocketAuthMiddleware = require('./middleware/websocketAuthMiddleware');
+const websocketAuthMiddleware = require('./middleware/middleware-websocketAuth');
 const { connectRedis } = require('./config/config-redis');
 
 const app = express();

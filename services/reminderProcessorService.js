@@ -1,6 +1,6 @@
-const { remindersStructure } = require('../utils/structureDefinitions');
+const { remindersStructure } = require('../config/config-structureDefinitions');
 const { ERROR_CODES } = require('../config/config-constants');
-const logger = require('../utils/logger');
+const logger = require('../utils/helpers/logger');
 
 
 const reminderProcessorService = {

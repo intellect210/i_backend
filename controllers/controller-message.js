@@ -1,5 +1,5 @@
 const Chat = require('../models/chatModel');
-const { handleDatabaseError } = require('../utils/errorHandlers');
+const { handleDatabaseError } = require('../utils/helpers/error-handlers');
 
 const messageController = {
   getAllMessages: async (req, res) => {

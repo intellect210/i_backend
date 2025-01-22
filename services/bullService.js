@@ -1,8 +1,8 @@
 const Queue = require('bull');
 const { redisClient } = require('../config/config-redis');
-const { handleRedisError } = require('../utils/errorHandlers');
+const { handleRedisError } = require('../utils/helpers/error-handlers');
 const { ERROR_CODES } = require('../config/config-constants');
-const logger = require('../utils/logger');
+const logger = require('../utils/helpers/logger');
 const { v4: uuidv4 } = require('uuid');
 const Reminder = require('../models/reminderModel');
 

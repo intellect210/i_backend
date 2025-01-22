@@ -1,6 +1,6 @@
-const chatRepository = require('../utils/data/chatRepository');
+const chatRepository = require('../utils/respositories/chatRepository');
 const botController = require('../controllers/controller-bot');
-const logger = require('../utils/logger');
+const logger = require('../utils/helpers/logger');
 
 const chatTitleService = {
   setChatTitle: async (chatId, userId, newTitle = null) => {

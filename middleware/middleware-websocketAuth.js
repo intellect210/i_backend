@@ -1,4 +1,4 @@
-// FILE: middleware/websocketAuthMiddleware.js
+// FILE: middleware/middleware-websocketAuth.js
 const jwt = require('jsonwebtoken');
 const { ERROR_CODES } = require('../config/config-constants');
 const dotenv = require('dotenv');

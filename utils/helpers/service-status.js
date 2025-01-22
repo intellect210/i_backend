@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const BackendStatus = require('../models/BackendStatus');
+const BackendStatus = require('../../models/BackendStatus');
 
 async function getServiceStatus() {
   try {

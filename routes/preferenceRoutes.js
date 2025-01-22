@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const authMiddleware = require('../middleware/authMiddleware');
-const PreferenceManager = require('../utils/data/preferenceManager');
+const authMiddleware = require('../middleware/middleware-auth');
+const PreferenceManager = require('../utils/respositories/preferenceManager');
 const { ERROR_CODES } = require('../config/config-constants');
 
 const preferenceManager = new PreferenceManager();
