@@ -1,7 +1,7 @@
 // FILE: utils/redisManager.js
-const { redisClient } = require('../config/redisConfig');
+const { redisClient } = require('../config/config-redis');
 const { handleRedisError } = require('./errorHandlers');
-const { ERROR_CODES } = require('../config/constants');
+const { ERROR_CODES } = require('../config/config-constants');
 
 const redisManager = {
   async set(key, value, options = {}) {

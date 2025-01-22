@@ -7,7 +7,7 @@ const {
   handleBotResponseError,
   handleRedisError,
 } = require('../utils/errorHandlers');
-const { MESSAGE_TYPES, MESSAGE_ROLES, ERROR_CODES } = require('../config/constants');
+const { MESSAGE_TYPES, MESSAGE_ROLES, ERROR_CODES } = require('../config/config-constants');
 const messageService = require('../services/messageService');
 
 class BotResponseOrchestrator {

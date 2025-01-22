@@ -1,5 +1,5 @@
 // FILE: utils/data/validators.js
-const { MESSAGE_TYPES, MESSAGE_ROLES } = require('../../config/constants');
+const { MESSAGE_TYPES, MESSAGE_ROLES } = require('../../config/config-constants');
 
 const validators = {
   isValidMessageType: (type) => {

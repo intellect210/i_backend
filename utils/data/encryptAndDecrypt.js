@@ -1,6 +1,6 @@
 // I_BACKEND/utils/data/encryptAndDecrypt.js
 const crypto = require('crypto');
-const config = require('../../config/config'); // Import config
+const config = require('../../config/config-main'); // Import config
 
 const algorithm = 'aes-256-cbc';
 const ENCRYPTION_KEY = config.encryptionKey; // Get key from config

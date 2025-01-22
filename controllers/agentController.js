@@ -2,7 +2,7 @@
 const User = require('../models/userModel');
 const AgentToken = require('../models/agentTokenModel');
 const { encrypt, decrypt } = require('../utils/data/encryptAndDecrypt');
-const { ERROR_CODES } = require('../config/constants');
+const { ERROR_CODES } = require('../config/config-constants');
 
 const setGmailTokens = async (req, res) => {
     try {

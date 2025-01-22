@@ -1,5 +1,5 @@
 const { google } = require('googleapis');
-const { ERROR_CODES } = require('../../config/constants');
+const { ERROR_CODES } = require('../../config/config-constants');
 
 class GmailTokenManagerLayer {
     constructor(tokenManager) {

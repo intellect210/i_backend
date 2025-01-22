@@ -1,7 +1,7 @@
 // I_BACKEND/services/classificationService.txt
 const { sendMessageWithInstructionsWithStructure } = require('../controllers/botController');
-const { classifications } = require('../config/classifications');
-const { DEFAULT_CLASSIFICATION, MODELS } = require('../config/constants');
+const { classifications } = require('../config/config-classifications');
+const { DEFAULT_CLASSIFICATION, MODELS } = require('../config/config-constants');
 const systemInstructions = require('../utils/systemInstructions');
 const { classificationResultStructure, combinedActionStructure } = require('../utils/structureDefinitions');
 const agentUtils = require('../utils/agentUtils');

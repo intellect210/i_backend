@@ -5,7 +5,7 @@ const {
   handleDatabaseError,
   handleRedisError,
 } = require('../utils/errorHandlers');
-const { ERROR_CODES } = require('../config/constants');
+const { ERROR_CODES } = require('../config/config-constants');
 const SchedulerService = require('../services/schedulerService');
 const schedulerService = new SchedulerService();
 const logger = require('../utils/logger');

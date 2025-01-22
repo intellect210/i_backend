@@ -1,4 +1,4 @@
-// config/classifications.js
+// config/config-classifications.js
 module.exports = {
   classifications: {
     "require context":

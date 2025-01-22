@@ -7,7 +7,7 @@ const {
   DEFAULT_TOP_K,
   DEFAULT_INCLUDE_VALUES,
   DEFAULT_INCLUDE_METADATA,
-} = require('../config/constants');
+} = require('../config/config-constants');
 
 class PineconeService {
   constructor() {

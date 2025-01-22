@@ -1,4 +1,4 @@
-// FILE: config/constants.js
+// FILE: config/config-constants.js
 const MESSAGE_TYPES = {
   TEXT: 'text',
   CHUNK: 'chunk',

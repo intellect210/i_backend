@@ -1,4 +1,4 @@
-const { ERROR_CODES } = require('../config/constants');
+const { ERROR_CODES } = require('../config/config-constants');
 const Personalization = require('../models/personalizationModel');
 const { handleBotResponseError } = require('./errorHandlers');
 const botController = require('../controllers/botController');

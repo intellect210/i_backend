@@ -1,6 +1,6 @@
 // FILE: models/chatModel.js
 const mongoose = require('mongoose');
-const { MESSAGE_TYPES, MESSAGE_ROLES } = require('../config/constants');
+const { MESSAGE_TYPES, MESSAGE_ROLES } = require('../config/config-constants');
 
 const chatSchema = new mongoose.Schema({
   userId: {

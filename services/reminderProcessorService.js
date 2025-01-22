@@ -1,5 +1,5 @@
 const { remindersStructure } = require('../utils/structureDefinitions');
-const { ERROR_CODES } = require('../config/constants');
+const { ERROR_CODES } = require('../config/config-constants');
 const logger = require('../utils/logger');
 
 

@@ -1,4 +1,4 @@
-const { ERROR_CODES, MESSAGE_TYPES, MESSAGE_ROLES } = require('../config/constants');
+const { ERROR_CODES, MESSAGE_TYPES, MESSAGE_ROLES } = require('../config/config-constants');
 const logger = require('../utils/logger');
 const {
   createChat,
@@ -7,7 +7,7 @@ const {
   replaceLastMessageInChat,
 } = require('../utils/data/chatRepository');
 const { isEmptyMessage, isConsecutiveUserMessage } = require('../utils/data/validators');
-const { BOT_RESPONSE_TIMEOUT_MS } = require('../config/constants');
+const { BOT_RESPONSE_TIMEOUT_MS } = require('../config/config-constants');
 const websocketConnectionManager = require('../utils/websocketConnectionManager');
 const chatTitleService = require('./chatTitleService');
 

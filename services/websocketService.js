@@ -4,7 +4,7 @@ const {
     MESSAGE_ROLES,
     MODELS,
     DEFAULT_CLASSIFICATION,
-  } = require('../config/constants');
+  } = require('../config/config-constants');
   const messageService = require('./messageService');
   const redisService = require('./redisService');
   const BotResponseOrchestrator = require('../utils/BotResponseOrchestrator');

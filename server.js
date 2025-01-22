@@ -1,17 +1,17 @@
 // I_BACKEND/server.js
-const config = require('./config/config'); // Import config
+const config = require('./config/config-main'); // Import config
 const express = require('express');
 const mongoose = require('mongoose');
 const winston = require('winston');
 const { createServer } = require('http');
 const { Server } = require('ws');
 const { v4: uuidv4 } = require('uuid');
-const { NODE_ENV } = require('./config/constants');
+const { NODE_ENV } = require('./config/config-constants');
 const routes = require('./routes/allRoutes');
-const dbConfig = require('./config/dbConfig');
+const dbConfig = require('./config/config-db');
 const websocketService = require('./services/websocketService');
 const websocketAuthMiddleware = require('./middleware/websocketAuthMiddleware');
-const { connectRedis } = require('./config/redisConfig');
+const { connectRedis } = require('./config/config-redis');
 
 const app = express();
 const PORT = config.port; // Use config.port

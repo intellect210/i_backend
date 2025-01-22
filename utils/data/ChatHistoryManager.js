@@ -3,7 +3,7 @@ const {
   ERROR_CODES,
   MESSAGE_ROLES,
   MESSAGE_TYPES,
-} = require('../../config/constants');
+} = require('../../config/config-constants');
 const { findChatById, addMessageToChat } = require('./chatRepository');
 
 class ChatHistoryManager {

@@ -1,6 +1,6 @@
 const Queue = require('bull');
-const { redisClient } = require('../../config/redisConfig');
-const { connectDB } = require('../../config/dbConfig');
+const { redisClient } = require('../../config/config-redis');
+const { connectDB } = require('../../config/config-db');
 const Reminder = require('../../models/reminderModel');
 const logger = require('../../utils/logger');
 const SchedulerService = require('../../services/schedulerService');

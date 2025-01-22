@@ -1,6 +1,6 @@
 const Preference = require('../../models/preferenceModel');
 const User = require('../../models/userModel'); // Import User model
-const { PREFERENCE_KEYS, ERROR_CODES } = require('../../config/constants');
+const { PREFERENCE_KEYS, ERROR_CODES } = require('../../config/config-constants');
 const logger = require('../logger');
 
 class PreferenceManager {

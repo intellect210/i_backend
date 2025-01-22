@@ -1,6 +1,6 @@
 // I_BACKEND/utils/agentUtils.js
 const redisManager = require('./redisManager');
-const agentConfig = require('../config/agentConfig');
+const agentConfig = require('../config/config-agent');
 
 const agentUtils = {
   getAgentConfig: async () => {
@@ -16,7 +16,7 @@ const agentUtils = {
           'Agent config not found in Redis cache. Reading from file.'
         );
         // Read config from file
-        const agentConfig = require('../config/agentConfig');
+        const agentConfig = require('../config/config-agent');
 
         // Cache the config in Redis with a TTL of 4 hours (14400 seconds)
         await redisManager.set(redisKey, JSON.stringify(agentConfig), {

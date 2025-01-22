@@ -5,8 +5,8 @@
 // const { Server } = require('ws');
 // const express = require('express'); // Import express
 
-// const connectDB = require('./config/dbConfig');
-// const { connectRedis } = require('./config/redisConfig');
+// const connectDB = require('./config/config-db');
+// const { connectRedis } = require('./config/config-redis');
 // const websocketAuthMiddleware = require('./middleware/websocketAuthMiddleware');
 // const websocketService = require('./services/websocketService');
 // const {
@@ -17,7 +17,7 @@
 // } = require('./utils/errorHandlers');
 // const logger = require('./utils/logger');
 // const jwt = require('jsonwebtoken');
-// const { MESSAGE_TYPES, MESSAGE_ROLES } = require('./config/constants');
+// const { MESSAGE_TYPES, MESSAGE_ROLES } = require('./config/config-constants');
 
 // // Assuming your server runs on this port
 // const PORT = process.env.PORT || 3000;
@@ -225,7 +225,7 @@
 //       // Wait a short time to allow the server to process the disconnection
 //       setTimeout(async () => {
 //         // Check Redis for the unsent message
-//         const { redisClient } = require('./config/redisConfig');
+//         const { redisClient } = require('./config/config-redis');
 //         const unsentMessages = await redisClient.lRange(
 //           `unsent:${TEST_USER_ID}`,
 //           0,
@@ -247,7 +247,7 @@
 
 // I_BACKEND/test.js
 const axios = require('axios');
-const config = require('./config/config'); // Import config
+const config = require('./config/config-main'); // Import config
 const TokenManager = require('./utils/data/tokenManager');
 const { v4: uuidv4 } = require('uuid');
 
