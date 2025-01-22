@@ -1,10 +1,4 @@
-const { ERROR_CODES } = require('../../config/config-constants');
 const Personalization = require('../../models/personalizationModel');
-const { handleBotResponseError } = require('../helpers/error-handlers');
-const botController = require('../../controllers/controller-bot');
-const AgentStateManager = require('../agents/agent-state-manager');
-const websocketService = require('../../services/websocketService');
-const agentStateManager = new AgentStateManager(websocketService.sendMessage);
 const SchedulerService = require('../../services/schedulerService');
 const schedulerService = new SchedulerService();
 

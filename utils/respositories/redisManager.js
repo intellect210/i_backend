@@ -1,7 +1,5 @@
 // FILE: utils/redisManager.js
 const { redisClient } = require('../../config/config-redis');
-const { handleRedisError } = require('../helpers/error-handlers');
-const { ERROR_CODES } = require('../../config/config-constants');
 
 const redisManager = {
   async set(key, value, options = {}) {
@@ -13,7 +11,6 @@ const redisManager = {
       );
       return true;
     } catch (error) {
-      handleRedisError(error, ERROR_CODES.REDIS_ERROR);
       return false;
     }
   },
@@ -24,7 +21,6 @@ const redisManager = {
       console.log(`Successfully retrieved value for key: ${key} from Redis`);
       return value;
     } catch (error) {
-      handleRedisError(error, ERROR_CODES.REDIS_ERROR);
       //console.error(`Error getting value for key: ${key} from Redis:`, error);
       return null;
     }
@@ -36,7 +32,6 @@ const redisManager = {
       console.log(`Successfully deleted key: ${key} from Redis`);
       return true;
     } catch (error) {
-      handleRedisError(error, ERROR_CODES.REDIS_ERROR);
       //console.error(`Error deleting key: ${key} from Redis:`, error);
       return false;
     }
@@ -48,7 +43,6 @@ const redisManager = {
       console.log(`Successfully checked existence of key: ${key} in Redis`);
       return exists === 1;
     } catch (error) {
-      handleRedisError(error, ERROR_CODES.REDIS_ERROR);
       //console.error(
       // `Error checking existence of key: ${key} in Redis:`,
       // error
@@ -62,7 +56,6 @@ const redisManager = {
       // console.log(`Successfully added value to list: ${key} in Redis`);
       return true;
     } catch (error) {
-      handleRedisError(error, ERROR_CODES.REDIS_ERROR);
       //console.error(`Error adding value to list: ${key} in Redis:`, error);
       return false;
     }
@@ -73,7 +66,6 @@ const redisManager = {
       console.log(`Successfully retrieved values from list: ${key} in Redis`);
       return values;
     } catch (error) {
-      handleRedisError(error, ERROR_CODES.REDIS_ERROR);
       //console.error(`Error retrieving values from list: ${key} in Redis:`, error);
       return [];
     }
@@ -84,7 +76,6 @@ const redisManager = {
       console.log(`Successfully retrieved value from list: ${key} in Redis`);
       return value;
     } catch (error) {
-      handleRedisError(error, ERROR_CODES.REDIS_ERROR);
       //console.error(`Error retrieving value from list: ${key} in Redis:`, error);
       return null;
     }
