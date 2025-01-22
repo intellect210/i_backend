@@ -20,7 +20,7 @@ const {
   const systemInstructions = require('../utils/systemInstructions');
   const DataInjector = require('../utils/data/dataInjector');
   const botResponseOrchestrator = new BotResponseOrchestrator();
-  const botController = require('../controllers/botController');
+  const botController = require('../controllers/controller-bot');
   const PineconeService = require('../services/pineconeService');
   const ClassificationService = require('./classificationService');
   const PersonalizationService = require('./personalizationService');

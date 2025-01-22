@@ -1,4 +1,4 @@
-const { verifyJwt } = require('../controllers/sessionController'); // Import verifyJwt
+const { verifyJwt } = require('../controllers/controller-session'); // Import verifyJwt
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 dotenv.config();

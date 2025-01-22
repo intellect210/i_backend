@@ -1,5 +1,5 @@
 // I_BACKEND/services/classificationService.txt
-const { sendMessageWithInstructionsWithStructure } = require('../controllers/botController');
+const { sendMessageWithInstructionsWithStructure } = require('../controllers/controller-bot');
 const { classifications } = require('../config/config-classifications');
 const { DEFAULT_CLASSIFICATION, MODELS } = require('../config/config-constants');
 const systemInstructions = require('../utils/systemInstructions');

@@ -1,5 +1,5 @@
 const chatRepository = require('../utils/data/chatRepository');
-const botController = require('../controllers/botController');
+const botController = require('../controllers/controller-bot');
 const logger = require('../utils/logger');
 
 const chatTitleService = {

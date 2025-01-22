@@ -1,7 +1,7 @@
 const { ERROR_CODES } = require('../config/config-constants');
 const Personalization = require('../models/personalizationModel');
 const { handleBotResponseError } = require('./errorHandlers');
-const botController = require('../controllers/botController');
+const botController = require('../controllers/controller-bot');
 const AgentStateManager = require('../utils/agentStateManager');
 const websocketService = require('../services/websocketService');
 const agentStateManager = new AgentStateManager(websocketService.sendMessage);

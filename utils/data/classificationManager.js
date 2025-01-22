@@ -1,5 +1,5 @@
 const { MODELS } = require('../../config/config-constants');
-const botController = require('../../controllers/botController');
+const botController = require('../../controllers/controller-bot');
 const { classificationResultBoolStructure } = require('../../utils/structureDefinitions');
 
 /**

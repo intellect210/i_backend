@@ -1,6 +1,6 @@
 // FILE: utils/BotResponseOrchestrator.txt
 const redisManager = require('./redisManager');
-const botController = require('../controllers/botController');
+const botController = require('../controllers/controller-bot');
 const ChatHistoryManager = require('./data/ChatHistoryManager');
 const chatRepository = require('./data/chatRepository');
 const {
