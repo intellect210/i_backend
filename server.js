@@ -43,8 +43,11 @@ const allowedOrigins = [
 
 app.use(cors({
     origin: allowedOrigins,
-    credentials: true, // If you need to allow credentials
+    credentials: true, // Allow credentials like cookies or Authorization headers
+    methods: ['GET', 'POST', 'OPTIONS'], // Explicitly allow these methods
+    allowedHeaders: ['Content-Type', 'Authorization'], // Allow required headers
 }));
+
 
 // Middleware
 app.use(express.json());
