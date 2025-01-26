@@ -96,7 +96,7 @@ router.post('/join', async (req, res) => {
 });
 
 // POST /api/waitlist/grantaccess
-router.post('/grantaccess', async (req, res) => {
+router.post('/grantaccess-protected-gate-01', async (req, res) => {
     try {
         const { email } = req.body;
 
