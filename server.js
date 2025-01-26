@@ -1,8 +1,8 @@
-// I_BACKEND/server.js
 const config = require('./config/config-main'); // Import config
 const express = require('express');
 const mongoose = require('mongoose');
 const winston = require('winston');
+const cors = require('cors'); // Import CORS
 const { createServer } = require('http');
 const { Server } = require('ws');
 const { v4: uuidv4 } = require('uuid');
@@ -32,6 +32,28 @@ if (NODE_ENV !== 'production') {
         format: winston.format.simple(),
     }));
 }
+
+// CORS configuration
+const allowedOrigins = [
+    'https://project-f0148.web.app',
+    'https://intai.in',
+    'http://intai.in',
+    "http://project-f0148.web.app",
+];
+
+// Function to check if the request origin is allowed
+const corsOptions = {
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin) || origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) {
+            callback(null, true); // Allow the request
+        } else {
+            callback(new Error('Not allowed by CORS')); // Block the request
+        }
+    },
+    credentials: true, // If you need to allow credentials
+};
+
+app.use(cors(corsOptions)); // Use CORS middleware
 
 // Middleware
 app.use(express.json());
