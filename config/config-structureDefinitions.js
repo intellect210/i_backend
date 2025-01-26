@@ -53,7 +53,7 @@ const automationFollowupStructure = {
         },
         "llmPipeline": {
           "type": "object",
-          "description": "Configuration settings for the LLM processing pipeline.",
+          "description": "If you need to offload some summarizing, categorizing, or other tasks to the LLM, you can configure the LLM pipeline here.",
           "properties": {
             "systemInstructions": {
               "type": "string",
@@ -96,6 +96,45 @@ const automationFollowupStructure = {
           "required": [
             "isIncluded"
           ]
+        },
+        "askUserQuestion": {
+          "type": "object",
+          "description": "Configuration settings for asking the user a question.",
+          "properties": {
+            "isIncluded": {
+              "type": "boolean",
+              "description": "Indicates whether the action to ask a user question is enabled (true) or disabled (false)."
+            },
+            "questionText": {
+              "type": "string",
+              "description": "The question to be asked to the user."
+            },
+            "executionOrderIfIncluded": {
+              "type": "number",
+              "description": "Defines the order of execution for this action if it is included, with lower numbers indicating higher priority."
+            }
+          },
+          "required": [
+            "isIncluded",
+            "questionText"
+          ]
+        },
+        "noActionOption": {
+          "type": "object",
+          "description": "Configuration settings for indicating no action is required.",
+          "properties": {
+            "isIncluded": {
+              "type": "boolean",
+              "description": "If the users query cannot be converted to a task using given options, this option will be included."
+            },
+            "executionOrderIfIncluded": {
+              "type": "number",
+              "description": "Defines the order of execution for this action if it is included, with lower numbers indicating higher priority."
+            }
+          },
+          "required": [
+            "isIncluded"
+          ]
         }
       }
     }
@@ -104,6 +143,7 @@ const automationFollowupStructure = {
     "actions"
   ]
 };
+
 
 const remindersStructure = {
   "type": "object",
