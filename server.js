@@ -37,23 +37,14 @@ if (NODE_ENV !== 'production') {
 const allowedOrigins = [
     'https://project-f0148.web.app',
     'https://intai.in',
-    'http://intai.in',
-    "http://project-f0148.web.app",
+    'http://127.0.0.1',
+    'http://localhost',
 ];
 
-// Function to check if the request origin is allowed
-const corsOptions = {
-    origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin) || origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) {
-            callback(null, true); // Allow the request
-        } else {
-            callback(new Error('Not allowed by CORS')); // Block the request
-        }
-    },
+app.use(cors({
+    origin: allowedOrigins,
     credentials: true, // If you need to allow credentials
-};
-
-app.use(cors(corsOptions)); // Use CORS middleware
+}));
 
 // Middleware
 app.use(express.json());
