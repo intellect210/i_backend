@@ -128,7 +128,7 @@ Holistic Presentation: The final version should read cohesively, reflecting a lo
         Key Requirements:
         Task Breakdown:
         Decompose the given task into discrete, logical steps (actions).
-        Ensure each action aligns with the task’s objectives and specifies any dependencies on outputs from previous actions.
+        Ensure each action aligns with the task’s objectives.
         Structured Output:
     Follow a strict schema for defining actions.`,
     

@@ -23,45 +23,38 @@ const classificationResultStructure = {
 };
 
 const automationFollowupStructure = {
-    "type": "object",
-    "description": "Contains the actions to be executed by the system.",
+  "type": "object",
   "properties": {
     "actions": {
       "type": "object",
-      "description": "A collection of actions that the system can perform. Actions within a task are executed in order, and multiple LLM pipelines can be used within a single task.",
       "properties": {
         "fetchEmails": {
           "type": "object",
-          "description": "Fetches email context if required for subsequent actions.",
           "properties": {
             "isIncluded": {
-              "type": "boolean",
-              "description": "Indicates whether to fetch emails."
+              "type": "boolean"
             },
             "SearchQueryInDetails": {
-              "type": "string",
-              "description": "A query string to filter emails. Examples: 'from:user@example.com', 'subject:Meeting'. Refer to email provider's documentation for advanced search syntax."
+              "type": "string"
             },
             "executionOrderIfIncluded": {
-              "type": "number",
-              "description": "Execution order within the task, lower numbers indicate higher priority (e.g., 1 executes before 2)."
+              "type": "number"
             }
           },
           "required": [
-            "isIncluded"
-          ]
+            "isIncluded",
+            "executionOrderIfIncluded"
+          ],
+          "description": "Fetches email context if required for subsequent actions."
         },
         "llmPipeline": {
           "type": "object",
-          "description": "Configures the LLM for tasks like summarizing or generating responses. Multiple llmPipeline actions can be included in a task.",
           "properties": {
             "isIncluded": {
-              "type": "boolean",
-              "description": "Indicates whether to use the LLM pipeline in this step of the task."
+              "type": "boolean"
             },
             "systemInstructions": {
               "type": "string",
-              "description": "Instructions for the LLM, specifying the task.",
               "enum": [
                 "summarizeEmails",
                 "generateResponse",
@@ -71,134 +64,121 @@ const automationFollowupStructure = {
               ]
             },
             "executionOrderIfIncluded": {
-              "type": "number",
-              "description": "Execution order within the task, lower numbers execute first."
+              "type": "number"
             },
             "inputContexts": {
               "type": "array",
-              "description": "Specifies one or more input data sources for the LLM: 'fetchedEmails', 'screenContext', 'calendarEvents', 'userQuery', or '' (empty) for no specific context.",
-              "items":{
+              "items": {
                 "type": "string",
                 "enum": [
                   "fetchedEmails",
                   "screenContext",
                   "calendarEvents",
-                  "userQuery",
-                  ""
+                  "userQuery"
                 ]
-              },
-              "minItems": 1,
-              "uniqueItems": true
+              }
             },
             "baseQuery": {
-              "type": "string",
-              "description": "The base query to be sent to the LLM, potentially combined with the inputContexts."
+              "type": "string"
             }
           },
           "required": [
-            "isIncluded"
-          ]
+            "isIncluded",
+            "executionOrderIfIncluded"
+          ],
+          "description": "Configures the LLM for tasks like summarizing or generating responses. Multiple llmPipeline actions can be included in a task."
         },
         "getScreenContext": {
           "type": "object",
-          "description": "Captures the user's current screen context.",
           "properties": {
             "isIncluded": {
-              "type": "boolean",
-              "description": "Indicates whether to capture the screen context."
+              "type": "boolean"
             },
             "executionOrderIfIncluded": {
-              "type": "number",
-              "description": "Execution order within the task."
+              "type": "number"
             }
           },
           "required": [
-            "isIncluded"
-          ]
+            "isIncluded",
+            "executionOrderIfIncluded"
+          ],
+          "description": "Captures the user's current screen context."
         },
         "getNotificationFromUserDevice": {
           "type": "object",
-          "description": "Retrieves recent user device notifications.",
           "properties": {
             "isIncluded": {
-              "type": "boolean",
-              "description": "Indicates whether to retrieve notifications."
+              "type": "boolean"
             },
             "executionOrderIfIncluded": {
-              "type": "number",
-              "description": "Execution order within the task."
+              "type": "number"
             },
             "filterByApp": {
-              "type": "string",
-              "description": "Optional. Filters notifications by the source app (e.g., 'com.example.app')."
+              "type": "string"
             },
             "filterByContent": {
-              "type": "string",
-              "description": "Optional. Filters notifications based on content keywords."
+              "type": "string"
             }
           },
           "required": [
-            "isIncluded"
-          ]
+            "isIncluded",
+            "executionOrderIfIncluded"
+          ],
+          "description": "Retrieves recent user device notifications."
         },
         "getCalendarEvents": {
           "type": "object",
-          "description": "Fetches calendar events for a specified time range.",
           "properties": {
             "isIncluded": {
-              "type": "boolean",
-              "description": "Indicates whether to fetch calendar events."
+              "type": "boolean"
             },
             "executionOrderIfIncluded": {
-              "type": "number",
-              "description": "Execution order within the task."
+              "type": "number"
             },
             "timeRange": {
               "type": "object",
-              "description": "The time range for fetching events.",
               "properties": {
                 "start": {
-                  "type": "string",
-                  "format": "date-time",
-                  "description": "Start of the range (ISO 8601 format)."
+                  "type": "string"
                 },
                 "end": {
-                  "type": "string",
-                  "format": "date-time",
-                  "description": "End of the range (ISO 8601 format)."
+                  "type": "string"
                 }
               },
               "required": [
                 "start",
                 "end"
-              ]
+              ],
+              "description": "The time range for fetching events."
             }
           },
           "required": [
-            "isIncluded"
-          ]
+            "isIncluded",
+            "executionOrderIfIncluded"
+          ],
+          "description": "Fetches calendar events for a specified time range."
         },
         "noActionOption": {
           "type": "object",
-          "description": "Indicates no action is required or if the user explicitly asked for it.",
           "properties": {
             "isIncluded": {
-              "type": "boolean",
-              "description": "Indicates no action is needed."
+              "type": "boolean"
             }
           },
           "required": [
             "isIncluded"
-          ]
+          ],
+          "description": "Indicates no action is required or if the user explicitly asked for it."
         }
-      }
+      },
+      "description": "A collection of actions that the system can perform. Actions within a task are executed in order, and multiple LLM pipelines can be used within a single task."
     }
   },
   "required": [
     "actions"
-  ]
+  ],
+  "description": "Contains the actions to be executed by the system."
 };
-
 
 const remindersStructure = {
   "type": "object",
