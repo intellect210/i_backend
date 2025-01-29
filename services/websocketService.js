@@ -27,142 +27,87 @@ const {
   /**
    * Handles an incoming user message, processes it, and triggers bot responses if needed.
    */
- handleMessage: async (ws, message) => {
-        // Receiving a new message
-        const user = ws.user;
-        const userId = user.useruid;
-        let { messageType, message: text, chatId, role } = message;
-        let messageId;
+  handleMessage: async (ws, message) => {
+  const agentStateManager = new AgentStateManager(websocketService.sendMessage);
 
-        console.log(`Handling message from user ${userId}:`, message);
+    // Receiving a new message
+    const user = ws.user;
+    const userId = user.useruid;
+    let { messageType, message: text, chatId, role } = message;
+    let messageId;
 
-        // Initialize history or personal edit
-        let history = [];
+    console.log(`Handling message from user ${userId}:`, message);
+
+    // Initialize history or personal edit
+    let history = [];
+
+    try {
+        // Build chat history code piece
 
         try {
-            // Build chat history code piece
-
-            try {
-                if (chatId) {
-                    const chatHistoryManager = new ChatHistoryManager(
-                        chatId,
-                        chatRepository
-                    );
-                    history = await chatHistoryManager.buildHistory();
-                }
-
-                const personalizationInfo =
-                    await personalizationService.getPersonalizationInfo(userId);
-                const currentDateTimeIST = dateTimeUtils.getCurrentDateTimeIST();
-
-                const infoText = `SYSTEM GIVEN INFO - , Current Date and time (take this as a fact): ${currentDateTimeIST}
-        ,Model personalised Name: ${personalizationInfo.personalisedName
-                    }, Follow given Model Behaviour: ${personalizationInfo.modelBehaviour
-                    }, Personal Info of user to use whenever necessary: ${personalizationInfo.personalInfo
-                    }`;
-
-                // Inject system instructions and personalization info into history
-                history = dataInjector.injectData(
-                    history,
-                    systemInstructions.getInstructions('assistantBehaviorPrompt'),
-                    'Understood. I follow the given instructions.'
+            if (chatId) {
+                const chatHistoryManager = new ChatHistoryManager(
+                    chatId,
+                    chatRepository
                 );
-
-                history = dataInjector.injectData(
-                    history,
-                    infoText,
-                    'Understood. I will keep these in mind for conversations.'
-                );
-
-            } catch (error) {
-                console.log(
-                    'Error building chat history or injecting data:',
-                    error
-                );
-                // Default to an empty history if errors occur
+                history = await chatHistoryManager.buildHistory();
             }
 
-            // Store the user message and update chatId
+            const personalizationInfo =
+                await personalizationService.getPersonalizationInfo(userId);
+            const currentDateTimeIST = dateTimeUtils.getCurrentDateTimeIST();
 
-            const userMessageResult = await messageService.storeMessage(
-                userId,
-                text,
-                messageType,
-                MESSAGE_ROLES.USER,
-                chatId
+            const infoText = `SYSTEM GIVEN INFO - , Current Date and time (take this as a fact): ${currentDateTimeIST
+                },Model personalised Name: ${personalizationInfo.personalisedName
+                }, Follow given Model Behaviour: ${personalizationInfo.modelBehaviour
+                }, Personal Info of user to use whenever necessary: ${personalizationInfo.personalInfo
+                }`;
+
+            // Inject system instructions and personalization info into history
+            history = dataInjector.injectData(
+                history,
+                systemInstructions.getInstructions('assistantBehaviorPrompt'),
+                'Understood. I follow the given instructions.'
             );
 
-            if (userMessageResult?.chat) {
-                chatId = userMessageResult.chat._id.toString();
-                messageId = userMessageResult.chat.messages.slice(-1)[0].messageId;
-            }
-
-            const classificationResult = await classificationService.classify(
-                text,
-                history
+            history = dataInjector.injectData(
+                history,
+                infoText,
+                'Understood. I will keep these in mind for conversations.'
             );
 
-            if (classificationResult.actions.noActionOption.isIncluded) {
-                console.log(
-                    'No agent action needed. Proceeding with normal bot response.'
-                );
-                await botController.streamBotResponse(
-                    { ...message, chatId },
-                    null,
-                    history,
-                    ws,
-                    websocketService.handleStream,
-                    websocketService.handleStreamError
-                );
-            } else {
-                const taskExecutorEngine = new TaskExecutorEngine(websocketService.sendMessage);
-                const taskExecutionResult = await taskExecutorEngine.executeTask(userId, text, classificationResult, true);
-
-                if (!taskExecutionResult.success) {
-                    console.error('Task execution failed:', taskExecutionResult.message);
-                }
-            }
         } catch (error) {
-            console.error('Error handling message:', error);
-
-            websocketService.sendMessage(userId, {
-                type: 'error',
-                code: error.code,
-                message: error.message,
-            });
+            console.log(
+                'Error building chat history or injecting data:',
+                error
+            );
+            // Default to an empty history if errors occur
         }
-    },
-   //=====================================================================================================
-  /**
-   * Executes the agent action based on the classification result.
-   * @param {Object} classificationResult - The result of the classification, including data for the action.
-   * @param {string} userId - The ID of the user.
-   * @param {string} chatId - The ID of the chat.
-   * @param {Array} history - The chat history.
-   * @param {Object} message - The original message object.
-   * @param {Object} ws - The WebSocket connection.
-   */
-    processAgentAction: async (
-        classificationResult,
-        userId,
-        chatId,
-        history,
-        message,
-        ws,
-        messageId
-    ) => {
-        const agentStateManager = new AgentStateManager(
-            websocketService.sendMessage
+
+        // Store the user message and update chatId
+
+        const userMessageResult = await messageService.storeMessage(
+            userId,
+            text,
+            messageType,
+            MESSAGE_ROLES.USER,
+            chatId
         );
-  
-        if (classificationResult.payload.classification === 'no_action_needed') {
+
+        if (userMessageResult?.chat) {
+            chatId = userMessageResult.chat._id.toString();
+            messageId = userMessageResult.chat.messages.slice(-1)[0].messageId;
+        }
+
+        const classificationResult = await classificationService.classify(
+            text,
+            history
+        );
+        const taskExecutorEngine = new TaskExecutorEngine(websocketService.sendMessage);
+       
+        if (classificationResult.actions.noActionOption.isIncluded) {
             console.log(
                 'No agent action needed. Proceeding with normal bot response.'
-            );
-            await agentStateManager.setState(
-                userId,
-                agentStateManager.states.awaitingBotResponse,
-                messageId
             );
             await botController.streamBotResponse(
                 { ...message, chatId },
@@ -172,106 +117,64 @@ const {
                 websocketService.handleStream,
                 websocketService.handleStreamError
             );
-            
-            await agentStateManager.setState(userId, agentStateManager.states.completed, messageId);
         } else {
-             console.log(
-                `Agent action needed: ${classificationResult.payload.classification} and actionType is ${classificationResult.payload.classification}`
+            await agentStateManager.setState(
+                userId,
+                agentStateManager.states.TasksStates.taskInitializing,
+                messageId
             );
-            try {
-                // Set state to action in progress
-                await agentStateManager.setState(
-                    userId,
-                    agentStateManager.states.actionDetected,
-                    messageId
-                );
-                
-                let actionResult;
-                
-                if (classificationResult.payload.classification === 'scheduleReminder') {
-                    await agentStateManager.setState(userId, agentStateManager.states.scheduleFollowup, messageId);
 
-                   actionResult = await actionExecutor.executeAction(
-                        classificationResult.payload.classification,
-                        JSON.stringify(classificationResult.payload.data),
-                        userId,
-                        messageId
-                   )
-                 }
-                else {
-                    await agentStateManager.setState(userId, agentStateManager.states.updatingPersonalInfo, messageId);
+            const taskExecutionResult = await taskExecutorEngine.executeTask(userId, text, classificationResult);
+           
+           await agentStateManager.setState(
+                userId,
+                agentStateManager.states.TasksStates.taskCompleted,
+                messageId
+            );
+            await agentStateManager.setState(
+                userId,
+                agentStateManager.states.awaitingBotResponse,
+                messageId
+            );
 
-                   actionResult = await actionExecutor.executeAction(
-                        classificationResult.payload.classification,
-                        classificationResult.payload.data,
-                        userId,
-                        messageId
-                  );
+            const finalQuery = `User query: ${message.message}.
+                Task Status: ${
+                    taskExecutionResult.success
+                        ? taskExecutionResult.message || 'Task completed successfully.'
+                        : taskExecutionResult.message || 'Task failed.'
                 }
-  
-  
-                if (!actionResult.success) {
-                    // Set state to error during action
-                    await agentStateManager.setState(
-                        userId,
-                        agentStateManager.states.errorDuringAction,
-                        messageId,
-                        actionResult.message
-                    );
-                } else {
-                    // Set state to action completed
-                    await agentStateManager.setState(
-                        userId,
-                        agentStateManager.states.actionCompleted,
-                        messageId
-                    );
-                }
-  
-                // Prepare final context message
-                const finalContext = `User query: ${message.message}.
-                Agent Status: ${
-                    actionResult.success
-                        ? actionResult.message || 'Action completed successfully.'
-                        : actionResult.message || 'Action failed.'
-                }
-                (Note: The status reflects the backend execution results based on the user query and is not provided directly by the user.)`;
-  
-                console.log('final context is ->', finalContext);
-  
-                // Proceed with normal bot response, including agent status
-                await agentStateManager.setState(
-                    userId,
-                    agentStateManager.states.awaitingBotResponse,
-                    messageId
-                );
-                await botController.streamBotResponse(
-                    { ...message, chatId, message: finalContext },
-                    null,
-                    history,
-                    ws,
-                    websocketService.handleStream,
-                    websocketService.handleStreamError
-                );
+                (Note: The status reflects the backend execution results based on the user query and is not provided directly by the user. provide feedback to user based on it)`;
+           await botController.streamBotResponse(
+            { ...message, chatId, message: finalQuery },
+            null,
+            history,
+            ws,
+            websocketService.handleStream,
+            websocketService.handleStreamError
+        );
 
-                await agentStateManager.setState(userId, agentStateManager.states.completed, messageId);
-            } catch (error) {
-                console.error('Error during agent action execution:', error);
-                await agentStateManager.setState(
-                    userId,
-                    agentStateManager.states.error,
-                    messageId,
-                    'Error during agent action execution.'
-                );
-                // Handle error appropriately, possibly by sending an error message to the user
-                websocketService.sendMessage(userId, {
-                    type: 'error',
-                    code: 'AGENT_ACTION_ERROR',
-                    message: 'An error occurred during agent action execution.',
-                });
+        await agentStateManager.setState(
+            userId,
+            agentStateManager.states.completed,
+            messageId
+        );
+
+            if (!taskExecutionResult.success) {
+               console.error('Task execution failed:', taskExecutionResult.message);
             }
         }
-    },
-    //=====================================================================================================
+    } catch (error) {
+        console.error('Error handling message:', error);
+
+        websocketService.sendMessage(userId, {
+            type: 'error',
+            code: error.code,
+            message: error.message,
+        });
+    }
+},
+
+//=====================================================================================================
     /**
      * Manages a newly established WebSocket connection.
      */

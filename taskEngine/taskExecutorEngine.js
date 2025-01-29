@@ -2,101 +2,112 @@
 const { TaskActionExecutor } = require('./taskActionExecutor');
 const { RedisTmpDataManagerForTasks } = require('./redisTmpDataManagerForTasks');
 const { TaskActionDefinitions } = require('./TaskActionDefinitions');
-const AgentStateManager = require('../utils/agents/agent-state-manager');
 const { v4: uuidv4 } = require('uuid');
 
-// Initialize AgentStateManager with sendMessage function (to be set later)
-const agentStateManager = new AgentStateManager(() => {}); // Placeholder function for now
-
 class TaskExecutorEngine {
-    constructor(sendMessage) {
+    constructor() {
         this.taskActionExecutor = new TaskActionExecutor();
         this.redisTmpDataManager = new RedisTmpDataManagerForTasks();
-        agentStateManager.sendMessage = sendMessage; // Set the sendMessage function for the AgentStateManager
     }
 
-    async executeTask(userId, query, plan, sendAgentStatus) {
-        const taskId = uuidv4();
-        console.log(`[TaskExecutorEngine] Executing task ${taskId} for user ${userId}`);
+   async executeTask(userId, query, plan) {
+    const taskId = uuidv4();
+    console.log(`[TaskExecutorEngine] Executing task ${taskId} for user ${userId}`);
+    let fallbackToNormal = false;
+    let overallStatus = {
+            success: true,
+            message: 'Task execution completed',
+            taskData: {}
+    };
+
+    // 1. Early Plan Validation
+    const parsedPlan = this._validateAndParsePlan(plan);
+    if (!parsedPlan) {
+        fallbackToNormal = true;
+        return {
+            success: false,
+            message: 'Invalid plan format, falling back to normal response.',
+            overallStatus
+        }; // Early return
+    }
+
+    const actions = parsedPlan.actions;
+
+    // Filter and sort actions based on isIncluded and executionOrderIfIncluded
+    const includedActions = Object.entries(actions)
+        .filter(([_, action]) => action.isIncluded)
+        .sort(([_, actionA], [__, actionB]) => actionA.executionOrderIfIncluded - actionB.executionOrderIfIncluded);
+
+    for (const [actionKey, action] of includedActions) {
+        const actionDefinition = TaskActionDefinitions.getAction(actionKey);
+
+        // 2. Direct Fallback for noActionOption
+        if (actionKey === 'noActionOption' && action.isIncluded) {
+            console.log('[TaskExecutorEngine] No action needed, immediate fallback to normal bot response.');
+            fallbackToNormal = true;
+            break; // Immediate break for noActionOption
+        }
+
+        if (!actionDefinition) {
+            console.warn(`[TaskExecutorEngine] Unknown action type: ${actionKey}`);
+            continue; // Skip unknown actions
+        }
+        
         try {
-            const parsedPlan = this._validateAndParsePlan(plan.toString());
-            const actions = parsedPlan.actions;
-            let overallStatus = {
-                success: true,
-                message: 'Task execution completed',
-                taskData: {}
-            };
-
-            console.log("[DEBUG: ] task executor" + actions)
-
-            // Filter and sort actions based on isIncluded and executionOrderIfIncluded
-            const includedActions = Object.entries(actions)
-                .filter(([_, action]) => action.isIncluded)
-                .sort(([_, actionA], [__, actionB]) => actionA.executionOrderIfIncluded - actionB.executionOrderIfIncluded);
-
-            for (const [actionKey, action] of includedActions) {
-                const actionDefinition = TaskActionDefinitions.getAction(actionKey);
-
-                if (actionKey === 'noActionOption' && action.isIncluded) {
-                    console.log('[TaskExecutorEngine] No action needed, skipping to normal bot response.');
-                    if (sendAgentStatus) {
-                        await this.sendStatusMessage(userId, actionKey, true, 'No action needed.');
-                    }
-                    continue; // Skip to the next action
-                }
-
-                if (!actionDefinition) {
-                    console.warn(`[TaskExecutorEngine] Unknown action type: ${actionKey}`);
-                    continue; // Skip unknown actions
-                }
-
-                if (sendAgentStatus) {
-                    await this.sendStatusMessage(userId, actionKey, true, 'Starting action.');
-                }
-                const actionResult = await this._executeAction(taskId, actionKey, action, userId);
-                if (actionResult && actionResult.data) {
-                    await this.redisTmpDataManager.storeActionData(taskId, actionKey, actionResult.data);
-                }
-
-                if (!actionResult.success) {
-                    overallStatus.success = false;
-                    overallStatus.message = `Task execution failed at action: ${actionKey}`;
-                    console.warn(`[TaskExecutorEngine] Partial failure for action: ${actionKey}`);
-                    if (sendAgentStatus) {
-                        await this.sendStatusMessage(userId, actionKey, false, `Failed to execute action: ${actionResult.message}`);
-                    }
-                } else {
-                    if (sendAgentStatus) {
-                        await this.sendStatusMessage(userId, actionKey, true, 'Action completed successfully.');
-                    }
-                }
+            const actionResult = await this._executeAction(taskId, actionKey, action, userId);
+            if (actionResult && actionResult.data) {
+                await this.redisTmpDataManager.storeActionData(taskId, actionKey, actionResult.data);
             }
 
-            overallStatus.taskData = await this.redisTmpDataManager.getActionData(taskId);
-
-            console.log(`[TaskExecutorEngine] Task ${taskId} execution finished for user ${userId}`);
-            return overallStatus;
+            if (!actionResult.success) {
+                overallStatus.success = false;
+                overallStatus.message = `Task execution failed at action: ${actionKey}`;
+                console.warn(`[TaskExecutorEngine] Partial failure for action: ${actionKey}`);
+                // Continue to the next action even if the current one fails
+            }
         } catch (error) {
-            console.error(`[TaskExecutorEngine] Task execution error for ${taskId}: ${error.message}`);
-            return { success: false, message: `Task execution failed: ${error.message}` };
+            console.error(`[TaskExecutorEngine] Error executing action ${actionKey}: ${error.message}`);
+            // Continue to the next action even if the current one fails
+                overallStatus.success = false;
+                overallStatus.message = `Task execution failed at action: ${actionKey}`;
         }
     }
+
+
+        if (fallbackToNormal) {
+            console.log('[TaskExecutorEngine] Fallback to normal bot response.');
+             // Trigger normal bot response logic here (e.g., call a function in websocketService)
+            // Example:
+            // await websocketService.handleNormalBotResponse(userId, query);
+            overallStatus = {
+                success: true,
+                message: "No agent action taken, performing normal response.",
+                taskData: {}
+           }
+        } else {
+             overallStatus.taskData = await this.redisTmpDataManager.getActionData(taskId);
+        }
+
+
+    console.log(`[TaskExecutorEngine] Task ${taskId} execution finished for user ${userId}`);
+    return {
+        ...overallStatus,
+       };
+}
 
     _validateAndParsePlan(plan) {
-        if (!plan || typeof plan !== 'string') {
-            return { actions: {} };
+        try {
+            return plan;
+        } catch (error) {
+            console.error("[TaskExecutorEngine] Plan parsing error:", error);
+            return null; // Return null for parsing errors
         }
-
-        const parsedPlan = JSON.parse(plan);
-        // if (!parsedPlan || typeof parsedPlan !== 'object' || !parsedPlan.actions) {
-        //     throw new Error('Invalid plan format: Missing or malformed actions');
-        // }
-
-        return parsedPlan;
     }
 
-    async _executeAction(taskId, actionKey, action, userId) {
+
+   async _executeAction(taskId, actionKey, action, userId) {
         console.log(`[TaskExecutorEngine] Executing action ${actionKey} for task ${taskId}`);
+        console.log('[DEBUG] Action:', action);
         if (!action || typeof action !== 'object') {
             console.warn(`[TaskExecutorEngine] Skipping invalid action: ${actionKey}`);
             return { success: false, message: 'Invalid action format' };
@@ -130,7 +141,7 @@ class TaskExecutorEngine {
                     actionResult = await actionHandler(taskId, action.isIncluded, action.executionOrderIfIncluded, action.finalEditedInfo, userId);
                     break;
                 case 'scheduleReminder':
-                    actionResult = await actionHandler(taskId, action.isIncluded, action.executionOrderIfIncluded, action.task, userId);
+                    actionResult = await actionHandler(taskId, action.isIncluded, action.executionOrderIfIncluded, action, userId);
                     break;
                 default:
                     console.warn(`[TaskExecutorEngine] Unknown action type: ${actionKey}`);
@@ -156,11 +167,6 @@ class TaskExecutorEngine {
         };
 
         return handlerMap[actionName] || null;
-    }
-
-    async sendStatusMessage(userId, actionKey, success, message) {
-        const state = success ? 'completed' : 'failed';
-        await agentStateManager.setState(userId, `${actionKey}-${state}`, null, message);
     }
 }
 

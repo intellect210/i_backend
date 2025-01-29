@@ -21,7 +21,58 @@ class AgentStateManager {
             executionPaused: 'execution paused',
             finalizing: 'finalizing execution',
             completed: 'completed',
-            scheduleFollowup: 'Scheduling a Followup'
+            scheduleFollowup: 'Scheduling a Followup',
+
+            TasksStates: {
+                taskInitializing: 'Initializing Task',
+                taskProcessingInput: 'Processing Task Input',
+                taskProcessingFailed: 'Task Processing Failed',
+                performingAction: 'Performing Actions',
+                taskCompleted: 'Task Processing Completed',
+                taskError: 'Task Error',
+
+                TaskActions: {
+                    fetchEmails: {
+                        fetchingEmails: 'Fetching Emails',
+                        emailsFetched: 'Emails Fetched',
+                        emailsFetchError: 'Error Fetching Emails',
+                    },
+                    getttingScreenContext: {
+                        gettingScreenContext: 'Getting Screen Context',
+                        screenContextRetrieved: 'Screen Context Retrieved',
+                        screenContextError: 'Error Getting Screen Context',
+                    },
+                    getNotificationFromUserDevice: {
+                        gettingNotification: 'Getting Notification',
+                        notificationRetrieved: 'Notification Retrieved',
+                        notificationError: 'Error Getting Notification',
+                    },
+                    getCalendarEvents: {
+                        gettingCalendarEvents: 'Getting Calendar Events',
+                        calendarEventsRetrieved: 'Calendar Events Retrieved',
+                        calendarEventsError: 'Error Getting Calendar Events',
+                    },
+                    llmPipeline: {
+                        executingLLMPipeline: 'Executing LLM Pipeline',
+                        llmPipelineExecuted: 'LLM Pipeline Executed',
+                        llmPipelineError: 'Error Executing LLM Pipeline',
+                    },
+                    profileUpdate: {
+                        updatingProfile: 'Updating Profile',
+                        profileUpdated: 'Profile Updated',
+                        profileUpdateError: 'Error Updating Profile',
+                    },
+                    scheduleReminder: {
+                        schedulingReminder: 'Scheduling Reminder',
+                        reminderScheduled: 'Reminder Scheduled',
+                        reminderScheduleError: 'Error Scheduling Reminder',
+                    },
+                    noActionOption: {
+                        noAction: 'No Action',
+                    }
+                }
+
+            }
         };
 
         this.stateQueueKey = 'agent_state_queue';

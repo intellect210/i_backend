@@ -52,7 +52,7 @@ const profileUpdate = {
 };
 
 const ReminderStructure = {
-  "taskAction": {
+  "scheduleReminder": {
     "type": "object",
     "properties": {
       "isIncluded": { "type": "boolean" },
