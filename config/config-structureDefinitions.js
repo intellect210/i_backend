@@ -22,163 +22,134 @@ const classificationResultStructure = {
   required: ['payload'],
 };
 
+//=======================================================================================================
+
+const actionSchemaTemplate = {
+  "type": "object",
+  "properties": {
+    "isIncluded": { "type": "boolean" },
+    "executionOrderIfIncluded": { "type": "number" }
+  },
+  "required": ["isIncluded", "executionOrderIfIncluded"]
+};
+
+// Individual action definitions
+
+const fetchEmails = {
+  "fetchEmails": {
+    ...actionSchemaTemplate,
+    "description": "Fetches email context if required for subsequent actions.",
+    "properties": {
+      ...actionSchemaTemplate.properties,
+      "SearchQueryInDetails": { "type": "string" }
+    }
+  }
+};
+
+const llmPipeline = {
+  "llmPipeline": {
+    ...actionSchemaTemplate,
+    "description": "Configures the LLM for tasks like summarizing or generating responses. Multiple llmPipeline actions can be included in a task.",
+    "properties": {
+      ...actionSchemaTemplate.properties,
+      "systemInstructions": {
+        "type": "string",
+        "enum": [
+          "summarizeEmails",
+          "generateResponse",
+          "summarizeCalendarEvents",
+          "summarizeScreenContext",
+          "factChecker"
+        ]
+      },
+      "inputContexts": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "fetchedEmails",
+            "screenContext",
+            "calendarEvents",
+            "userQuery"
+          ]
+        }
+      },
+      "baseQuery": { "type": "string" }
+    }
+  }
+};
+
+const getScreenContext = {
+  "getScreenContext": {
+    ...actionSchemaTemplate,
+    "description": "Captures the user's current screen context."
+  }
+};
+
+const getNotificationFromUserDevice = {
+  "getNotificationFromUserDevice": {
+    ...actionSchemaTemplate,
+    "description": "Retrieves recent user device notifications.",
+    "properties": {
+      ...actionSchemaTemplate.properties,
+      "filterByApp": { "type": "string" },
+      "filterByContent": { "type": "string" }
+    }
+  }
+};
+
+const getCalendarEvents = {
+  "getCalendarEvents": {
+    ...actionSchemaTemplate,
+    "description": "Fetches calendar events for a specified time range.",
+    "properties": {
+      ...actionSchemaTemplate.properties,
+      "timeRange": {
+        "type": "object",
+        "properties": {
+          "start": { "type": "string" },
+          "end": { "type": "string" }
+        },
+        "required": ["start", "end"],
+        "description": "The time range for fetching events."
+      }
+    }
+  }
+};
+
+const noActionOption = {
+  "noActionOption": {
+    "type": "object",
+    "properties": {
+      "isIncluded": { "type": "boolean" }
+    },
+    "required": ["isIncluded"],
+    "description": "Indicates no action is required or if the user explicitly asked for it."
+  }
+};
+
+// Combine all enabled actions
 const automationFollowupStructure = {
   "type": "object",
   "properties": {
     "actions": {
       "type": "object",
       "properties": {
-        "fetchEmails": {
-          "type": "object",
-          "properties": {
-            "isIncluded": {
-              "type": "boolean"
-            },
-            "SearchQueryInDetails": {
-              "type": "string"
-            },
-            "executionOrderIfIncluded": {
-              "type": "number"
-            }
-          },
-          "required": [
-            "isIncluded",
-            "executionOrderIfIncluded"
-          ],
-          "description": "Fetches email context if required for subsequent actions."
-        },
-        "llmPipeline": {
-          "type": "object",
-          "properties": {
-            "isIncluded": {
-              "type": "boolean"
-            },
-            "systemInstructions": {
-              "type": "string",
-              "enum": [
-                "summarizeEmails",
-                "generateResponse",
-                "summarizeCalendarEvents",
-                "summarizeScreenContext",
-                "factChecker"
-              ]
-            },
-            "executionOrderIfIncluded": {
-              "type": "number"
-            },
-            "inputContexts": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": [
-                  "fetchedEmails",
-                  "screenContext",
-                  "calendarEvents",
-                  "userQuery"
-                ]
-              }
-            },
-            "baseQuery": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "isIncluded",
-            "executionOrderIfIncluded"
-          ],
-          "description": "Configures the LLM for tasks like summarizing or generating responses. Multiple llmPipeline actions can be included in a task."
-        },
-        "getScreenContext": {
-          "type": "object",
-          "properties": {
-            "isIncluded": {
-              "type": "boolean"
-            },
-            "executionOrderIfIncluded": {
-              "type": "number"
-            }
-          },
-          "required": [
-            "isIncluded",
-            "executionOrderIfIncluded"
-          ],
-          "description": "Captures the user's current screen context."
-        },
-        "getNotificationFromUserDevice": {
-          "type": "object",
-          "properties": {
-            "isIncluded": {
-              "type": "boolean"
-            },
-            "executionOrderIfIncluded": {
-              "type": "number"
-            },
-            "filterByApp": {
-              "type": "string"
-            },
-            "filterByContent": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "isIncluded",
-            "executionOrderIfIncluded"
-          ],
-          "description": "Retrieves recent user device notifications."
-        },
-        "getCalendarEvents": {
-          "type": "object",
-          "properties": {
-            "isIncluded": {
-              "type": "boolean"
-            },
-            "executionOrderIfIncluded": {
-              "type": "number"
-            },
-            "timeRange": {
-              "type": "object",
-              "properties": {
-                "start": {
-                  "type": "string"
-                },
-                "end": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "start",
-                "end"
-              ],
-              "description": "The time range for fetching events."
-            }
-          },
-          "required": [
-            "isIncluded",
-            "executionOrderIfIncluded"
-          ],
-          "description": "Fetches calendar events for a specified time range."
-        },
-        "noActionOption": {
-          "type": "object",
-          "properties": {
-            "isIncluded": {
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "isIncluded"
-          ],
-          "description": "Indicates no action is required or if the user explicitly asked for it."
-        }
+        ...fetchEmails,
+        ...llmPipeline,
+        ...getScreenContext,
+        ...getNotificationFromUserDevice,
+        ...getCalendarEvents,
+        ...noActionOption
       },
-      "description": "A collection of actions that the system can perform. Actions within a task are executed in order, and multiple LLM pipelines can be used within a single task."
+      "description": "A collection of actions that the system can perform."
     }
   },
-  "required": [
-    "actions"
-  ],
+  "required": ["actions"],
   "description": "Contains the actions to be executed by the system."
 };
+
+//=======================================================================================================
 
 const remindersStructure = {
   "type": "object",
