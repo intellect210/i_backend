@@ -5,7 +5,7 @@ const {
 } = require('@google/generative-ai');
 const { v4: uuidv4 } = require('uuid');
 const { MODELS, CURRENT_MODEL } = require('../config/config-constants');
-const systemInstructions = require('../utils/agents/system-instructions');
+const systemInstructions = require('../config/config-systemInstructions.js');
 const CustomGenerationConfig = require('../config/config-customGeneration');
 const { personalInfoUpdateStructure } = require('../config/config-structureDefinitions');
 

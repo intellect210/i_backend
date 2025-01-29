@@ -1,6 +1,6 @@
-const redisManager = require('../respositories/redisManager');
+const redisManager = require('../utils/respositories/redisManager');
 const fs = require('fs');
-const agentConfig = require('../../config/config-agent');
+const agentConfig = require('./config-agent');
 
 const systemInstructions = {
   instructions: {
@@ -170,7 +170,7 @@ Holistic Presentation: The final version should read cohesively, reflecting a lo
       } else {
         console.log('Agent config not found in Redis cache. Reading from file.');
         // Read config from file
-        const agentConfig = require('../../config/config-agent');
+        const agentConfig = require('./config-agent');
 
         // Cache the config in Redis with a TTL of 4 hours (14400 seconds)
         await redisManager.set(redisKey, JSON.stringify(agentConfig), {

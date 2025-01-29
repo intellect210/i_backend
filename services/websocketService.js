@@ -17,7 +17,7 @@ const {
   } = require('../utils/helpers/error-handlers');
   const redisManager = require('../utils/respositories/redisManager');
   const { v4: uuidv4 } = require('uuid');
-  const systemInstructions = require('../utils/agents/system-instructions');
+  const systemInstructions = require('../config/config-systemInstructions.js');
   const DataInjector = require('../utils/helpers/data-injector');
   const botResponseOrchestrator = new BotResponseOrchestrator();
   const botController = require('../controllers/controller-bot');
