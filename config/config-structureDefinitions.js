@@ -35,6 +35,114 @@ const actionSchemaTemplate = {
 
 // Individual action definitions
 
+const profileUpdate = {
+  "profileUpdate": {
+    "type": "object",
+    "properties": {
+      "isIncluded": { "type": "boolean" },
+      "executionOrderIfIncluded": { "type": "number" },
+      "description": {
+        "type": "string",
+        "description": "Updates the user's personal information."
+      },
+      "finalEditedInfo": { "type": "string" }
+    },
+    "required": ["isIncluded", "executionOrderIfIncluded", "finalEditedInfo"]
+  }
+};
+
+const ReminderStructure = {
+  "taskAction": {
+    "type": "object",
+    "properties": {
+      "isIncluded": { "type": "boolean" },
+      "executionOrderIfIncluded": { "type": "number" },
+      "description": {
+        "type": "string",
+        "description": "Defines a task or reminder with specific details."
+      },
+      "taskDescription": {
+        "type": "string",
+        "description": "Description of the task or reminder in detail"
+      },
+      "time": {
+        "type": "string",
+        "description": "Time for the task or reminder in HH:mm format"
+      },
+      "recurrence": {
+        "type": "object",
+        "description": "Information about how often the task should repeat.",
+        "nullable": true,
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Type of recurrence",
+            "enum": [
+              "once",
+              "daily",
+              "weekly",
+              "limited"
+            ]
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Days for the weekly recurrence",
+              "enum": [
+                "monday",
+                "tuesday",
+                "wednesday",
+                "thursday",
+                "friday",
+                "saturday",
+                "sunday"
+              ]
+            }
+          },
+          "ends": {
+            "type": "object",
+            "description": "Specifies when the recurrence ends, if applicable.",
+            "nullable": true,
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Type of end condition for the recurrence",
+                "enum": [
+                  "after_repetitions",
+                  "on_date"
+                ]
+              },
+              "value": {
+                "type": "string",
+                "description": "Value of the end condition"
+              }
+            }
+          },
+          "start_date": {
+            "type": "string",
+            "description": "Start date for the recurrence in YYYY-MM-DD format"
+          },
+          "one_time_date": {
+            "type": "string",
+            "description": "If only time is given by user then one_time_date is necessary to schedule the reminder so either ask user or use today's date in YYYY-MM-DD format"
+          }
+        },
+        "required": [
+          "type",
+          "one_time_date"
+        ]
+      }
+    },
+    "required": [
+      "isIncluded",
+      "executionOrderIfIncluded",
+      "taskDescription",
+      "recurrence"
+    ]
+  }
+};
+
 const fetchEmails = {
   "fetchEmails": {
     ...actionSchemaTemplate,
@@ -136,11 +244,13 @@ const automationFollowupStructure = {
       "type": "object",
       "properties": {
         ...fetchEmails,
-        ...llmPipeline,
+        // ...llmPipeline,
         ...getScreenContext,
         ...getNotificationFromUserDevice,
         ...getCalendarEvents,
-        ...noActionOption
+        ...noActionOption,
+        ...profileUpdate,
+        ...ReminderStructure
       },
       "description": "A collection of actions that the system can perform."
     }
