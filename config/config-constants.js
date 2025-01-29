@@ -63,6 +63,11 @@ const CURRENT_MODEL = MODELS.GEMINI_105_FLASH;
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
+// Centralized TTLs
+const TTL_CONFIG = {
+  TASK_QUEUE_ITEM_TTL: 600000, // 15 minutes in seconds
+};
+
 module.exports = {
   MESSAGE_TYPES,
   MESSAGE_ROLES,
@@ -71,5 +76,6 @@ module.exports = {
   MODELS,
   CURRENT_MODEL,
   NODE_ENV,
-  PREFERENCE_KEYS
+  PREFERENCE_KEYS,
+  TTL_CONFIG
 };

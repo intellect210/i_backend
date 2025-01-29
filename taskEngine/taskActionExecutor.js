@@ -1,10 +1,20 @@
+// FILE: taskEngine/taskActionExecutor.js
+// CHANGES: (No changes required here as they are dummy implementations,
+// but ensure taskId is used when calling storeActionData in your actual implementations)
+
 const { v4: uuidv4 } = require('uuid');
+const { RedisTmpDataManagerForTasks } = require('./redisTmpDataManagerForTasks');
+const { TaskActionDefinitions } = require('./TaskActionDefinitions');
+
+const redisTmpDataManager = new RedisTmpDataManagerForTasks();
 
 class TaskActionExecutorImpl {
     async fetchEmails(isIncluded, SearchQueryInDetails, executionOrderIfIncluded) {
         console.log(`[TaskActionExecutorImpl] fetchEmails called`);
         if (!isIncluded || Math.random() < 0.3) {
-            return { success: true, message: 'fetchEmails action executed, no emails fetched', data: { isIncluded, SearchQueryInDetails, executionOrderIfIncluded, emails: [] } };
+             const data = { isIncluded, SearchQueryInDetails, executionOrderIfIncluded, emails: [] };
+            //  await redisTmpDataManager.storeActionData('tempId', 'fetchEmails', data);
+            return { success: true, message: 'fetchEmails action executed, no emails fetched', data };
         }
         const emails = Array.from({ length: Math.floor(Math.random() * 5) + 1 }, () => ({
             id: uuidv4(),
@@ -12,31 +22,43 @@ class TaskActionExecutorImpl {
             subject: `Test Email ${Math.floor(Math.random() * 10)}`,
             body: `This is a test email body ${Math.random()}`,
         }));
-        return { success: true, message: 'fetchEmails action executed', data: { isIncluded, SearchQueryInDetails, executionOrderIfIncluded, emails } };
+        const data = { isIncluded, SearchQueryInDetails, executionOrderIfIncluded, emails }
+          await redisTmpDataManager.storeActionData('tempId', 'fetchEmails', data);
+        return { success: true, message: 'fetchEmails action executed', data };
     }
 
     async llmPipeline(isIncluded, systemInstructions, executionOrderIfIncluded, inputContexts, baseQuery) {
         console.log(`[TaskActionExecutorImpl] llmPipeline called`);
         if (!isIncluded || Math.random() < 0.3) {
-            return { success: true, message: 'llmPipeline action executed, no llm output', data: { isIncluded, systemInstructions, executionOrderIfIncluded, inputContexts, baseQuery, output: null } };
+             const data = { isIncluded, systemInstructions, executionOrderIfIncluded, inputContexts, baseQuery, output: null };
+             await redisTmpDataManager.storeActionData('tempId', 'llmPipeline', data);
+            return { success: true, message: 'llmPipeline action executed, no llm output', data };
         }
         const output = `LLM output for query "${baseQuery}" with instructions "${systemInstructions}" ${Math.random()}`;
-        return { success: true, message: 'llmPipeline action executed', data: { isIncluded, systemInstructions, executionOrderIfIncluded, inputContexts, baseQuery, output } };
+       const data =  { isIncluded, systemInstructions, executionOrderIfIncluded, inputContexts, baseQuery, output }
+      await redisTmpDataManager.storeActionData('tempId', 'llmPipeline', data);
+        return { success: true, message: 'llmPipeline action executed', data };
     }
 
     async getScreenContext(isIncluded, executionOrderIfIncluded) {
         console.log(`[TaskActionExecutorImpl] getScreenContext called`);
-        if (!isIncluded || Math.random() < 0.3) {
-            return { success: true, message: 'getScreenContext action executed, no screen context found', data: { isIncluded, executionOrderIfIncluded, context: null } };
+       if (!isIncluded || Math.random() < 0.3) {
+             const data = { isIncluded, executionOrderIfIncluded, context: null };
+             await redisTmpDataManager.storeActionData('tempId', 'getScreenContext', data);
+            return { success: true, message: 'getScreenContext action executed, no screen context found', data };
         }
         const context = `Screen context: User is on ${Math.random() > 0.5 ? 'dashboard' : 'settings'} page ${Math.random()}`;
-        return { success: true, message: 'getScreenContext action executed', data: { isIncluded, executionOrderIfIncluded, context } };
+         const data = { isIncluded, executionOrderIfIncluded, context };
+         await redisTmpDataManager.storeActionData('tempId', 'getScreenContext', data);
+        return { success: true, message: 'getScreenContext action executed', data };
     }
 
     async getNotificationFromUserDevice(isIncluded, executionOrderIfIncluded, filterByApp, filterByContent) {
         console.log(`[TaskActionExecutorImpl] getNotificationFromUserDevice called`);
            if (!isIncluded || Math.random() < 0.3) {
-            return { success: true, message: 'getNotificationFromUserDevice action executed, no notification found', data: { isIncluded, executionOrderIfIncluded, filterByApp, filterByContent, notifications: [] } };
+              const data =  { isIncluded, executionOrderIfIncluded, filterByApp, filterByContent, notifications: [] };
+             await redisTmpDataManager.storeActionData('tempId', 'getNotificationFromUserDevice', data);
+             return { success: true, message: 'getNotificationFromUserDevice action executed, no notification found', data };
         }
          const notifications = Array.from({ length: Math.floor(Math.random() * 3) + 1 }, () => ({
             id: uuidv4(),
@@ -44,13 +66,17 @@ class TaskActionExecutorImpl {
             content: filterByContent || `Notification content ${Math.random()}`,
             timestamp: new Date().toISOString(),
         }));
-       return { success: true, message: 'getNotificationFromUserDevice action executed', data: { isIncluded, executionOrderIfIncluded, filterByApp, filterByContent, notifications } };
+       const data =  { isIncluded, executionOrderIfIncluded, filterByApp, filterByContent, notifications };
+     await redisTmpDataManager.storeActionData('tempId', 'getNotificationFromUserDevice', data);
+        return { success: true, message: 'getNotificationFromUserDevice action executed', data };
     }
 
     async getCalendarEvents(isIncluded, executionOrderIfIncluded, timeRange) {
         console.log(`[TaskActionExecutorImpl] getCalendarEvents called`);
          if (!isIncluded || Math.random() < 0.3) {
-            return { success: true, message: 'getCalendarEvents action executed, no events found', data: { isIncluded, executionOrderIfIncluded, timeRange, events: [] } };
+            const data = { isIncluded, executionOrderIfIncluded, timeRange, events: [] };
+            await redisTmpDataManager.storeActionData('tempId', 'getCalendarEvents', data);
+            return { success: true, message: 'getCalendarEvents action executed, no events found', data };
         }
         const events = Array.from({ length: Math.floor(Math.random() * 4) + 1 }, () => ({
             id: uuidv4(),
@@ -58,12 +84,16 @@ class TaskActionExecutorImpl {
             start: new Date().toISOString(),
             end: new Date(new Date().getTime() + 3600000).toISOString(), // 1 hour later
         }));
-        return { success: true, message: 'getCalendarEvents action executed', data: { isIncluded, executionOrderIfIncluded, timeRange, events } };
+         const data = { isIncluded, executionOrderIfIncluded, timeRange, events };
+         await redisTmpDataManager.storeActionData('tempId', 'getCalendarEvents', data);
+        return { success: true, message: 'getCalendarEvents action executed', data };
     }
 
     async noActionOption(isIncluded) {
         console.log(`[TaskActionExecutorImpl] noActionOption called`);
-        return { success: true, message: 'noActionOption action executed', data: { isIncluded } };
+         const data = { isIncluded };
+         await redisTmpDataManager.storeActionData('tempId', 'noActionOption', data);
+        return { success: true, message: 'noActionOption action executed', data };
     }
 }
 

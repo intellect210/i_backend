@@ -80,6 +80,16 @@ const redisManager = {
       return null;
     }
   },
+  async sendCommand(args) {
+    try {
+        const reply = await redisClient.sendCommand(args);
+        console.log(`Successfully executed command: ${args.join(' ')}`);
+        return reply;
+    } catch (error) {
+        console.error(`Error executing command: ${args.join(' ')}`, error);
+        throw error;
+    }
+},
 };
 
 module.exports = redisManager;

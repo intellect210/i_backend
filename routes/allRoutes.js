@@ -22,7 +22,7 @@ router.use('/personalization', require('./personalizationRoutes'));
 router.use('/preferences', preferenceRoutes);
 router.use('/reminders', reminderRoutes);
 router.use('/waitlist', waitlistRoutes);
-// router.use('/test', testRoutes); // Use test routes
+router.use('/test', testRoutes); // Use test routes
 
 
 module.exports = router;
