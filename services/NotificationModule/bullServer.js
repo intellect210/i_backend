@@ -1,72 +1,81 @@
-// const Queue = require('bull');
-// const { redisClient } = require('../../config/config-redis');
-// const { connectDB } = require('../../config/config-db');
-// const Reminder = require('../../models/reminderModel');
-// const logger = require('../../utils/helpers/logger');
-// const SchedulerService = require('../../services/schedulerService');
-// const schedulerService = new SchedulerService();
+const { redisClient, connectRedis } = require('../../config/config-redis');
+const { connectDB } = require('../../config/config-db');
+const logger = require('../../utils/helpers/logger');
+const { TaskExecutorEngine } = require('../../taskEngine/taskExecutorEngine');
+const { TaskQueueService } = require('../../services/bullService');
+const { TTL_CONFIG } = require('../../config/config-constants');
+
+const taskExecutorEngine = new TaskExecutorEngine();
+
+// Initialize Bull queue for task processing
+const taskQueueService = new TaskQueueService();
+const taskQueue = taskQueueService.queue;
+
+// Connect to MongoDB
+(async () => {
+    try {
+        await connectDB();
+        await connectRedis();
+        logger.info('Connected to MongoDB');
+    } catch (error) {
+        logger.error('Error connecting to MongoDB:', error);
+        process.exit(1);
+    }
+})();
+
+// Process jobs from taskQueue
+taskQueue.process(async (job) => {
+    const { userId, scheduleId, plan } = job.data;
+    logger.info(`[BullServer] Processing task job with ID: ${job.id} , scheduleId: ${scheduleId} for user: ${userId}`);
+
+    try {
+        if (!userId || !scheduleId || !plan) {
+            logger.error(`[BullServer] Job with ID ${job.id} is missing userId, scheduleId or plan data. Job data: ${JSON.stringify(job.data)}`);
+            throw new Error(`Job is missing userId, scheduleId or plan data. Job data: ${JSON.stringify(job.data)}`);
+        }
+
+        // Execute the task using the task executor engine
+        logger.info(`[BullServer] Executing task ${scheduleId} for user ${userId}`);
+        const executionResult = await taskExecutorEngine.executeTask(userId, scheduleId, plan);
+
+        if(executionResult.success) {
+            logger.info(`[BullServer] Task ${scheduleId} completed successfully for user ${userId}`);
+        }else{
+            logger.warn(`[BullServer] Task ${scheduleId} failed for user ${userId} due to ${executionResult.message}`);
+        }
+           
+        logger.info(`[BullServer] Completed processing task job with ID: ${job.id}, scheduleId: ${scheduleId} for user: ${userId} `);
+        
+        // Return result for complete event
+        return {
+          success: executionResult.success,
+          message: executionResult.message,
+          jobId: scheduleId // Return the scheduleId for update if needed
+       };
 
 
-// // Initialize Bull queue
-// const reminderQueue = new Queue('reminderQueue', {
-//     redis: {
-//         client: redisClient,
-//     },
-// });
-
-// // Connect to MongoDB
-// (async () => {
-//     try {
-//         await connectDB();
-//         logger.info('Connected to MongoDB');
-//     } catch (error) {
-//         logger.error('Error connecting to MongoDB:', error);
-//         process.exit(1);
-//     }
-// })();
-
-// // Demo function simulating a 15-second task
-// const simulateLongTask = async () => {
-//     logger.info('Simulating a long task that will take 15 seconds');
-//     return new Promise((resolve) => {
-//         setTimeout(() => {
-//             resolve();
-//             logger.info('Long Task Simulation Completed');
-//         }, 15000); // 15 seconds
-//     });
-// };
-
-// // Process jobs
-// reminderQueue.process(async (job) => {
-//     const { userId, taskDescription, time, recurrence } = job.data;
-//     // logger.info(`[${new Date().toISOString()}] Processing job with ID: ${job.id} for user ${userId} with task: ${taskDescription} at time: ${time}`);
-
-//     try {
-//         // Simulate some work
-//        await simulateLongTask();
+    } catch (error) {
+        logger.error(`[BullServer] Error processing job with ID: ${job.id}, scheduleId: ${scheduleId} for user ${userId}:`, error);
+        // Return error for failed event
+        return {
+            message: error.message || `Error processing job with ID: ${job.id}, scheduleId: ${scheduleId} for user ${userId}`,
+            jobId: scheduleId // Return the scheduleId for update if needed
+         };
+    }
+});
 
 
-//         // Example condition for a job failure
-//         if (Math.random() < 0.2) {
-//            logger.warn(`Simulating Job Fail for id ${job.id}`)
-//            throw new Error('Simulated job failure.');
-//         }
+taskQueue.on('completed', async (job) => {
+    try {
+        logger.info(`[BullServer] Job Completed callback for  job with ID: ${job.id} and scheduleId: ${job.returnvalue?.jobId}`);
+         
+    } catch (error) {
+         logger.warn(`[BullServer] Error on Job Completed callback for  job with ID: ${job.id} and scheduleId: ${job.returnvalue?.jobId}, error: ${error}`);
+    }
+});
 
+taskQueue.on('failed', async (job, error) => {
+    logger.warn(`[BullServer] Job Failed callback for  job with ID: ${job.id} and scheduleId: ${job.failedReason?.jobId}, error: ${error}`);
+});
 
-//         logger.info(`[${new Date().toISOString()}] Successfully processed job with ID: ${job.id}`);
-
-//     } catch (error) {
-//         logger.error(`[${new Date().toISOString()}] Job with ID: ${job.id} failed`, error);
-//         throw error; // This re-throws the error, causing Bull to mark the job as failed
-//     }
-// });
-
-// schedulerService.onReminderCompleted(async (job) => {
-//     logger.info(`[${new Date().toISOString()}] Job Completed callback for  job with ID: ${job.id}`);
-// });
-
-// schedulerService.onReminderFailed(async (job, error) => {
-//     logger.warn(`[${new Date().toISOString()}] Job Failed callback for  job with ID: ${job.id}, error: ${error}`);
-// });
-
-// logger.info('Bull worker server started.');
+logger.info('Bull task worker server started.');
