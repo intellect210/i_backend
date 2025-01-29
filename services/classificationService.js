@@ -3,7 +3,7 @@ const { sendMessageWithInstructionsWithStructure } = require('../controllers/con
 const { classifications } = require('../config/config-classifications');
 const { DEFAULT_CLASSIFICATION, MODELS } = require('../config/config-constants');
 const systemInstructions = require('../config/config-systemInstructions.js');
-const { classificationResultStructure, combinedActionStructure } = require('../config/config-structureDefinitions');
+const { classificationResultStructure, combinedActionStructure, automationFollowupStructure } = require('../config/config-structureDefinitions');
 const agentUtils = require('../utils/agents/agent-helper');
 
 const classificationService = {
@@ -15,7 +15,7 @@ const classificationService = {
             return jsonString;
         } catch (error) {
             console.error('Error sanitizing output:', error);
-            return JSON.stringify({ payload: { classification: "no_action_needed" } });
+            return JSON.stringify({ actions: { noActionOption: { isIncluded: true } } });
         }
     },
     classify: async (text, history) => {
@@ -23,10 +23,10 @@ const classificationService = {
             const agentConfig = await agentUtils.getAgentConfig();
             const result = await sendMessageWithInstructionsWithStructure(
                 `Current user message: ${text}.`,
-                'classify_and_act',
+                'automationFollowupInstructions',
                 { agentConfig },
                 MODELS.GEMINI_105_FLASH,
-                 combinedActionStructure,
+                automationFollowupStructure,
                 [
                     ...history,
                     {
@@ -48,7 +48,7 @@ const classificationService = {
 
         } catch (error) {
             console.error('Error during classification:', error);
-            return { payload: { classification: "no_action_needed" } };
+            return { actions: { noActionOption: { isIncluded: true } } };
         }
     },
 };

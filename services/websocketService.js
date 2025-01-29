@@ -1,47 +1,25 @@
 const {
     MESSAGE_TYPES,
-    ERROR_CODES,
     MESSAGE_ROLES,
-    MODELS,
-    DEFAULT_CLASSIFICATION,
   } = require('../config/config-constants');
   const messageService = require('./messageService');
   const redisService = require('./redisService');
-  const BotResponseOrchestrator = require('../utils/agents/bot-response-orchestrator');
   const websocketConnectionManager = require('../utils/respositories/websocketConnectionManager');
   const ChatHistoryManager = require('../utils/respositories/ChatHistoryManager');
   const chatRepository = require('../utils/respositories/chatRepository');
-  const {
-    handleRedisError,
-    handleDatabaseError,
-  } = require('../utils/helpers/error-handlers');
-  const redisManager = require('../utils/respositories/redisManager');
-  const { v4: uuidv4 } = require('uuid');
   const systemInstructions = require('../config/config-systemInstructions.js');
   const DataInjector = require('../utils/helpers/data-injector');
-  const botResponseOrchestrator = new BotResponseOrchestrator();
   const botController = require('../controllers/controller-bot');
-  const PineconeService = require('../services/pineconeService');
-  const ClassificationService = require('./classificationService');
   const PersonalizationService = require('./personalizationService');
-  const { info } = require('winston');
   const dateTimeUtils = require('../utils/helpers/data-time-helper');
-  const ClassificationManager = require('../utils/respositories/classificationManager');
   const AgentStateManager = require('../utils/agents/agent-state-manager');
   const ActionExecutor = require('../utils/agents/action-executor');
-  const pineconeService = new PineconeService();
   const personalizationService = new PersonalizationService();
   const dataInjector = new DataInjector();
   const actionExecutor = new ActionExecutor();
-  const { personalInfoUpdateStructure, remindersStructure } = require('../config/config-structureDefinitions');
   const classificationService = require('./classificationService');
-  const PreferenceManager = require('../utils/respositories/preferenceManager');
-  const SchedulerService = require('./schedulerService');
-  const reminderProcessorService = require('./reminderProcessorService');
-  const preferenceManager = new PreferenceManager();
-  const schedulerService = new SchedulerService();
-  const Reminder = require('../models/reminderModel');
-  const logger = require('../utils/helpers/logger');
+
+  const TaskExecutorEngine = require('../taskEngine/taskExecutorEngine');
   
   const websocketService = {
   //=====================================================================================================
@@ -49,111 +27,111 @@ const {
   /**
    * Handles an incoming user message, processes it, and triggers bot responses if needed.
    */
-  handleMessage: async (ws, message) => {
-      // Receiving a new message
-      const user = ws.user;
-      const userId = user.useruid;
-      let { messageType, message: text, chatId, role } = message;
-      const agentStateManager = new AgentStateManager(
-          websocketService.sendMessage
-      );
-      let messageId;
-  
-      console.log(`Handling message from user ${userId}:`, message);
-  
-      // Initialize history or personal edit
-      let actionResult;
-      let history = [];
-      let isPersonalInfoEdit = false;
-  
-      try {
-          // Build chat history code piece
-  
-          try {
-              if (chatId) {
-                  const chatHistoryManager = new ChatHistoryManager(
-                      chatId,
-                      chatRepository
-                  );
-                  history = await chatHistoryManager.buildHistory();
-              }
-  
-              const personalizationInfo =
-                  await personalizationService.getPersonalizationInfo(userId);
-              const currentDateTimeIST = dateTimeUtils.getCurrentDateTimeIST();
-  
-              const infoText = `SYSTEM GIVEN INFO - , Current Date and time (take this as a fact): ${currentDateTimeIST}
-        ,Model personalised Name: ${
-                  personalizationInfo.personalisedName
-              }, Follow given Model Behaviour: ${
-                  personalizationInfo.modelBehaviour
-              }, Personal Info of user to use whenever necessary: ${
-                  personalizationInfo.personalInfo
-              }`;
-  
-              // Inject system instructions and personalization info into history
-              history = dataInjector.injectData(
-                  history,
-                  systemInstructions.getInstructions('assistantBehaviorPrompt'),
-                  'Understood. I follow the given instructions.'
-              );
-  
-              history = dataInjector.injectData(
-                  history,
-                  infoText,
-                  'Understood. I will keep these in mind for conversations.'
-              );
-  
-          } catch (error) {
-              console.log(
-                  'Error building chat history or injecting data:',
-                  error
-              );
-              // Default to an empty history if errors occur
-          }
-  
-          // Store the user message and update chatId
-  
-          const userMessageResult = await messageService.storeMessage(
-              userId,
-              text,
-              messageType,
-              MESSAGE_ROLES.USER,
-              chatId
-          );
-  
-          if (userMessageResult?.chat) {
-              chatId = userMessageResult.chat._id.toString();
-              messageId = userMessageResult.chat.messages.slice(-1)[0].messageId;
-          }
-  
-          // If followupsPreference is false or reminder scheduling fails, proceed with normal message processing
-          const classificationResult = await classificationService.classify(
-              text,
-              history
-          );
-  
-          // Process agent action or proceed with normal bot response
-          await websocketService.processAgentAction(
-              classificationResult,
-              userId,
-              chatId,
-              history,
-              message,
-              ws,
-              messageId
-          );
-  
-      } catch (error) {
-          console.error('Error handling message:', error);
-  
-          websocketService.sendMessage(userId, {
-              type: 'error',
-              code: error.code,
-              message: error.message,
-          });
-      }
-  },
+ handleMessage: async (ws, message) => {
+        // Receiving a new message
+        const user = ws.user;
+        const userId = user.useruid;
+        let { messageType, message: text, chatId, role } = message;
+        let messageId;
+
+        console.log(`Handling message from user ${userId}:`, message);
+
+        // Initialize history or personal edit
+        let history = [];
+
+        try {
+            // Build chat history code piece
+
+            try {
+                if (chatId) {
+                    const chatHistoryManager = new ChatHistoryManager(
+                        chatId,
+                        chatRepository
+                    );
+                    history = await chatHistoryManager.buildHistory();
+                }
+
+                const personalizationInfo =
+                    await personalizationService.getPersonalizationInfo(userId);
+                const currentDateTimeIST = dateTimeUtils.getCurrentDateTimeIST();
+
+                const infoText = `SYSTEM GIVEN INFO - , Current Date and time (take this as a fact): ${currentDateTimeIST}
+        ,Model personalised Name: ${personalizationInfo.personalisedName
+                    }, Follow given Model Behaviour: ${personalizationInfo.modelBehaviour
+                    }, Personal Info of user to use whenever necessary: ${personalizationInfo.personalInfo
+                    }`;
+
+                // Inject system instructions and personalization info into history
+                history = dataInjector.injectData(
+                    history,
+                    systemInstructions.getInstructions('assistantBehaviorPrompt'),
+                    'Understood. I follow the given instructions.'
+                );
+
+                history = dataInjector.injectData(
+                    history,
+                    infoText,
+                    'Understood. I will keep these in mind for conversations.'
+                );
+
+            } catch (error) {
+                console.log(
+                    'Error building chat history or injecting data:',
+                    error
+                );
+                // Default to an empty history if errors occur
+            }
+
+            // Store the user message and update chatId
+
+            const userMessageResult = await messageService.storeMessage(
+                userId,
+                text,
+                messageType,
+                MESSAGE_ROLES.USER,
+                chatId
+            );
+
+            if (userMessageResult?.chat) {
+                chatId = userMessageResult.chat._id.toString();
+                messageId = userMessageResult.chat.messages.slice(-1)[0].messageId;
+            }
+
+            const classificationResult = await classificationService.classify(
+                text,
+                history
+            );
+
+            if (classificationResult.actions.noActionOption.isIncluded) {
+                console.log(
+                    'No agent action needed. Proceeding with normal bot response.'
+                );
+                await botController.streamBotResponse(
+                    { ...message, chatId },
+                    null,
+                    history,
+                    ws,
+                    websocketService.handleStream,
+                    websocketService.handleStreamError
+                );
+            } else {
+                const taskExecutorEngine = new TaskExecutorEngine(websocketService.sendMessage);
+                const taskExecutionResult = await taskExecutorEngine.executeTask(userId, text, classificationResult, true);
+
+                if (!taskExecutionResult.success) {
+                    console.error('Task execution failed:', taskExecutionResult.message);
+                }
+            }
+        } catch (error) {
+            console.error('Error handling message:', error);
+
+            websocketService.sendMessage(userId, {
+                type: 'error',
+                code: error.code,
+                message: error.message,
+            });
+        }
+    },
    //=====================================================================================================
   /**
    * Executes the agent action based on the classification result.

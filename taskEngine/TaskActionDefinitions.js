@@ -1,5 +1,4 @@
 // FILE: taskEngine/taskActionDefinitions.js
-// CHANGES:
 class TaskActionDefinitions {
     constructor() {
         this.actions = {};
@@ -45,5 +44,7 @@ taskActionDefinitions.registerAction('getScreenContext', 'screenContext');
 taskActionDefinitions.registerAction('getNotificationFromUserDevice', 'notification');
 taskActionDefinitions.registerAction('getCalendarEvents', 'calendar');
 taskActionDefinitions.registerAction('noActionOption', 'noAction');
+taskActionDefinitions.registerAction('profileUpdate', 'profile');
+taskActionDefinitions.registerAction('scheduleReminder', 'reminder');
 
 module.exports = { TaskActionDefinitions: taskActionDefinitions };
