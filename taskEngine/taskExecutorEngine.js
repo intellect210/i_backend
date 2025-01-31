@@ -189,9 +189,11 @@ class TaskExecutorEngine {
                   if (!data || !data.context) return 'No screen context available.';
                   return `Screen Context: ${data.context}\n`;
             case 'notification':
-                if (!data || !Array.isArray(data.notifications) || data.notifications.length === 0) return 'No notifications found.';
-                const notificationContext = data.notifications.map(notification =>
-                    `Notification from ${notification.app} with content ${notification.content} at ${notification.timestamp}`
+                // console.log("[DEBUG: TaskExecutorEngine] Notification data:", data);
+                const notifications = JSON.parse(data.notifications);
+                if (!data || !Array.isArray(notifications) || notifications.length === 0) return 'No notifications found.';
+                const notificationContext = notifications.map(notification =>
+                    `Notification from ${notification.appName} with title ${notification.title} with content ${notification.text} at ${notification.timestamp}`
                 ).join('\n');
                 return `Notifications found:\n${notificationContext}\n`;
               case 'calendar':

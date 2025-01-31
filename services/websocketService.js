@@ -112,7 +112,7 @@ const {
             history
         );
        
-        if (classificationResult.actions.noActionOption.isIncluded) {
+        if (classificationResult.actions.noActionOption && classificationResult.actions.noActionOption.isIncluded) {
             console.log(
                 'No agent action needed. Proceeding with normal bot response.'
             );
