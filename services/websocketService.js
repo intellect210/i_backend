@@ -1,3 +1,4 @@
+// FILE: services/websocketService.txt
 const {
     MESSAGE_TYPES,
     MESSAGE_ROLES,
@@ -136,16 +137,9 @@ const {
                 agentStateManager.states.awaitingBotResponse,
                 messageId
             );
-
-            const finalQuery = `User query: ${message.message}.
-                Task Status: ${
-                    taskExecutionResult.success
-                        ? taskExecutionResult.message || 'Task completed successfully.'
-                        : taskExecutionResult.message || 'Task failed.'
-                }
-                (Note: The status reflects the backend execution results based on the user query and is not provided directly by the user. provide feedback to user based on it)`;
+            
            await botController.streamBotResponse(
-            { ...message, chatId, message: finalQuery },
+            { ...message, chatId, message: taskExecutionResult.finalQuery },
             null,
             history,
             ws,
