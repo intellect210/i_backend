@@ -1,14 +1,17 @@
-// FILE: taskEngine/taskActionExecutor.js
 const { v4: uuidv4 } = require('uuid');
 const { RedisTmpDataManagerForTasks } = require('./redisTmpDataManagerForTasks');
 const { TaskActionDefinitions } = require('./TaskActionDefinitions');
 const Personalization = require('../models/personalizationModel');
 const SchedulerService = require('../services/schedulerService');
 const schedulerService = new SchedulerService();
-
+const notificationService = require('../services/notificationService'); // Import notification service
 const redisTmpDataManager = new RedisTmpDataManagerForTasks();
 
 class TaskActionExecutorImpl {
+    constructor(sendMessage) {
+        this.sendMessage = sendMessage;
+    }
+
     async fetchEmails(taskId, isIncluded, SearchQueryInDetails, executionOrderIfIncluded) {
         console.log(`[TaskActionExecutorImpl] fetchEmails called`);
         if (!isIncluded || Math.random() < 0.3) {
@@ -53,22 +56,53 @@ class TaskActionExecutorImpl {
         return { success: true, message: 'getScreenContext action executed', data };
     }
 
-    async getNotificationFromUserDevice(taskId, isIncluded, executionOrderIfIncluded, filterByApp, filterByContent) {
+    async getNotificationFromUserDevice(taskId, isIncluded, executionOrderIfIncluded, filterByApp, filterByContent, userId) {
         console.log(`[TaskActionExecutorImpl] getNotificationFromUserDevice called`);
-        if (!isIncluded || Math.random() < 0.3) {
-            const data = { isIncluded, executionOrderIfIncluded, filterByApp, filterByContent, notifications: [] };
+
+        if (!isIncluded) {
+             const data = { isIncluded, executionOrderIfIncluded, filterByApp, filterByContent, notifications: [] };
             await redisTmpDataManager.storeActionData(taskId, 'getNotificationFromUserDevice', data);
-            return { success: true, message: 'getNotificationFromUserDevice action executed, no notification found', data };
+            return { success: true, message: 'getNotificationFromUserDevice action skipped, not included', data };
+         }
+
+        try {
+              const notificationResult = await notificationService.requestNotifications(userId, filterByApp, filterByContent, this.sendMessage);
+              const data = { isIncluded, executionOrderIfIncluded, filterByApp, filterByContent, notifications: notificationResult.notifications };
+
+              if(notificationResult.success) {
+                  await redisTmpDataManager.storeActionData(taskId, 'getNotificationFromUserDevice', data);
+                 return { success: true, message: `getNotificationFromUserDevice action completed`, data };
+              }
+                 await redisTmpDataManager.storeActionData(taskId, 'getNotificationFromUserDevice', {
+                    isIncluded,
+                     executionOrderIfIncluded,
+                     filterByApp,
+                     filterByContent,
+                    notifications: [],
+                     error: notificationResult.message
+                });
+            return { success: false, message: `getNotificationFromUserDevice action failed, due to: ${notificationResult.message}`, data };
+
+        } catch (error) {
+              await redisTmpDataManager.storeActionData(taskId, 'getNotificationFromUserDevice', {
+                   isIncluded,
+                    executionOrderIfIncluded,
+                    filterByApp,
+                    filterByContent,
+                   notifications: [],
+                    error: error.message
+               });
+            console.error('Error getting notifications from user device:', error);
+             return { success: false, message: `Error getting notifications from user device: ${error.message}` , data: {
+                    isIncluded,
+                    executionOrderIfIncluded,
+                    filterByApp,
+                    filterByContent,
+                   notifications: [],
+                    error: error.message
+               }};
         }
-        const notifications = Array.from({ length: Math.floor(Math.random() * 3) + 1 }, () => ({
-            id: uuidv4(),
-            app: filterByApp || `app${Math.floor(Math.random() * 10)}`,
-            content: filterByContent || `Notification content ${Math.random()}`,
-            timestamp: new Date().toISOString(),
-        }));
-        const data = { isIncluded, executionOrderIfIncluded, filterByApp, filterByContent, notifications };
-        await redisTmpDataManager.storeActionData(taskId, 'getNotificationFromUserDevice', data);
-        return { success: true, message: 'getNotificationFromUserDevice action executed', data };
+
     }
 
     async getCalendarEvents(taskId, isIncluded, executionOrderIfIncluded, timeRange) {
@@ -174,8 +208,8 @@ class TaskActionExecutorImpl {
 }
 
 class TaskActionExecutor {
-    constructor() {
-        this.taskActionExecutorImpl = new TaskActionExecutorImpl();
+    constructor(sendMessage) {
+        this.taskActionExecutorImpl = new TaskActionExecutorImpl(sendMessage);
     }
 
     async fetchEmails(taskId, isIncluded, SearchQueryInDetails, executionOrderIfIncluded) {
@@ -190,8 +224,8 @@ class TaskActionExecutor {
         return this.taskActionExecutorImpl.getScreenContext(taskId, isIncluded, executionOrderIfIncluded);
     }
 
-    async getNotificationFromUserDevice(taskId, isIncluded, executionOrderIfIncluded, filterByApp, filterByContent) {
-        return this.taskActionExecutorImpl.getNotificationFromUserDevice(taskId, isIncluded, executionOrderIfIncluded, filterByApp, filterByContent);
+   async getNotificationFromUserDevice(taskId, isIncluded, executionOrderIfIncluded, filterByApp, filterByContent, userId) {
+        return this.taskActionExecutorImpl.getNotificationFromUserDevice(taskId, isIncluded, executionOrderIfIncluded, filterByApp, filterByContent, userId);
     }
 
     async getCalendarEvents(taskId, isIncluded, executionOrderIfIncluded, timeRange) {

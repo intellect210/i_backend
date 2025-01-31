@@ -5,8 +5,8 @@ const { TaskActionDefinitions } = require('./TaskActionDefinitions');
 const { v4: uuidv4 } = require('uuid');
 
 class TaskExecutorEngine {
-    constructor() {
-        this.taskActionExecutor = new TaskActionExecutor();
+    constructor(sendMessage) {
+        this.taskActionExecutor = new TaskActionExecutor(sendMessage);
         this.redisTmpDataManager = new RedisTmpDataManagerForTasks();
     }
 
@@ -124,7 +124,7 @@ class TaskExecutorEngine {
                     actionResult = await actionHandler(taskId, action.isIncluded, action.executionOrderIfIncluded);
                     break;
                 case 'getNotificationFromUserDevice':
-                    actionResult = await actionHandler(taskId, action.isIncluded, action.executionOrderIfIncluded, action.filterByApp, action.filterByContent);
+                    actionResult = await actionHandler(taskId, action.isIncluded, action.executionOrderIfIncluded, action.filterByApp, action.filterByContent, userId);
                     break;
                 case 'getCalendarEvents':
                     actionResult = await actionHandler(taskId, action.isIncluded, action.executionOrderIfIncluded, action.timeRange);
@@ -172,7 +172,8 @@ class TaskExecutorEngine {
                   systemContext += this._formatContext(dataType, taskData[actionKey]);
             }
         return systemContext;
-    }
+        }
+    
     _formatContext(dataType, data) {
         switch (dataType) {
             case 'gmail':
@@ -188,11 +189,11 @@ class TaskExecutorEngine {
                   if (!data || !data.context) return 'No screen context available.';
                   return `Screen Context: ${data.context}\n`;
             case 'notification':
-                   if (!data || !data.notifications || data.notifications.length === 0) return 'No notifications found.';
-                     const notificationContext = data.notifications.map(notification =>
-                         `Notification from ${notification.app} with content ${notification.content} at ${notification.timestamp}`
-                     ).join('\n');
-                    return `Notifications found:\n${notificationContext}\n`;
+                if (!data || !Array.isArray(data.notifications) || data.notifications.length === 0) return 'No notifications found.';
+                const notificationContext = data.notifications.map(notification =>
+                    `Notification from ${notification.app} with content ${notification.content} at ${notification.timestamp}`
+                ).join('\n');
+                return `Notifications found:\n${notificationContext}\n`;
               case 'calendar':
                    if (!data || !data.events || data.events.length === 0) return 'No calendar events found.';
                    const eventContext = data.events.map(event =>
@@ -213,4 +214,4 @@ class TaskExecutorEngine {
     }
 }
 
-module.exports = TaskExecutorEngine;
+module.exports = { TaskExecutorEngine };

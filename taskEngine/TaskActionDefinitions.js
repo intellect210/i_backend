@@ -1,4 +1,3 @@
-// FILE: taskEngine/taskActionDefinitions.js
 class TaskActionDefinitions {
     constructor() {
         this.actions = {};

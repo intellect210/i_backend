@@ -1,4 +1,3 @@
-// FILE: services/websocketService.txt
 const {
     MESSAGE_TYPES,
     MESSAGE_ROLES,
@@ -15,12 +14,13 @@ const {
   const dateTimeUtils = require('../utils/helpers/data-time-helper');
   const AgentStateManager = require('../utils/agents/agent-state-manager');
   const ActionExecutor = require('../utils/agents/action-executor');
+  const notificationService = require('./notificationService');
   const personalizationService = new PersonalizationService();
   const dataInjector = new DataInjector();
   const actionExecutor = new ActionExecutor();
   const classificationService = require('./classificationService');
 
-  const TaskExecutorEngine = require('../taskEngine/taskExecutorEngine');
+  const {TaskExecutorEngine} = require('../taskEngine/taskExecutorEngine');
   
   const websocketService = {
   //=====================================================================================================
@@ -34,10 +34,17 @@ const {
     // Receiving a new message
     const user = ws.user;
     const userId = user.useruid;
-    let { messageType, message: text, chatId, role } = message;
+    let { messageType, message: text, chatId, role, route, dataType } = message;
     let messageId;
 
     console.log(`Handling message from user ${userId}:`, message);
+
+    // Handle notification responses
+        if (route === 'stMessage' && dataType === 'Notifications') {
+            notificationService.handleNotificationResponse(message);
+            return;
+        }
+
 
     // Initialize history or personal edit
     let history = [];
@@ -104,7 +111,6 @@ const {
             text,
             history
         );
-        const taskExecutorEngine = new TaskExecutorEngine(websocketService.sendMessage);
        
         if (classificationResult.actions.noActionOption.isIncluded) {
             console.log(
@@ -124,7 +130,8 @@ const {
                 agentStateManager.states.TasksStates.taskInitializing,
                 messageId
             );
-
+            const taskExecutorEngine = new TaskExecutorEngine(websocketService.sendMessage);
+    
             const taskExecutionResult = await taskExecutorEngine.executeTask(userId, text, classificationResult);
            
            await agentStateManager.setState(
