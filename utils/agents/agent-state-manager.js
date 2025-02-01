@@ -1,8 +1,11 @@
+// FILE: utils/agents/agent-state-manager.js
+// Updated agent state manager to remove the _process and save function
 const redisManager = require('../respositories/redisManager');
 const { ERROR_CODES } = require('../../config/config-constants');
 const AgentState = require('../../models/agentStateModel');
-const Chat = require('../../models/chatModel');
+const Task = require('../../models/taskModel');
 const { v4: uuidv4 } = require('uuid');
+const taskController = require('../../controllers/controller-task');
 
 class AgentStateManager {
     constructor(sendMessage) {
@@ -71,7 +74,6 @@ class AgentStateManager {
                         noAction: 'No Action',
                     }
                 }
-
             }
         };
 
@@ -83,89 +85,76 @@ class AgentStateManager {
      * Sets the state for a user.
      * @param {string} userId - The ID of the user.
      * @param {string} state - The state to set.
-     * @param {string} messageId - The ID of the message associated with the state.
+      * @param {string} messageId - The ID of the message associated with the state.
      * @param {string|null} errorMessage - An optional error message.
+      * @param {string|null} taskId - The ID of the task associated with the state.
      */
-    async setState(userId, state, messageId, errorMessage = null) {
-        const stateData = {
-            state: state,
+     async setState(userId, state, messageId, errorMessage = null, taskId = null) {
+         const stateData = {
+             state: state,
             timestamp: Date.now(),
             errorMessage: errorMessage,
-            messageId: messageId,
+             taskId: taskId
         };
-
         try {
-            await this.enqueueState(userId, stateData);
+              await this.enqueueState(userId, stateData, messageId);
         } catch (error) {
             console.log("Error setting state:", error);
-            // throw error;
-            return;
+          return;
         }
     }
-
     /**
      * Enqueues the state data for processing.
      * @param {string} userId - The ID of the user.
      * @param {Object} stateData - The state data to enqueue.
      */
-    async enqueueState(userId, stateData) {
-        try {
-            const processedStateData = await this._processAndSaveState(userId, stateData);
-            const queueItem = JSON.stringify({ userId, stateData: processedStateData });
-
+     async enqueueState(userId, stateData, messageId) {
+          try {
+             const processedStateData = await this._processAndSaveState( stateData);
+             const queueItem = JSON.stringify({ userId, stateData: processedStateData });
              const success = await redisManager.rPush(this.stateQueueKey, queueItem);
-
             if (!success) {
-                // throw new Error('Failed to enqueue state in Redis');
-                console.log('Failed to enqueue state in Redis');
+                 console.log('Failed to enqueue state in Redis');
                 return;
             }
-            await this.processQueue();
-        } catch (error) {
-             console.log("Error enqueuing state:", error);
-            //  throw { code: ERROR_CODES.REDIS_ERROR, message: error.message };
-         }
-
-    }
-
-    async _processAndSaveState(userId, stateData) {
-        try {
-            const chat = await Chat.findOne({ 'messages.messageId': stateData.messageId }, { 'messages.$': 1 });
-            if(!chat) {
-                 console.log('Chat not found for messageId:', stateData.messageId);
-                 return;
-            }
-
-           const message = chat.messages.find(msg => msg.messageId.toString() === stateData.messageId.toString());
-
-           if(!message) {
-             console.log('Message not found for messageId:', stateData.messageId);
-             return;
+             await this.processQueue();
+         } catch (error) {
+              console.log("Error enqueuing state:", error);
            }
+     }
 
-            const sequence =  message.agentStates ? message.agentStates.length + 1 : 1;
-
-            const agentState = new AgentState({
-                  message: message.messageId,
-                  sequence: sequence,
-                  state: stateData.state,
-                  timestamp: stateData.timestamp,
-                  errorMessage: stateData.errorMessage,
-                });
-
-              await agentState.save();
-
-              await Chat.updateOne(
-                { 'messages.messageId': stateData.messageId },
-                { $push: { 'messages.$.agentStates': agentState._id } }
-              );
-
-           return { ...stateData, sequence: sequence }
+     async _processAndSaveState(stateData) {
+        try {
+            let sequence = 1;
+             if(stateData.taskId){
+                const task = await Task.findOne({ taskId: stateData.taskId }).populate('executionStatus');
+               if (task && task.executionStatus && task.executionStatus.length > 0) {
+                  sequence = task.executionStatus.length + 1;
+                }
+            }
+ 
+           const agentState = new AgentState({
+                state: stateData.state,
+                 timestamp: stateData.timestamp,
+                errorMessage: stateData.errorMessage,
+                 taskId: stateData.taskId,
+                sequence: sequence
+               });
+             await agentState.save();
+            if(stateData.taskId){
+               const task = await Task.findOne({taskId: stateData.taskId});
+                if(task) {
+                 await taskController.addExecutionStatus(stateData.taskId, agentState._id);
+                } else {
+                   console.log('Task not found for taskId:', stateData.taskId);
+                }
+             }
+            return { ...stateData, sequence: sequence, agentStateId: agentState._id}
         } catch (error) {
              console.error("Error processing and saving state:", error);
              throw error;
          }
-    }
+     }
 
     /**
      * Processes the state queue.
@@ -179,7 +168,6 @@ class AgentStateManager {
             }
         } catch (error) {
             console.error("Error processing queue:", error);
-            // throw { code: ERROR_CODES.REDIS_ERROR, message: error.message };
             return;
         }
     }
@@ -190,14 +178,13 @@ class AgentStateManager {
      * @param {Object} stateData - The state data to broadcast.
      */
     async broadcastState(userId, stateData) {
-        try {
-            await this.sendMessage(userId, { type: 'agentState', ...stateData });
-        } catch (error) {
+         try {
+           await this.sendMessage(userId, { type: 'agentState', ...stateData });
+         } catch (error) {
             console.error(`Error broadcasting state for user ${userId}:`, error);
-            // throw { code: ERROR_CODES.WEBSOCKET_ERROR, message: `Error broadcasting state to user ${userId}: ${error.message}` };
-            return;
-        }
-    }
+           return;
+         }
+     }
 }
 
 module.exports = AgentStateManager;

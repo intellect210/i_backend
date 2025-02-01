@@ -1,3 +1,5 @@
+// FILE: services/websocketService.js
+// Updated handleMessage function
 const {
     MESSAGE_TYPES,
     MESSAGE_ROLES,
@@ -14,13 +16,13 @@ const {
   const dateTimeUtils = require('../utils/helpers/data-time-helper');
   const AgentStateManager = require('../utils/agents/agent-state-manager');
   const ActionExecutor = require('../utils/agents/action-executor');
+const taskController = require('../controllers/controller-task');
   const notificationService = require('./notificationService');
   const personalizationService = new PersonalizationService();
   const dataInjector = new DataInjector();
   const actionExecutor = new ActionExecutor();
   const classificationService = require('./classificationService');
-
-  const {TaskExecutorEngine} = require('../taskEngine/taskExecutorEngine');
+    const {TaskExecutorEngine} = require('../taskEngine/taskExecutorEngine');
   
   const websocketService = {
   //=====================================================================================================
@@ -29,14 +31,14 @@ const {
    * Handles an incoming user message, processes it, and triggers bot responses if needed.
    */
   handleMessage: async (ws, message) => {
-  const agentStateManager = new AgentStateManager(websocketService.sendMessage);
+      const agentStateManager = new AgentStateManager(websocketService.sendMessage);
 
-    // Receiving a new message
-    const user = ws.user;
-    const userId = user.useruid;
-    let { messageType, message: text, chatId, role, route, dataType } = message;
+      // Receiving a new message
+        const user = ws.user;
+      const userId = user.useruid;
+      let { messageType, message: text, chatId, role, route, dataType } = message;
     let messageId;
-
+    let taskId;
     console.log(`Handling message from user ${userId}:`, message);
 
     // Handle notification responses
@@ -45,67 +47,62 @@ const {
             return;
         }
 
-
     // Initialize history or personal edit
     let history = [];
-
+   
     try {
-        // Build chat history code piece
-
-        try {
-            if (chatId) {
-                const chatHistoryManager = new ChatHistoryManager(
-                    chatId,
-                    chatRepository
-                );
-                history = await chatHistoryManager.buildHistory();
-            }
-
-            const personalizationInfo =
-                await personalizationService.getPersonalizationInfo(userId);
-            const currentDateTimeIST = dateTimeUtils.getCurrentDateTimeIST();
-
-            const infoText = `SYSTEM GIVEN INFO - , Current Date and time (take this as a fact): ${currentDateTimeIST
-                },Model personalised Name: ${personalizationInfo.personalisedName
-                }, Follow given Model Behaviour: ${personalizationInfo.modelBehaviour
-                }, Personal Info of user to use whenever necessary: ${personalizationInfo.personalInfo
-                }`;
-
-            // Inject system instructions and personalization info into history
-            history = dataInjector.injectData(
-                history,
-                systemInstructions.getInstructions('assistantBehaviorPrompt'),
-                'Understood. I follow the given instructions.'
-            );
-
-            history = dataInjector.injectData(
-                history,
-                infoText,
-                'Understood. I will keep these in mind for conversations.'
-            );
-
-        } catch (error) {
-            console.log(
-                'Error building chat history or injecting data:',
-                error
-            );
-            // Default to an empty history if errors occur
+      // Build chat history code piece
+      try {
+        if (chatId) {
+          const chatHistoryManager = new ChatHistoryManager(
+            chatId,
+            chatRepository
+          );
+          history = await chatHistoryManager.buildHistory();
         }
+        const personalizationInfo =
+          await personalizationService.getPersonalizationInfo(userId);
+        const currentDateTimeIST = dateTimeUtils.getCurrentDateTimeIST();
 
-        // Store the user message and update chatId
+        const infoText = `SYSTEM GIVEN INFO - , Current Date and time (take this as a fact): ${currentDateTimeIST
+          },Model personalised Name: ${personalizationInfo.personalisedName
+          }, Follow given Model Behaviour: ${personalizationInfo.modelBehaviour
+          }, Personal Info of user to use whenever necessary: ${personalizationInfo.personalInfo
+          }`;
 
-        const userMessageResult = await messageService.storeMessage(
-            userId,
-            text,
-            messageType,
-            MESSAGE_ROLES.USER,
-            chatId
+        // Inject system instructions and personalization info into history
+        history = dataInjector.injectData(
+          history,
+          systemInstructions.getInstructions('assistantBehaviorPrompt'),
+          'Understood. I follow the given instructions.'
         );
 
-        if (userMessageResult?.chat) {
-            chatId = userMessageResult.chat._id.toString();
-            messageId = userMessageResult.chat.messages.slice(-1)[0].messageId;
-        }
+        history = dataInjector.injectData(
+          history,
+          infoText,
+          'Understood. I will keep these in mind for conversations.'
+        );
+      } catch (error) {
+        console.log(
+          'Error building chat history or injecting data:',
+          error
+        );
+        // Default to an empty history if errors occur
+      }
+      // Store the user message and update chatId
+
+        const userMessageResult = await messageService.storeMessage(
+          userId,
+          text,
+          messageType,
+          MESSAGE_ROLES.USER,
+          chatId
+      );
+
+      if (userMessageResult?.chat) {
+        chatId = userMessageResult.chat._id.toString();
+           messageId = userMessageResult.chat.messages.slice(-1)[0].messageId.toString();
+      }
 
         const classificationResult = await classificationService.classify(
             text,
@@ -116,66 +113,111 @@ const {
             console.log(
                 'No agent action needed. Proceeding with normal bot response.'
             );
-            await botController.streamBotResponse(
-                { ...message, chatId },
-                null,
-                history,
-                ws,
-                websocketService.handleStream,
-                websocketService.handleStreamError
-            );
-        } else {
-            await agentStateManager.setState(
-                userId,
-                agentStateManager.states.TasksStates.taskInitializing,
-                messageId
-            );
-            const taskExecutorEngine = new TaskExecutorEngine(websocketService.sendMessage);
-    
-            const taskExecutionResult = await taskExecutorEngine.executeTask(userId, text, classificationResult);
-           
-           await agentStateManager.setState(
-                userId,
-                agentStateManager.states.TasksStates.taskCompleted,
-                messageId
-            );
-            await agentStateManager.setState(
-                userId,
-                agentStateManager.states.awaitingBotResponse,
-                messageId
-            );
-            
-           await botController.streamBotResponse(
-            { ...message, chatId, message: taskExecutionResult.finalQuery },
+             await botController.streamBotResponse(
+            { ...message, chatId },
             null,
             history,
             ws,
             websocketService.handleStream,
             websocketService.handleStreamError
         );
+        } else {
 
-        await agentStateManager.setState(
-            userId,
-            agentStateManager.states.completed,
-            messageId
-        );
+        try {
+         // Create a new task in the database and get taskId
+          const task = await taskController.createTask(userId, classificationResult);
+          taskId = task.taskId;
+          console.log(`[websocketService] Task created with taskId: ${taskId}`);
 
-            if (!taskExecutionResult.success) {
-               console.error('Task execution failed:', taskExecutionResult.message);
+          // Add task details to the task
+            if(messageId) {
+              await taskController.addTaskDetails(taskId, messageId, chatId);
+             console.log(
+              `[websocketService] messageId added with value: ${messageId} , chatId: ${chatId}`
+             );
+             }
+
+           // Update the message with taskId
+          if (messageId) {
+              const chat = await chatRepository.findChatById(chatId);
+              const message = chat.messages.find(
+                (msg) => msg.messageId.toString() === messageId
+            );
+            if(message){
+              message.taskId = taskId;
+              await chat.save();
             }
+           console.log(`[websocketService] taskId: ${taskId} added in messageId: ${messageId}`);
+          }
+
+          await agentStateManager.setState(
+              userId,
+              agentStateManager.states.TasksStates.taskInitializing,
+             messageId,
+             null,
+             taskId
+            );
+           const taskExecutorEngine = new TaskExecutorEngine(websocketService.sendMessage);
+            const taskExecutionResult = await taskExecutorEngine.executeTask(userId, text, classificationResult);
+
+            await agentStateManager.setState(
+               userId,
+               agentStateManager.states.TasksStates.taskCompleted,
+              messageId,
+               null,
+               taskId
+            );
+
+            await agentStateManager.setState(
+                 userId,
+                agentStateManager.states.awaitingBotResponse,
+                 messageId,
+                 null,
+                 taskId
+             );
+            
+           await botController.streamBotResponse(
+              { ...message, chatId, message: taskExecutionResult.finalQuery },
+             null,
+            history,
+             ws,
+              websocketService.handleStream,
+            websocketService.handleStreamError
+           );
+
+           await agentStateManager.setState(
+               userId,
+             agentStateManager.states.completed,
+            messageId,
+             null,
+             taskId
+           );
+
+           if (!taskExecutionResult.success) {
+             console.error('Task execution failed:', taskExecutionResult.message);
+           }
+        } catch (error) {
+             console.error(
+                '[websocketService] Error handling message (Task Execution):',
+                error
+             );
+             websocketService.sendMessage(userId, {
+                type: 'error',
+              code: error.code,
+              message: error.message || "Error during task execution"
+            });
+         }
         }
     } catch (error) {
-        console.error('Error handling message:', error);
-
-        websocketService.sendMessage(userId, {
-            type: 'error',
-            code: error.code,
-            message: error.message,
-        });
+      console.error('Error handling message:', error);
+      websocketService.sendMessage(userId, {
+        type: 'error',
+        code: error.code,
+        message: error.message,
+      });
     }
-},
-
-//=====================================================================================================
+  },
+  
     /**
      * Manages a newly established WebSocket connection.
      */

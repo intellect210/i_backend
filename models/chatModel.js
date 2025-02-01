@@ -1,4 +1,5 @@
 // FILE: models/chatModel.js
+// Updated chat model to remove agentState array from messages schema and enforce taskId rules.
 const mongoose = require('mongoose');
 const { MESSAGE_TYPES, MESSAGE_ROLES } = require('../config/config-constants');
 
@@ -41,14 +42,14 @@ const chatSchema = new mongoose.Schema({
         enum: ['sent', 'delivered', 'failed'],
         default: 'sent',
       },
+      taskId: {
+        type: String,
+        default: null,
+      },
       createdAt: {
         type: Date,
         default: Date.now,
       },
-      agentStates: [{
-         type: mongoose.Schema.Types.ObjectId,
-          ref: 'AgentState',
-      }],
     },
   ],
   createdAt: {
@@ -59,6 +60,16 @@ const chatSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+});
+
+// Middleware to enforce taskId rules
+chatSchema.pre('save', function (next) {
+  this.messages.forEach((message) => {
+    if (message.role !== MESSAGE_ROLES.USER) {
+      message.taskId = null; // Force null for BOT or other roles
+    }
+  });
+  next();
 });
 
 const Chat = mongoose.model('Chat', chatSchema);
