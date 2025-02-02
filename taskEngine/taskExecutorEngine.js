@@ -10,8 +10,7 @@ class TaskExecutorEngine {
         this.redisTmpDataManager = new RedisTmpDataManagerForTasks();
     }
 
-    async executeTask(userId, query, plan) {
-        const taskId = uuidv4();
+    async executeTask(userId, query, plan, messageId, flag_send_status = false, taskId) {
         console.log(`[TaskExecutorEngine] Executing task ${taskId} for user ${userId}`);
         let fallbackToNormal = false;
         let overallStatus = {
@@ -53,7 +52,7 @@ class TaskExecutorEngine {
                 continue; // Skip unknown actions
             }
             try {
-                const actionResult = await this._executeAction(taskId, actionKey, action, userId);
+                const actionResult = await this._executeAction(taskId, actionKey, action, userId, messageId, flag_send_status);
                 if (actionResult && actionResult.data) {
                      overallStatus.taskData[actionKey] = actionResult.data;
                 }
@@ -84,6 +83,7 @@ class TaskExecutorEngine {
        overallStatus.finalQuery = `User query: ${query}. \n System context: ${systemContext} `;
 
         console.log(`[TaskExecutorEngine] Task ${taskId} execution finished for user ${userId}`);
+        
         return {
             ...overallStatus,
         };
@@ -98,8 +98,7 @@ class TaskExecutorEngine {
         }
     }
 
-
-    async _executeAction(taskId, actionKey, action, userId) {
+    async _executeAction(taskId, actionKey, action, userId, messageId, flag_send_status) {
         console.log(`[TaskExecutorEngine] Executing action ${actionKey} for task ${taskId}`);
         if (!action || typeof action !== 'object') {
             console.warn(`[TaskExecutorEngine] Skipping invalid action: ${actionKey}`);
@@ -115,25 +114,25 @@ class TaskExecutorEngine {
             let actionResult;
             switch (actionKey) {
                 case 'fetchEmails':
-                    actionResult = await actionHandler(taskId, action.isIncluded, action.SearchQueryInDetails, action.executionOrderIfIncluded);
+                    actionResult = await actionHandler(taskId, action.isIncluded, action.SearchQueryInDetails, action.executionOrderIfIncluded, userId, messageId, flag_send_status);
                     break;
                 case 'llmPipeline':
-                    actionResult = await actionHandler(taskId, action.isIncluded, action.systemInstructions, action.executionOrderIfIncluded, action.inputContexts, action.baseQuery);
+                    actionResult = await actionHandler(taskId, action.isIncluded, action.systemInstructions, action.executionOrderIfIncluded, action.inputContexts, action.baseQuery, userId, messageId, flag_send_status);
                     break;
                 case 'getScreenContext':
-                    actionResult = await actionHandler(taskId, action.isIncluded, action.executionOrderIfIncluded);
+                    actionResult = await actionHandler(taskId, action.isIncluded, action.executionOrderIfIncluded, userId, messageId, flag_send_status);
                     break;
                 case 'getNotificationFromUserDevice':
-                    actionResult = await actionHandler(taskId, action.isIncluded, action.executionOrderIfIncluded, action.filterByApp, action.filterByContent, userId);
+                    actionResult = await actionHandler(taskId, action.isIncluded, action.executionOrderIfIncluded, action.filterByApp, action.filterByContent, userId, messageId, flag_send_status);
                     break;
                 case 'getCalendarEvents':
-                    actionResult = await actionHandler(taskId, action.isIncluded, action.executionOrderIfIncluded, action.timeRange);
+                    actionResult = await actionHandler(taskId, action.isIncluded, action.executionOrderIfIncluded, action.timeRange, userId, messageId, flag_send_status);
                     break;
                  case 'profileUpdate':
-                    actionResult = await actionHandler(taskId, action.isIncluded, action.executionOrderIfIncluded, action.finalEditedInfo, userId);
+                    actionResult = await actionHandler(taskId, action.isIncluded, action.executionOrderIfIncluded, action.finalEditedInfo, userId, messageId, flag_send_status);
                     break;
                 case 'scheduleReminder':
-                    actionResult = await actionHandler(taskId, action.isIncluded, action.executionOrderIfIncluded, action.task, userId);
+                    actionResult = await actionHandler(taskId, action.isIncluded, action.executionOrderIfIncluded, action.task, userId, messageId, flag_send_status);
                      break;
                 default:
                     console.warn(`[TaskExecutorEngine] Unknown action type: ${actionKey}`);
@@ -160,7 +159,8 @@ class TaskExecutorEngine {
 
         return handlerMap[actionName] || null;
     }
-     _getContextString(taskData) {
+
+    _getContextString(taskData) {
        let systemContext = "";
             for (const actionKey in taskData) {
                  const actionDefinition = TaskActionDefinitions.getAction(actionKey);

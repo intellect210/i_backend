@@ -158,7 +158,7 @@ const taskController = require('../controllers/controller-task');
              taskId
             );
            const taskExecutorEngine = new TaskExecutorEngine(websocketService.sendMessage);
-            const taskExecutionResult = await taskExecutorEngine.executeTask(userId, text, classificationResult);
+            const taskExecutionResult = await taskExecutorEngine.executeTask(userId, text,classificationResult, messageId, true, taskId);
 
             await agentStateManager.setState(
                userId,
