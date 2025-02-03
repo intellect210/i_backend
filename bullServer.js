@@ -1,12 +1,12 @@
-const { redisClient, connectRedis } = require('../../config/config-redis');
-const { connectDB } = require('../../config/config-db');
-const { TaskExecutorEngine } = require('../../taskEngine/taskExecutorEngine');
-const { TaskQueueService } = require('../../services/bullService');
-const { ReminderQueueService } = require('../../services/bullService');
-const { TTL_CONFIG } = require('../../config/config-constants');
-const FCMService = require('../../services/fcmService'); // Import FCM Service
-const NotificationModule = require('../../services/notificationModule');
-const processRemindersEngine = require('../../taskEngine/processRemindersEngine'); // Import processRemindersEngine
+const { redisClient, connectRedis } = require('./config/config-redis');
+const { connectDB } = require('./config/config-db');
+const { TaskExecutorEngine } = require('./taskEngine/taskExecutorEngine');
+const { TaskQueueService } = require('./services/bullService');
+const { ReminderQueueService } = require('./services/bullService');
+const { TTL_CONFIG } = require('./config/config-constants');
+const FCMService = require('./services/fcmService'); // Import FCM Service
+const NotificationModule = require('./services/notificationModule');
+const processRemindersEngine = require('./taskEngine/processRemindersEngine'); // Import processRemindersEngine
 
 const taskExecutorEngine = new TaskExecutorEngine();
 // Initialize FCMService and NotificationModule outside of the event handlers
@@ -16,7 +16,6 @@ const notificationModule = new NotificationModule();
 // Initialize Bull queue for task processing
 const taskQueueService = new TaskQueueService();
 const taskQueue = taskQueueService.queue;
-
 
 // Initialize Bull queue for reminder processing
 const reminderQueueService = new ReminderQueueService();
