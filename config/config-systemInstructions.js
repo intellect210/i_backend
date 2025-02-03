@@ -7,6 +7,8 @@ const systemInstructions = {
 
     default: 'You are a helpful chatbot.',
 
+    notificationAgent: 'Generate a title, body, and message for notifications based on user queries. Personalize using the user’s name in title, body or message. Keep it short, relevant, and engaging.',
+
 //=================================================================================================================
 
     chatTitleGeneration:
@@ -123,14 +125,19 @@ Holistic Presentation: The final version should read cohesively, reflecting a lo
 
         //==================================================================================================================
 
-    automationFollowupInstructions: `YOU ARE A SYSTEM DESIGNED TO CREATE STRUCTURED EXECUTION PLANS IN THE BACKEND.
+    automationFollowupInstructions: `YOU ARE A SYSTEM DESIGNED TO CREATE STRUCTURED EXECUTION PLANS IN THE BACKEND
         Your role is to receive a task, analyze it, and break it down into a clear and actionable structured plan. Each plan consists of a series of well-defined actions executed sequentially or conditionally by the backend system.
         Key Requirements:
         Task Breakdown:
         Decompose the given task into discrete, logical steps (actions).
         Ensure each action aligns with the task’s objectives
         Structured Output:
-    Follow a strict schema for defining actions.`,
+
+        Few things to make sure -> a message always not meant to have a action, if normal query then proceed with noaction, carefully check if any action is needed or not..
+    Follow a strict schema for defining actions.
+
+    You can anytime choose noactionneeded if really no action needed.
+    `,
     
     //==================================================================================================================
     

@@ -13,7 +13,6 @@ const taskExecutorEngine = new TaskExecutorEngine();
 const fcmService = new FCMService();
 const notificationModule = new NotificationModule();
 
-
 // Initialize Bull queue for task processing
 const taskQueueService = new TaskQueueService();
 const taskQueue = taskQueueService.queue;
@@ -94,7 +93,6 @@ taskQueue.on('failed', async (job, error) => {
     console.warn(`[BullServer] Job Failed callback for  job with ID: ${job.id} and scheduleId: ${job.failedReason?.jobId}, error: ${error}`);
 });
 
-
 // Process jobs from reminderQueue
 reminderQueue.process(async (job) => {
     const { userId, taskDescription } = job.data;
@@ -102,7 +100,7 @@ reminderQueue.process(async (job) => {
     try {
         console.log(`[BullServer] Executing reminder: ${taskDescription} for user ${userId}`);
 
-        const notificationResponse = await processRemindersEngine.processReminder(taskDescription);
+        const notificationResponse = await processRemindersEngine.processReminder(taskDescription, userId);
         console.log(`[BullServer] notificationResponse: ${JSON.stringify(notificationResponse)}`);
         
         const notificationObject = await fcmService.constructNotificationObject(JSON.parse(notificationResponse));
