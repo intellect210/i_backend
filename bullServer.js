@@ -1,4 +1,4 @@
-const { redisClient, connectRedis } = require('./config/config-redis');
+// const { redisClient, connectRedis } = require('./config/config-redis');
 const { connectDB } = require('./config/config-db');
 const { TaskExecutorEngine } = require('./taskEngine/taskExecutorEngine');
 const { TaskQueueService } = require('./services/bullService');
@@ -25,12 +25,20 @@ const reminderQueue = reminderQueueService.queue;
 // Initialize Bull queue for notification processing
 const notificationQueue = notificationModule.notificationQueue;
 
+const redis = require('redis');
+
 // Connect to MongoDB
 (async () => {
     try {
         await connectDB();
-        await connectRedis();
+
         console.log('Connected to MongoDB');
+
+        const redisClient = redis.createClient({
+            url: process.env.REDIS_URI,
+          });
+          redisClient.connect();
+          redisClient.on('connect', () => console.log('Redis client connected'));
     } catch (error) {
         console.error('Error connecting to MongoDB:', error);
         process.exit(1);
