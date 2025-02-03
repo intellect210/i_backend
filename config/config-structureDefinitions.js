@@ -38,6 +38,7 @@ const actionSchemaTemplate = {
 const profileUpdate = {
   "profileUpdate": {
     "type": "object",
+    "description": "this is used to update the user's hyper-personal information later to be used by the model for personalization",
     "properties": {
       "isIncluded": { "type": "boolean" },
       "executionOrderIfIncluded": { "type": "number" },
@@ -190,14 +191,14 @@ const llmPipeline = {
 const getScreenContext = {
   "getScreenContext": {
     ...actionSchemaTemplate,
-    "description": "Captures the user's current screen context."
+    "description": "Captures the user's current screen context if needed for fact checking or context",
   }
 };
 
 const getNotificationFromUserDevice = {
   "getNotificationFromUserDevice": {
     ...actionSchemaTemplate,
-    "description": "Retrieves recent user device notifications.",
+    "description": "Retrieves recent user device notifications for context.",
     "properties": {
       ...actionSchemaTemplate.properties,
       "filterByApp": { "type": "string" },
@@ -232,7 +233,7 @@ const noActionOption = {
       "isIncluded": { "type": "boolean" }
     },
     "required": ["isIncluded"],
-    "description": "Indicates no action is required or if the user explicitly asked for it."
+    "description": "Indicates no action is required when no action necessary to provide user with help or if the user explicitly asked for it."
   }
 };
 
@@ -243,11 +244,11 @@ const automationFollowupStructure = {
     "actions": {
       "type": "object",
       "properties": {
-        ...fetchEmails,
+        // ...fetchEmails,
         // ...llmPipeline,
         ...getScreenContext,
         ...getNotificationFromUserDevice,
-        ...getCalendarEvents,
+        // ...getCalendarEvents,
         ...noActionOption,
         ...profileUpdate,
         ...ReminderStructure
@@ -369,7 +370,7 @@ const classificationResultBoolStructure = {
 
 const combinedActionStructure = {
   "type": "object",
-  "description": "Structure for combined actions: no action, personal info update, or schedule reminder/followups/time-related schedulers",
+  "description": "Structure for combined actions: no action,context retrieval, personal info update, or schedule reminder/followups/time-related schedulers",
   "properties": {
     "payload": {
       "type": "object",
