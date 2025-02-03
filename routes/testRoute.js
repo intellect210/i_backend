@@ -5,25 +5,25 @@ const { TaskExecutorEngine } = require('../taskEngine/taskExecutorEngine');
 const NotificationModule = require('../services/notificationModule'); // Import NotificationModule
 const FCMService = require('../services/fcmService');
 
-// const taskScheduler = new TaskScheduler();
+const taskScheduler = new TaskScheduler();
 // const taskExecutorEngine = new TaskExecutorEngine();
 const notificationModule = new NotificationModule();
 const fcmService = new FCMService();
 
 // Route to test scheduleTask
-// router.post('/scheduleTask', async (req, res) => {
-//     try {
-//         const { userId, query } = req.body;
-//         if (!userId || !query) {
-//             return res.status(400).json({ message: 'User ID and query are required' });
-//         }
-//         const response = await taskScheduler.scheduleTask(userId, query);
-//         res.json(response);
-//     } catch (error) {
-//         console.error('Error testing scheduleTask:', error);
-//         res.status(500).json({ message: 'Error testing scheduleTask', error: error.message });
-//     }
-// });
+router.post('/scheduleTask', async (req, res) => {
+    try {
+        const { userId, query } = req.body;
+        if (!userId || !query) {
+            return res.status(400).json({ message: 'User ID and query are required' });
+        }
+        const response = await taskScheduler.scheduleTask(userId, query);
+        res.json(response);
+    } catch (error) {
+        console.error('Error testing scheduleTask:', error);
+        res.status(500).json({ message: 'Error testing scheduleTask', error: error.message });
+    }
+});
 
 // // Route to test executeTask
 // router.post('/executeTask', async (req, res) => {

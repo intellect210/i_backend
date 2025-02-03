@@ -132,7 +132,7 @@ class TaskExecutorEngine {
                     actionResult = await actionHandler(taskId, action.isIncluded, action.executionOrderIfIncluded, action.finalEditedInfo, userId, messageId, flag_send_status);
                     break;
                 case 'scheduleReminder':
-                    actionResult = await actionHandler(taskId, action.isIncluded, action.executionOrderIfIncluded, action.task, userId, messageId, flag_send_status);
+                    actionResult = await actionHandler(taskId, action.isIncluded, action.executionOrderIfIncluded, action, userId, messageId, flag_send_status);
                      break;
                 default:
                     console.warn(`[TaskExecutorEngine] Unknown action type: ${actionKey}`);

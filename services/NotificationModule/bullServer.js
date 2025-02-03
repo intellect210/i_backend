@@ -102,7 +102,6 @@ reminderQueue.process(async (job) => {
     try {
         console.log(`[BullServer] Executing reminder: ${taskDescription} for user ${userId} at ${time}`);
            
-        // Return result for complete event
            console.log(`[BullServer] Completed processing reminder job with ID: ${job.id} for user ${userId} `);
           return {
             success: true,
