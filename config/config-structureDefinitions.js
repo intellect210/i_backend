@@ -1,4 +1,3 @@
-// I_BACKEND/utils/structureDefinitions.txt
 const classificationResultStructure = {
   type: 'object',
   properties: {
@@ -334,8 +333,7 @@ const remindersStructure = {
             },
             "one_time_date": {
               "type": "string",
-              "description": "If only time is given by user then one_time_date is necessary to schedule the reminder so either ask user or use todays date"
-            }
+              "description": "If only time is given by user then one_time_date is necessary to schedule the reminder so either ask user or use todays date"}
           },
           "required": [
             "type",
@@ -489,11 +487,25 @@ const combinedActionStructure = {
   ]
 };
 
+
+const notificationResponseStructure = {
+  type: 'object',
+  description: 'Structure for notification response to be sent to user.',
+  properties: {
+      title: { type: 'string', description: 'eye catching notification title atleast 4 words' },
+      body: { type: 'string', description: 'Body of the notification(minimum 15 words)' },
+      message: { type: 'string', description: 'Main response of the query' },
+  },
+  required: ['title', 'body', 'message'],
+};
+
+
 module.exports = {
   personalInfoUpdateStructure,
   classificationResultBoolStructure,
   classificationResultStructure,
   automationFollowupStructure,
   remindersStructure,
-    combinedActionStructure
+    combinedActionStructure,
+  notificationResponseStructure
 };

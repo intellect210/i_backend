@@ -1,4 +1,3 @@
-// FILE: bullServer.js
 const { redisClient, connectRedis } = require('../../config/config-redis');
 const { connectDB } = require('../../config/config-db');
 const { TaskExecutorEngine } = require('../../taskEngine/taskExecutorEngine');
@@ -7,7 +6,7 @@ const { ReminderQueueService } = require('../../services/bullService');
 const { TTL_CONFIG } = require('../../config/config-constants');
 const FCMService = require('../../services/fcmService'); // Import FCM Service
 const NotificationModule = require('../../services/notificationModule');
-
+const processRemindersEngine = require('../../taskEngine/processRemindersEngine'); // Import processRemindersEngine
 
 const taskExecutorEngine = new TaskExecutorEngine();
 // Initialize FCMService and NotificationModule outside of the event handlers
@@ -53,7 +52,7 @@ taskQueue.process(async (job) => {
 
         // Execute the task using the task executor engine
         console.log(`[BullServer] Executing task ${scheduleId} for user ${userId}`);
-        const executionResult = await taskExecutorEngine.executeTask(userId, scheduleId, plan);
+        const executionResult = await taskExecutorEngine.executeTask(userId, scheduleId, plan, null, false);
 
         if(executionResult.success) {
             console.log(`[BullServer] Task ${scheduleId} completed successfully for user ${userId}`);
@@ -95,18 +94,34 @@ taskQueue.on('failed', async (job, error) => {
     console.warn(`[BullServer] Job Failed callback for  job with ID: ${job.id} and scheduleId: ${job.failedReason?.jobId}, error: ${error}`);
 });
 
+
 // Process jobs from reminderQueue
 reminderQueue.process(async (job) => {
-    const { userId, taskDescription, time, recurrence } = job.data;
+    const { userId, taskDescription } = job.data;
      console.log(`[BullServer] Processing reminder job with ID: ${job.id} for user: ${userId}`);
     try {
-        console.log(`[BullServer] Executing reminder: ${taskDescription} for user ${userId} at ${time}`);
-           
-           console.log(`[BullServer] Completed processing reminder job with ID: ${job.id} for user ${userId} `);
+        console.log(`[BullServer] Executing reminder: ${taskDescription} for user ${userId}`);
+
+        const notificationResponse = await processRemindersEngine.processReminder(taskDescription);
+        console.log(`[BullServer] notificationResponse: ${JSON.stringify(notificationResponse)}`);
+        
+        const notificationObject = await fcmService.constructNotificationObject(JSON.parse(notificationResponse));
+        console.log(`[BullServer] notificationObject: ${JSON.stringify(notificationObject)}`);
+        
+        const notificationResult = await notificationModule.setNotification(userId, notificationObject);
+        console.log(`[BullServer] notificationResult: ${JSON.stringify(notificationResult)}`);
+        if(notificationResult.success) {
+              console.log(`[BullServer] Reminder notification sent successfully for user ${userId} with jobId: ${notificationResult.bullJobId} and message: ${notificationResult.message}`);
+          } else {
+                console.warn(`[BullServer] Reminder notification failed for user ${userId} with message: ${notificationResult.message}`);
+          }
+
+
+        console.log(`[BullServer] Completed processing reminder job with ID: ${job.id} for user ${userId} `);
           return {
-            success: true,
-           message: `reminder: ${taskDescription} for user ${userId} at ${time}`,
-        };
+              success: true,
+              message: `reminder: ${taskDescription} for user ${userId} and notification sent with message: ${notificationResult.message}`,
+          };
     } catch (error) {
          console.error(`[BullServer] Error processing job with ID: ${job.id} for user ${userId}:`, error);
         // Return error for failed event

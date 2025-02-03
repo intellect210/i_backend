@@ -10,7 +10,7 @@ class TaskExecutorEngine {
         this.redisTmpDataManager = new RedisTmpDataManagerForTasks();
     }
 
-    async executeTask(userId, query, plan, messageId, flag_send_status = false, taskId) {
+    async executeTask(userId, query, plan, messageId = null, flag_send_status = false, taskId = null) {
         console.log(`[TaskExecutorEngine] Executing task ${taskId} for user ${userId}`);
         let fallbackToNormal = false;
         let overallStatus = {
@@ -98,7 +98,7 @@ class TaskExecutorEngine {
         }
     }
 
-    async _executeAction(taskId, actionKey, action, userId, messageId, flag_send_status) {
+    async _executeAction(taskId = null, actionKey, action, userId, messageId = null, flag_send_status) {
         console.log(`[TaskExecutorEngine] Executing action ${actionKey} for task ${taskId}`);
         if (!action || typeof action !== 'object') {
             console.warn(`[TaskExecutorEngine] Skipping invalid action: ${actionKey}`);
