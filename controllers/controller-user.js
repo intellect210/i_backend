@@ -138,7 +138,7 @@ const setFcmToken = async (req, res) => {
                 fcmToken: fcmToken
             });
         }
-
+        
         await notificationRecord.save();
         console.log(`[DEBUG: userController] Fcm token saved successfully for user: ${useruid}`);
         res.status(200).json({ message: 'FCM token set successfully' });

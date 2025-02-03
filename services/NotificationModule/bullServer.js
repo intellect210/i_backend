@@ -131,13 +131,15 @@ reminderQueue.on('failed', async (job, error) => {
 
 // Process jobs from notificationQueue
 notificationQueue.process(async (job) => {
-     const { fcmToken, notification } = job.data;
+    const { fcmToken, notification } = job.data; // Destructure from job.data
+    console.log(`[BullServer] notification ${notification}`);
      console.log(`[BullServer] Processing notification job with ID: ${job.id}`);
       try {
           if (!fcmToken || !notification) {
             console.error(`[BullServer] Job with ID ${job.id} is missing fcmToken or notification data. Job data: ${JSON.stringify(job.data)}`);
             throw new Error(`Job is missing fcmToken or notification data. Job data: ${JSON.stringify(job.data)}`);
         }
+
        const notificationResult = await fcmService.sendFcmNotification(fcmToken, notification);
        if(notificationResult.success) {
             console.log(`[BullServer] Notification sent successfully with ID: ${job.id}`);
@@ -157,7 +159,6 @@ notificationQueue.process(async (job) => {
      }
 });
 
-
 notificationQueue.on('completed', async (job) => {
     try {
         console.log(`[BullServer] Job Completed callback for notification job with ID: ${job.id}`);
@@ -169,6 +170,5 @@ notificationQueue.on('completed', async (job) => {
 notificationQueue.on('failed', async (job, error) => {
    console.warn(`[BullServer] Job Failed callback for notification job with ID: ${job.id}, error: ${error}`);
 });
- 
 
 console.log('Bull worker server started.');

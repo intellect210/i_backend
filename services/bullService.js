@@ -2,9 +2,9 @@ const Queue = require('bull');
 const { redisClient } = require('../config/config-redis');
 const { handleRedisError } = require('../utils/helpers/error-handlers');
 const { ERROR_CODES } = require('../config/config-constants');
-const logger = require('../utils/helpers/logger');
 const { v4: uuidv4 } = require('uuid');
 const Reminder = require('../models/reminderModel');
+const logger = require('../utils/helpers/logger');
 
 class BaseQueueService {
     constructor(queueName, defaultJobOptions) {
@@ -32,6 +32,25 @@ class BaseQueueService {
         logger.error(`Bull queue "${this.queueName}" error:`, error);
     }
 
+    /**
+     * Creates a new job in the queue
+     * @input {
+     *   jobData: object,   // Required. Data for the job
+     *   options: {         // Optional. Job configuration
+     *     attempts?: number,
+     *     backoff?: object,
+     *     priority?: number,
+     *     delay?: number
+     *   }
+     * }
+     * @output {
+     *   success: boolean,  // Whether job was created
+     *   bullJobId?: string,    // Unique job identifier
+     *   bullInternalJobId?: string, // Internal Bull job ID
+     *   repeatJobKey?: string, // Key for repeatable jobs
+     *   message?: string   // Error message if failed
+     * }
+     */
     async createJob(jobData, options) {
         let job;
         try {
@@ -144,6 +163,17 @@ class BaseQueueService {
         }
     }
 
+    /**
+     * Removes a repeatable job from the queue
+     * @input {
+     *   repeatJobKey: string,  // Required. Key of repeatable job
+     *   reminderId: string     // Required. ID of the reminder
+     * }
+     * @output {
+     *   success: boolean,      // Whether removal was successful
+     *   message: string        // Description of the result
+     * }
+     */
     async removeRepeatableJob(repeatJobKey, reminderId) {
         try {
             const jobs = await this.queue.getRepeatableJobs();
@@ -271,8 +301,38 @@ class TaskQueueService extends BaseQueueService {
     // You can define more specific methods for taskQueue
 }
 
+class NotificationQueueService extends BaseQueueService {
+    constructor() {
+        super('notificationQueue', {
+             removeOnComplete: true,
+             attempts: 2,
+            backoff: {
+                 type: 'exponential',
+                 delay: 1000,
+              },
+         });
+       this.setupListeners();
+    }
+
+   setupListeners() {
+         this.queue.on('completed', (job) => this.handleJobCompleted(job));
+         this.queue.on('failed', (job, error) => this.handleJobFailed(job, error));
+    }
+
+     async handleJobCompleted(job) {
+           logger.info(`Job completed with ID: ${job.id} removed from queue "${this.queueName}".`);
+      }
+
+     async handleJobFailed(job, error) {
+          logger.warn(`Job failed with ID: ${job.id} in queue "${this.queueName}", error: ${error}. Retries exhausted, marking as failed.`);
+     }
+
+   // You can define more specific methods for notificationQueue
+}
+
 
 module.exports = {
     ReminderQueueService,
-     TaskQueueService
+     TaskQueueService,
+     NotificationQueueService,
 };
