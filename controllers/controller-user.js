@@ -1,5 +1,8 @@
+// FILE: controllers/controller-user.js
 const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
+const Notification = require('../models/notificationModel'); // Import Notification model
+const { ERROR_CODES } = require('../config/config-constants'); // Import error codes
 
 // Create a new user or return an existing one
 const createUser = async (req, res) => {
@@ -106,10 +109,53 @@ const generateTestToken = (req, res) => {
   }
 };
 
+// Set or Update FCM token for a user
+const setFcmToken = async (req, res) => {
+    try {
+        const { useruid } = req.params;
+        const { fcmToken } = req.body;
+
+        if (!fcmToken) {
+           console.error('[DEBUG: userController] FCM token is missing');
+            return res.status(400).json({ code: ERROR_CODES.INVALID_REQUEST, message: 'FCM token is required' });
+        }
+        console.log(`[DEBUG: userController] setFcmToken called with useruid: ${useruid}`);
+        const user = await User.findOne({ useruid: useruid });
+         if (!user) {
+           console.error(`[DEBUG: userController] User not found for useruid: ${useruid}`);
+             return res.status(404).json({ code: ERROR_CODES.USER_NOT_FOUND, message: 'User not found' });
+        }
+
+        let notificationRecord = await Notification.findOne({ user: user._id });
+
+        if (notificationRecord) {
+            console.log(`[DEBUG: userController] Existing fcm token found, updating token for user: ${useruid}`);
+            notificationRecord.fcmToken = fcmToken;
+        } else {
+            console.log(`[DEBUG: userController] No fcm token found, creating a new record for user: ${useruid}`);
+            notificationRecord = new Notification({
+                user: user._id,
+                fcmToken: fcmToken
+            });
+        }
+
+        await notificationRecord.save();
+        console.log(`[DEBUG: userController] Fcm token saved successfully for user: ${useruid}`);
+        res.status(200).json({ message: 'FCM token set successfully' });
+    } catch (error) {
+        console.error('[DEBUG: userController] Error setting FCM token:', error);
+        if (error.name === 'ValidationError') {
+           return res.status(400).json({ code: ERROR_CODES.MESSAGE_VALIDATION_ERROR, message: error.message });
+         }
+        return res.status(500).json({ code: ERROR_CODES.DATABASE_ERROR, message: 'Database error', error: error.message });
+    }
+};
+
 module.exports = {
   createUser,
   getUser,
   updateUser,
   deleteUser,
-  generateTestToken
+  generateTestToken,
+  setFcmToken
 };

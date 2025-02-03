@@ -21,4 +21,6 @@ router.put('/:useruid', userController.updateUser);
 // DELETE /:useruid - Delete a user by useruid
 router.delete('/:useruid', userController.deleteUser);
 
+router.post('/:useruid/fcmtoken', userController.setFcmToken);
+
 module.exports = router;
