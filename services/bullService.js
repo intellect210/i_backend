@@ -5,6 +5,7 @@ const { ERROR_CODES } = require('../config/config-constants');
 const { v4: uuidv4 } = require('uuid');
 const Reminder = require('../models/reminderModel');
 const logger = require('../utils/helpers/logger');
+const config = require('../config/config-main');
 
 class BaseQueueService {
     constructor(queueName, defaultJobOptions) {
@@ -19,9 +20,7 @@ class BaseQueueService {
         };
 
         this.queue = new Queue(this.queueName, {
-            redis: {
-                client: redisClient,
-            },
+            redis: config.redisUri,
             defaultJobOptions: this.defaultJobOptions,
         });
 
