@@ -35,7 +35,9 @@ const redis = require('redis');
         console.log('Connected to MongoDB');
 
         const redisClient = redis.createClient({
-            url: process.env.REDIS_URI,
+            // url: process.env.REDIS_URI,
+            host:'127.0.0.1',
+            port:6379
           });
           redisClient.connect();
           redisClient.on('connect', () => console.log('Redis client connected'));
