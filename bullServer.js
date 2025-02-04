@@ -21,6 +21,8 @@ const taskQueue = taskQueueService.queue;
 const reminderQueueService = new ReminderQueueService();
 const reminderQueue = reminderQueueService.queue;
 
+const config = require('./config/config-main'); // Import config
+
 
 // Initialize Bull queue for notification processing
 const notificationQueue = notificationModule.notificationQueue;
@@ -35,9 +37,9 @@ const redis = require('redis');
         console.log('Connected to MongoDB');
 
         const redisClient = redis.createClient({
-            // url: process.env.REDIS_URI,
-            host:'127.0.0.1',
-            port:6379
+            url: config.redisUri
+            // host:'127.0.0.1',
+            // port:6379
           });
           redisClient.connect();
           redisClient.on('connect', () => console.log('Redis client connected'));
@@ -45,6 +47,7 @@ const redis = require('redis');
         console.error('Error connecting to MongoDB:', error);
         process.exit(1);
     }
+    
 })();
 
 // Process jobs from taskQueue
