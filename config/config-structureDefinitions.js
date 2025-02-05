@@ -125,7 +125,7 @@ const ReminderStructure = {
           },
           "one_time_date": {
             "type": "string",
-            "description": "If only time is given by user then one_time_date is necessary to schedule the reminder so either ask user or use today's date in YYYY-MM-DD format"
+            "description": "If only time is given by user then one_time_date is necessary to schedule the reminder so either ask user or use today's date. example format 2025-02-05T08:41:45Z"
           }
         },
         "required": [

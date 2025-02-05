@@ -64,6 +64,8 @@ const processRemindersEngine = {
                 null
             );
             let finalQuery = `User query: ${taskDescription}. \n System context: ${taskExecutionResult.finalQuery} `;
+            
+            console.log("[DEBUG] processReminderEANGINE", finalQuery)
             const notificationResponse = await sendMessageWithInstructionsWithStructure(
                 finalQuery,
                 'notificationAgent',
